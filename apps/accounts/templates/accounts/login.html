@@ -1,0 +1,58 @@
+{% extends 'accounts/base_auth.html' %}
+
+{% block title %}Login - Thesis Grey{% endblock %}
+
+{% block auth_title %}Login{% endblock %}
+
+{% block auth_content %}
+<form method="post" novalidate>
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div class="mb-3">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div class="invalid-feedback d-block">
+                {% for error in form.username.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="mb-3">
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        {% if form.password.errors %}
+            <div class="invalid-feedback d-block">
+                {% for error in form.password.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">Login</button>
+    </div>
+    
+    <hr class="my-4">
+    
+    <div class="text-center">
+        <p class="mb-2">
+            <a href="{% url 'accounts:password_reset' %}">Forgot your password?</a>
+        </p>
+        <p>
+            Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up</a>
+        </p>
+    </div>
+</form>
+{% endblock %}

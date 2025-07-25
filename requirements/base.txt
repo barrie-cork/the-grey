@@ -1,0 +1,39 @@
+# Core Django
+Django==4.2.11
+djangorestframework==3.16.0
+
+# Database
+psycopg[binary]==3.2.9
+dj-database-url==2.1.0
+
+# Environment and Configuration
+python-decouple==3.8
+
+# Redis and Caching
+redis==6.2.0
+django-redis==6.0.0
+
+# Celery
+celery==5.5.3
+flower==2.0.1
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2024.1
+
+# Security
+django-cors-headers==4.7.0
+
+# Monitoring and Logging
+sentry-sdk==1.40.6
+
+# File handling
+Pillow==10.2.0
+whitenoise==6.6.0
+
+# API and Serialization
+djangorestframework-simplejwt==5.3.1
+
+# HTTP Requests (for Serper API)
+requests==2.31.0
+httpx==0.26.0

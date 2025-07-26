@@ -6,8 +6,10 @@ Business capability: Review data export, validation, and analytics.
 from typing import Dict, Any, List
 from django.utils import timezone
 
+from apps.core.logging import ServiceLoggerMixin
 
-class ReviewAnalyticsService:
+
+class ReviewAnalyticsService(ServiceLoggerMixin):
     """Service for review analytics, export, and validation."""
     
     def export_review_data(self, session_id: str, format_type: str = 'csv') -> Dict[str, Any]:

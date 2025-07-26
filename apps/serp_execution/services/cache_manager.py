@@ -15,6 +15,8 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+from apps.core.logging import ServiceLoggerMixin
+
 
 class CacheManager:
     """

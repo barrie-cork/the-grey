@@ -5,8 +5,10 @@ Business capability: Search performance metrics and analytics.
 
 from typing import Dict, Any
 
+from apps.core.logging import ServiceLoggerMixin
 
-class PerformanceAnalyticsService:
+
+class PerformanceAnalyticsService(ServiceLoggerMixin):
     """Service for calculating search performance metrics and analytics."""
     
     def calculate_search_performance_metrics(self, session_id: str) -> Dict[str, Any]:

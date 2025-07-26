@@ -26,18 +26,34 @@ class MetadataExtractionService(ServiceLoggerMixin):
         Returns:
             Dictionary with extracted metadata
         """
-        metadata = self._initialize_metadata()
-        text_to_analyze = f"{title} {snippet}".lower()
-        domain = urlparse(url).netloc.lower()
+        self.log_info("Starting metadata extraction", url=url, title_length=len(title))
         
-        self._detect_document_type(metadata, text_to_analyze, url)
-        self._detect_academic_source(metadata, text_to_analyze, domain)
-        self._detect_authors(metadata, title, snippet)
-        self._extract_publication_year(metadata, text_to_analyze)
-        self._extract_organization(metadata, domain)
-        self._detect_subject_areas(metadata, text_to_analyze)
-        
-        return metadata
+        try:
+            metadata = self._initialize_metadata()
+            text_to_analyze = f"{title} {snippet}".lower()
+            domain = urlparse(url).netloc.lower()
+            
+            self._detect_document_type(metadata, text_to_analyze, url)
+            self._detect_academic_source(metadata, text_to_analyze, domain)
+            self._detect_authors(metadata, title, snippet)
+            self._extract_publication_year(metadata, text_to_analyze)
+            self._extract_organization(metadata, domain)
+            self._detect_subject_areas(metadata, text_to_analyze)
+            
+            self.log_debug(
+                "Metadata extraction completed",
+                url=url,
+                document_type=metadata.get('document_type'),
+                has_authors=metadata.get('has_authors'),
+                publication_year=metadata.get('publication_year'),
+                subject_areas=metadata.get('subject_areas')
+            )
+            
+            return metadata
+            
+        except Exception as e:
+            self.log_error("Failed to extract metadata", error=e, url=url)
+            raise
     
     def _initialize_metadata(self) -> Dict[str, Any]:
         """Initialize metadata structure with default values."""

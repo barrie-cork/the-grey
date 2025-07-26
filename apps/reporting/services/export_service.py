@@ -6,8 +6,10 @@ Business capability: Data export and format conversion.
 from typing import Dict, Any
 from django.utils import timezone
 
+from apps.core.logging import ServiceLoggerMixin
 
-class ExportService:
+
+class ExportService(ServiceLoggerMixin):
     """Service for exporting data in various formats."""
     
     def generate_export_formats(self, data: Dict[str, Any], format_type: str) -> Dict[str, Any]:

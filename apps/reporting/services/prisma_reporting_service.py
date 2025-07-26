@@ -6,8 +6,10 @@ Business capability: PRISMA-compliant report generation and flow diagram data.
 from typing import Dict, Any
 from django.utils import timezone
 
+from apps.core.logging import ServiceLoggerMixin
 
-class PrismaReportingService:
+
+class PrismaReportingService(ServiceLoggerMixin):
     """Service for generating PRISMA-compliant reports and flow diagrams."""
     
     def generate_prisma_flow_data(self, session_id: str) -> Dict[str, Any]:

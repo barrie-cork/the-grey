@@ -17,6 +17,8 @@ from apps.serp_execution.models import SearchExecution, ExecutionMetrics
 
 logger = logging.getLogger(__name__)
 
+from apps.core.logging import ServiceLoggerMixin
+
 
 class UsageTracker:
     """

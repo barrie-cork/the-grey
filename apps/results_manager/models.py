@@ -389,3 +389,261 @@ class ResultMetadata(models.Model):
     
     def __str__(self) -> str:
         return f"Metadata for: {self.result.title[:50]}..."
+
+
+class ProcessingSession(models.Model):
+    """
+    Tracks the progress of results processing for a search session.
+    This provides real-time status updates and error tracking.
+    """
+    
+    # Status choices
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('partial', 'Partial'),
+    ]
+    
+    # Processing stages
+    STAGE_CHOICES = [
+        ('initialization', 'Initialization'),
+        ('url_normalization', 'URL Normalization'),
+        ('metadata_extraction', 'Metadata Extraction'),
+        ('deduplication', 'Deduplication'),
+        ('quality_scoring', 'Quality Scoring'),
+        ('finalization', 'Finalization'),
+    ]
+    
+    # Primary key
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Relationship
+    search_session = models.OneToOneField(
+        'review_manager.SearchSession',
+        on_delete=models.CASCADE,
+        related_name='processing_session',
+        help_text="The search session being processed"
+    )
+    
+    # Status tracking
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        help_text="Current processing status"
+    )
+    current_stage = models.CharField(
+        max_length=30,
+        choices=STAGE_CHOICES,
+        blank=True,
+        help_text="Current processing stage"
+    )
+    stage_progress = models.IntegerField(
+        default=0,
+        help_text="Progress within current stage (0-100)"
+    )
+    
+    # Progress metrics
+    total_raw_results = models.IntegerField(
+        default=0,
+        help_text="Total number of raw results to process"
+    )
+    processed_count = models.IntegerField(
+        default=0,
+        help_text="Number of results processed so far"
+    )
+    error_count = models.IntegerField(
+        default=0,
+        help_text="Number of processing errors encountered"
+    )
+    duplicate_count = models.IntegerField(
+        default=0,
+        help_text="Number of duplicates found"
+    )
+    
+    # Timing information
+    started_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When processing started"
+    )
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When processing completed"
+    )
+    last_heartbeat = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last progress update timestamp"
+    )
+    
+    # Error tracking
+    error_details = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of processing errors with details"
+    )
+    retry_count = models.IntegerField(
+        default=0,
+        help_text="Number of retry attempts"
+    )
+    
+    # Configuration and metadata
+    processing_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Processing configuration parameters"
+    )
+    celery_task_id = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Associated Celery task ID"
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'processing_sessions'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['search_session', 'status']),
+            models.Index(fields=['status', 'started_at']),
+        ]
+    
+    def __str__(self) -> str:
+        return f"Processing: {self.search_session.title} ({self.status})"
+    
+    @property
+    def progress_percentage(self) -> int:
+        """Calculate overall progress percentage."""
+        if self.total_raw_results == 0:
+            return 0
+        return min(100, int((self.processed_count / self.total_raw_results) * 100))
+    
+    @property
+    def duration_seconds(self) -> Optional[int]:
+        """Get processing duration in seconds."""
+        if not self.started_at:
+            return None
+        
+        end_time = self.completed_at or timezone.now()
+        duration = end_time - self.started_at
+        return int(duration.total_seconds())
+    
+    @property
+    def estimated_completion(self) -> Optional[timezone.datetime]:
+        """Estimate completion time based on current progress."""
+        if not self.started_at or self.processed_count == 0:
+            return None
+        
+        elapsed = timezone.now() - self.started_at
+        rate = self.processed_count / elapsed.total_seconds()  # results per second
+        
+        remaining = self.total_raw_results - self.processed_count
+        if remaining <= 0 or rate <= 0:
+            return None
+        
+        estimated_seconds = remaining / rate
+        return timezone.now() + timezone.timedelta(seconds=estimated_seconds)
+    
+    def update_progress(
+        self,
+        stage: str,
+        stage_progress: int,
+        processed_count: Optional[int] = None,
+        error_count: Optional[int] = None,
+        duplicate_count: Optional[int] = None
+    ) -> None:
+        """
+        Update processing progress.
+        
+        Args:
+            stage: Current processing stage
+            stage_progress: Progress within stage (0-100)
+            processed_count: Total processed count (optional)
+            error_count: Total error count (optional)
+            duplicate_count: Total duplicate count (optional)
+        """
+        self.current_stage = stage
+        self.stage_progress = stage_progress
+        self.last_heartbeat = timezone.now()
+        
+        if processed_count is not None:
+            self.processed_count = processed_count
+        if error_count is not None:
+            self.error_count = error_count
+        if duplicate_count is not None:
+            self.duplicate_count = duplicate_count
+        
+        self.save(update_fields=[
+            'current_stage', 'stage_progress', 'last_heartbeat',
+            'processed_count', 'error_count', 'duplicate_count', 'updated_at'
+        ])
+    
+    def add_error(self, error_message: str, error_details: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Add an error to the processing session.
+        
+        Args:
+            error_message: Error message
+            error_details: Additional error details
+        """
+        error_entry = {
+            'timestamp': timezone.now().isoformat(),
+            'message': error_message,
+            'details': error_details or {}
+        }
+        
+        self.error_details.append(error_entry)
+        self.error_count += 1
+        self.save(update_fields=['error_details', 'error_count', 'updated_at'])
+    
+    def start_processing(self, total_raw_results: int, celery_task_id: str = '') -> None:
+        """
+        Mark processing as started.
+        
+        Args:
+            total_raw_results: Total number of results to process
+            celery_task_id: Associated Celery task ID
+        """
+        self.status = 'in_progress'
+        self.total_raw_results = total_raw_results
+        self.started_at = timezone.now()
+        self.celery_task_id = celery_task_id
+        self.current_stage = 'initialization'
+        self.stage_progress = 0
+        
+        self.save(update_fields=[
+            'status', 'total_raw_results', 'started_at', 'celery_task_id',
+            'current_stage', 'stage_progress', 'updated_at'
+        ])
+    
+    def complete_processing(self) -> None:
+        """Mark processing as completed."""
+        self.status = 'completed'
+        self.completed_at = timezone.now()
+        self.current_stage = 'finalization'
+        self.stage_progress = 100
+        
+        self.save(update_fields=[
+            'status', 'completed_at', 'current_stage', 'stage_progress', 'updated_at'
+        ])
+    
+    def fail_processing(self, error_message: str, error_details: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Mark processing as failed.
+        
+        Args:
+            error_message: Failure reason
+            error_details: Additional error details
+        """
+        self.status = 'failed'
+        self.completed_at = timezone.now()
+        self.add_error(error_message, error_details)
+        
+        self.save(update_fields=['status', 'completed_at', 'updated_at'])

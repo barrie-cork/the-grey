@@ -9,8 +9,10 @@ from django.db.models import Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
 
+from apps.core.logging import ServiceLoggerMixin
 
-class CostService:
+
+class CostService(ServiceLoggerMixin):
     """Service for handling all cost-related calculations and budget tracking."""
     
     def calculate_api_cost(self, credits_used: int, rate_per_credit: Decimal = Decimal('0.001')) -> Decimal:

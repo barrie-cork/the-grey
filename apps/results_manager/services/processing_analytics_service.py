@@ -7,8 +7,10 @@ from typing import Dict, Any
 from django.db.models import QuerySet, Count, Avg
 from django.utils import timezone
 
+from apps.core.logging import ServiceLoggerMixin
 
-class ProcessingAnalyticsService:
+
+class ProcessingAnalyticsService(ServiceLoggerMixin):
     """Service for processing analytics, statistics, and result prioritization."""
     
     def get_processing_statistics(self, session_id: str) -> Dict[str, Any]:

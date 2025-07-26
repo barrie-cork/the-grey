@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "apps.core.logging.RequestIDMiddleware",  # Add request ID tracking
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -131,8 +132,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = config("STATIC_URL", default="/static/")
-STATIC_ROOT = BASE_DIR / "static"
-STATICFILES_DIRS = []
+STATIC_ROOT = BASE_DIR / "staticfiles"  # Where collectstatic puts files for production
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Project-wide static files during development
+]
 
 # Media files
 MEDIA_URL = config("MEDIA_URL", default="/media/")
@@ -177,3 +180,75 @@ REST_FRAMEWORK = {
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = []
+
+# SERP Execution Configuration
+SERPER_API_KEY = config('SERPER_API_KEY', default='')
+SERPER_DAILY_BUDGET = config('SERPER_DAILY_BUDGET', default='10.00', cast=float)
+SERPER_MONTHLY_BUDGET = config('SERPER_MONTHLY_BUDGET', default='300.00', cast=float)
+SERP_CACHE_ENABLED = config('SERP_CACHE_ENABLED', default=True, cast=bool)
+SERP_CACHE_TTL = config('SERP_CACHE_TTL', default=86400, cast=int)  # 24 hours
+
+# Logging Configuration
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'request_id': {
+            '()': 'apps.core.logging.RequestIDFilter'
+        }
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {request_id} {message}',
+            'style': '{',
+        },
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s %(request_id)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'filters': ['request_id'],
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_DIR / 'app.log'),
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 7,
+            'formatter': 'json',
+            'filters': ['request_id'],
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_DIR / 'errors.log'),
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 7,
+            'formatter': 'json',
+            'filters': ['request_id'],
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'apps': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': os.getenv('APP_LOG_LEVEL', 'DEBUG'),
+            'propagate': False,
+        },
+    },
+}

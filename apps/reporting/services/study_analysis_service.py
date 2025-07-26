@@ -5,8 +5,10 @@ Business capability: Study characteristics analysis and reporting.
 
 from typing import Dict, Any
 
+from apps.core.logging import ServiceLoggerMixin
 
-class StudyAnalysisService:
+
+class StudyAnalysisService(ServiceLoggerMixin):
     """Service for analyzing study characteristics and generating study tables."""
     
     def generate_study_characteristics_table(self, session_id: str) -> Dict[str, Any]:

@@ -1,8 +1,11 @@
+from typing import Any, Optional
 from django.contrib.auth import login
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
+from django.http import HttpResponse
+from django.db.models import QuerySet
 
 from .forms import SignUpForm, ProfileForm
 from .models import User

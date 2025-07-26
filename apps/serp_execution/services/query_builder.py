@@ -11,6 +11,8 @@ from django.utils.text import slugify
 
 logger = logging.getLogger(__name__)
 
+from apps.core.logging import ServiceLoggerMixin
+
 
 class QueryBuilder:
     """

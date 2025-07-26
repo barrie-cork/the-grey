@@ -9,8 +9,10 @@ from urllib.parse import urlparse
 from datetime import datetime
 from dateutil import parser as date_parser
 
+from apps.core.logging import ServiceLoggerMixin
 
-class ContentAnalysisService:
+
+class ContentAnalysisService(ServiceLoggerMixin):
     """Service for analyzing and classifying search result content."""
     
     # Academic source patterns

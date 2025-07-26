@@ -5,8 +5,10 @@ Business capability: Result quality assessment and relevance scoring.
 
 from typing import List
 
+from apps.core.logging import ServiceLoggerMixin
 
-class QualityAssessmentService:
+
+class QualityAssessmentService(ServiceLoggerMixin):
     """Service for assessing result quality and calculating relevance scores."""
     
     def calculate_relevance_score(self, result, query_terms: List[str]) -> float:

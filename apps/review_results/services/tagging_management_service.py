@@ -9,8 +9,10 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from apps.core.logging import ServiceLoggerMixin
 
-class TaggingManagementService:
+
+class TaggingManagementService(ServiceLoggerMixin):
     """Service for managing tags and tagging operations."""
     
     def get_tag_usage_statistics(self, session_id: str) -> Dict[str, Any]:

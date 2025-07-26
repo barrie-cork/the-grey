@@ -170,6 +170,21 @@ class SearchSession(models.Model):
         if self.reviewed_results == 0:
             return 0
         return round((self.included_results / self.reviewed_results) * 100, 1)
+    
+    @property
+    def is_active(self) -> bool:
+        """Check if session is in an active state."""
+        return self.status not in ['completed', 'archived']
+    
+    @property
+    def can_edit(self) -> bool:
+        """Check if session details can be edited."""
+        return self.status in ['draft', 'defining_search']
+    
+    @property
+    def can_delete(self) -> bool:
+        """Check if session can be deleted."""
+        return self.status == 'draft'
 
 
 class SessionActivity(models.Model):
@@ -262,6 +277,6 @@ class SessionActivity(models.Model):
             session=session,
             activity_type=activity_type,
             description=description,
-            user=user or session.owner,
+            user=user,
             metadata=metadata or {}
         )

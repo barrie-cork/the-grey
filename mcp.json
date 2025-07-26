@@ -42,6 +42,36 @@
       "env": {
         "REF_API_KEY": "ref-3bc0dda3754818d70ae0"
       }
+    },
+    "docker-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "mcp/docker-mcp:latest"
+      ]
+    },
+    "docker-compose": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "-v",
+        "/mnt/d/Python/Projects/django/HTA-projects/agent-grey:/workspace",
+        "-w",
+        "/workspace",
+        "docker:cli",
+        "docker-compose"
+      ],
+      "env": {
+        "COMPOSE_PROJECT_NAME": "agent-grey"
+      }
     }
   }
 }

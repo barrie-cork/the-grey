@@ -10,8 +10,10 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from apps.core.logging import ServiceLoggerMixin
 
-class ReviewRecommendationService:
+
+class ReviewRecommendationService(ServiceLoggerMixin):
     """Service for providing intelligent review recommendations."""
     
     def get_review_recommendations(self, session_id: str, user: User, limit: int = 10) -> QuerySet:

@@ -23,6 +23,10 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("apps.accounts.urls")),
+    path("", include("apps.review_manager.urls")),  # Dashboard at root
+    path("api/review-manager/", include("apps.review_manager.api.urls")),
+    path("execution/", include("apps.serp_execution.urls")),
+    path("results-manager/", include("apps.results_manager.urls")),
 ]
 
 # Serve static and media files in development

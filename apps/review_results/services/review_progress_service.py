@@ -7,8 +7,10 @@ from typing import Dict, Any
 from django.db.models import Count
 from django.utils import timezone
 
+from apps.core.logging import ServiceLoggerMixin
 
-class ReviewProgressService:
+
+class ReviewProgressService(ServiceLoggerMixin):
     """Service for tracking review progress and calculating velocity metrics."""
     
     def calculate_review_progress(self, session_id: str) -> Dict[str, Any]:

@@ -17,6 +17,8 @@ from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
+from apps.core.logging import ServiceLoggerMixin
+
 
 class SerperAPIError(Exception):
     """Base exception for Serper API errors."""

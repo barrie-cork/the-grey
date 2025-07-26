@@ -6,8 +6,10 @@ Business capability: Search strategy documentation and reporting.
 from typing import Dict, Any
 from django.db import models
 
+from apps.core.logging import ServiceLoggerMixin
 
-class SearchStrategyReportingService:
+
+class SearchStrategyReportingService(ServiceLoggerMixin):
     """Service for generating comprehensive search strategy reports."""
     
     def generate_search_strategy_report(self, session_id: str) -> Dict[str, Any]:

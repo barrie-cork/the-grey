@@ -26,6 +26,7 @@ django-cors-headers==4.7.0
 
 # Monitoring and Logging
 sentry-sdk==1.40.6
+python-json-logger==2.0.7
 
 # File handling
 Pillow==10.2.0
@@ -33,6 +34,7 @@ whitenoise==6.6.0
 
 # API and Serialization
 djangorestframework-simplejwt==5.3.1
+pydantic==2.10.4
 
 # HTTP Requests (for Serper API)
 requests==2.31.0

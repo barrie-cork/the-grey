@@ -9,8 +9,10 @@ from urllib.parse import urlparse, parse_qs
 from django.db.models import QuerySet
 from difflib import SequenceMatcher
 
+from apps.core.logging import ServiceLoggerMixin
 
-class DeduplicationService:
+
+class DeduplicationService(ServiceLoggerMixin):
     """Service for handling result deduplication and similarity detection."""
     
     def normalize_url(self, url: str) -> str:

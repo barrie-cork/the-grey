@@ -8,8 +8,10 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q, Count, Avg
 
+from apps.core.logging import ServiceLoggerMixin
 
-class ExecutionService:
+
+class ExecutionService(ServiceLoggerMixin):
     """Service for managing search execution lifecycle and coordination."""
     
     def estimate_execution_time(self, query_complexity: int, search_engines: List[str]) -> int:

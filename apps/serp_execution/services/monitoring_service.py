@@ -9,8 +9,10 @@ from decimal import Decimal
 from django.db.models import Sum, Avg, Count
 from django.utils import timezone
 
+from apps.core.logging import ServiceLoggerMixin
 
-class MonitoringService:
+
+class MonitoringService(ServiceLoggerMixin):
     """Service for monitoring execution performance and analyzing failures."""
     
     def get_execution_statistics(self, session_id: str) -> Dict[str, Any]:

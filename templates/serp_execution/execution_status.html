@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Execution Status - {{ session.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'review_manager:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' pk=session.id %}">{{ session.title }}</a></li>
+                    <li class="breadcrumb-item active">Execution Status</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h2 mb-4">
+                Execution Status: {{ session.title }}
+                {% if has_running %}
+                    <span class="badge bg-primary">
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                        Running
+                    </span>
+                {% endif %}
+            </h1>
+        </div>
+    </div>
+
+    <!-- Overall Progress -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Overall Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 25px;">
+                        {% with progress=stats.successful_executions|add:stats.failed_executions|floatformat:0 total=stats.total_executions %}
+                        {% if total > 0 %}
+                            {% widthratio progress total 100 as percent %}
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {% widthratio stats.successful_executions total 100 %}%">
+                                {{ stats.successful_executions }} Completed
+                            </div>
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 style="width: {% widthratio stats.failed_executions total 100 %}%">
+                                {{ stats.failed_executions }} Failed
+                            </div>
+                        {% else %}
+                            <div class="progress-bar" role="progressbar" style="width: 0%">
+                                0%
+                            </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h4 class="text-primary">{{ stats.total_executions }}</h4>
+                            <p class="text-muted mb-0">Total Queries</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-success">{{ stats.successful_executions }}</h4>
+                            <p class="text-muted mb-0">Completed</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-danger">{{ stats.failed_executions }}</h4>
+                            <p class="text-muted mb-0">Failed</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-warning">{{ stats.pending_executions }}</h4>
+                            <p class="text-muted mb-0">Pending</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Execution Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Total Results Found:</strong> {{ stats.total_results }}</p>
+                            <p class="mb-2"><strong>Total Cost:</strong> ${{ stats.total_cost|floatformat:2 }}</p>
+                            <p class="mb-2"><strong>Average Execution Time:</strong> {{ stats.average_execution_time|floatformat:1 }}s</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Success Rate:</strong> {{ stats.success_rate }}%</p>
+                            <p class="mb-2"><strong>Search Engines:</strong> {{ stats.engines_used|join:", " }}</p>
+                            <p class="mb-2"><strong>Last Execution:</strong> 
+                                {% if stats.last_execution_date %}
+                                    {{ stats.last_execution_date|timesince }} ago
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tasks"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if not has_running %}
+                        <a href="{% url 'review_manager:session_detail' pk=session.id %}" 
+                           class="btn btn-primary btn-block mb-2">
+                            <i class="fas fa-arrow-left"></i> Back to Session
+                        </a>
+                        
+                        {% if failed_executions %}
+                            <button type="button" class="btn btn-warning btn-block" 
+                                    data-bs-toggle="modal" data-bs-target="#retryModal">
+                                <i class="fas fa-redo"></i> Retry Failed Executions
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-info-circle"></i> Actions available when execution completes
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Executions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Individual Executions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="executions-table">
+                            <thead>
+                                <tr>
+                                    <th>Query</th>
+                                    <th>Engine</th>
+                                    <th>Status</th>
+                                    <th>Results</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for execution in executions %}
+                                <tr data-execution-id="{{ execution.id }}">
+                                    <td>
+                                        <small>{{ execution.query.query_string|truncatechars:50 }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ execution.search_engine }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge badge 
+                                            {% if execution.status == 'completed' %}bg-success
+                                            {% elif execution.status == 'failed' %}bg-danger
+                                            {% elif execution.status == 'running' %}bg-primary
+                                            {% else %}bg-secondary{% endif %}">
+                                            {% if execution.status == 'running' %}
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                            {% endif %}
+                                            {{ execution.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="results-count">{{ execution.results_count }}</td>
+                                    <td class="duration">
+                                        {% if execution.duration_seconds %}
+                                            {{ execution.duration_seconds|floatformat:1 }}s
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if execution.status == 'failed' and execution.can_retry %}
+                                            <a href="{% url 'serp_execution:error_recovery' execution_id=execution.id %}" 
+                                               class="btn btn-sm btn-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> Recover
+                                            </a>
+                                        {% elif execution.error_message %}
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                    data-bs-toggle="popover" 
+                                                    data-bs-trigger="hover"
+                                                    data-bs-content="{{ execution.error_message }}">
+                                                <i class="fas fa-info-circle"></i> Error
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coverage Metrics (if available) -->
+    {% if coverage_metrics %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Search Coverage Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6>Content Distribution</h6>
+                            <ul class="list-unstyled">
+                                <li>Academic: {{ coverage_metrics.academic_percentage }}%</li>
+                                <li>PDFs: {{ coverage_metrics.pdf_percentage }}%</li>
+                                <li>Total Results: {{ coverage_metrics.total_results }}</li>
+                                <li>Unique Domains: {{ coverage_metrics.unique_domains }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-5">
+                            <h6>Top Domains</h6>
+                            <ul class="list-unstyled">
+                                {% for domain, count in coverage_metrics.domain_distribution.items|slice:":5" %}
+                                    <li>{{ domain }}: {{ count }} results</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Date Coverage</h6>
+                            {% if coverage_metrics.date_coverage %}
+                                <p>{{ coverage_metrics.date_coverage.earliest_year }} - {{ coverage_metrics.date_coverage.latest_year }}</p>
+                            {% else %}
+                                <p class="text-muted">No date information available</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Retry Modal -->
+{% if failed_executions %}
+<div class="modal fade" id="retryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Retry Failed Executions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>The following executions failed and can be retried:</p>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Error</th>
+                            <th>Suggested Action</th>
+                            <th>Retry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for failed in failed_executions %}
+                        <tr>
+                            <td><small>{{ failed.query_title }}</small></td>
+                            <td><small class="text-danger">{{ failed.error_message|truncatechars:50 }}</small></td>
+                            <td><small>{{ failed.suggested_action }}</small></td>
+                            <td>
+                                {% if failed.can_retry %}
+                                    <button class="btn btn-sm btn-warning retry-btn" 
+                                            data-execution-id="{{ failed.execution_id }}">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted">Max retries</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Auto-refresh if executions are running
+{% if refresh_interval > 0 %}
+let refreshInterval = {{ refresh_interval }};
+let refreshTimer = null;
+
+function refreshStatus() {
+    fetch('{% url "serp_execution:session_progress_api" session_id=session.id %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.has_running) {
+                // Continue refreshing
+                refreshTimer = setTimeout(refreshStatus, refreshInterval);
+            } else {
+                // Reload page to show final status
+                window.location.reload();
+            }
+            
+            // Update progress bar
+            updateProgress(data.progress);
+        })
+        .catch(error => {
+            console.error('Error fetching status:', error);
+            // Retry after delay
+            refreshTimer = setTimeout(refreshStatus, refreshInterval * 2);
+        });
+}
+
+function updateProgress(progress) {
+    // Update progress bar width
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        progressBar.style.width = progress + '%';
+        progressBar.textContent = Math.round(progress) + '%';
+    }
+}
+
+// Start auto-refresh
+refreshTimer = setTimeout(refreshStatus, refreshInterval);
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+    if (refreshTimer) {
+        clearTimeout(refreshTimer);
+    }
+});
+{% endif %}
+
+// Retry button handlers
+document.querySelectorAll('.retry-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const executionId = this.dataset.executionId;
+        const button = this;
+        
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        
+        fetch(`{% url "serp_execution:retry_execution_api" execution_id="00000000-0000-0000-0000-000000000000" %}`.replace('00000000-0000-0000-0000-000000000000', executionId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated status
+                window.location.reload();
+            } else {
+                alert('Failed to retry: ' + data.error);
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-redo"></i>';
+            }
+        })
+        .catch(error => {
+            alert('Error retrying execution');
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-redo"></i>';
+        });
+    });
+});
+
+// Initialize popovers
+var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+    return new bootstrap.Popover(popoverTriggerEl)
+});
+</script>
+{% endblock %}

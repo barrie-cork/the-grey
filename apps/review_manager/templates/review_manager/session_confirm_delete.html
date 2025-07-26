@@ -1,0 +1,58 @@
+{% extends "review_manager/base.html" %}
+{% load static %}
+
+{% block title %}Delete {{ object.title }} - Thesis Grey{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' session_id=object.id %}">{{ object.title|truncatewords:5 }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Delete</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h5 class="alert-heading">Are you sure?</h5>
+                        <p>You are about to permanently delete the following session:</p>
+                        <hr>
+                        <p class="mb-0">
+                            <strong>{{ object.title }}</strong>
+                            {% if object.description %}
+                            <br>
+                            <small class="text-muted">{{ object.description|truncatewords:30 }}</small>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Warning:</strong> This action cannot be undone. 
+                        All data associated with this session will be permanently deleted.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Yes, Delete Session
+                            </button>
+                            <a href="{% url 'review_manager:session_detail' session_id=object.id %}" 
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

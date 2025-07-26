@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'review_manager/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'review_manager/css/sessions.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'review_manager:dashboard' %}">Dashboard</a></li>
+        {% block breadcrumb_items %}{% endblock %}
+    </ol>
+</nav>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'review_manager/js/messages.js' %}"></script>
+<script src="{% static 'review_manager/js/dashboard.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,301 @@
+/**
+ * SERP Execution Styles
+ * Styles for search execution interface
+ */
+
+/* Loading animations */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+/* Progress bars */
+.overall-progress {
+    margin-bottom: 2rem;
+}
+
+.overall-progress .progress {
+    height: 30px;
+    font-size: 1rem;
+}
+
+/* Status badges */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.badge i {
+    margin-right: 0.25rem;
+}
+
+/* Query table */
+.query-table {
+    font-size: 0.9rem;
+}
+
+.query-table th {
+    background-color: var(--bs-gray-100);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.query-table td {
+    vertical-align: middle;
+}
+
+.query-status .badge {
+    min-width: 100px;
+}
+
+/* Statistics cards */
+.stat-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card .card-body {
+    padding: 1.25rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--bs-gray-600);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Cost estimation */
+.cost-estimate {
+    background-color: var(--bs-light);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.cost-estimate .cost-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--bs-success);
+}
+
+.cost-breakdown {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.cost-breakdown dl {
+    margin-bottom: 0;
+}
+
+.cost-breakdown dt {
+    font-weight: 500;
+    color: var(--bs-gray-700);
+}
+
+.cost-breakdown dd {
+    color: var(--bs-gray-600);
+}
+
+/* Query preview */
+.query-preview {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.query-preview-item {
+    border-left: 3px solid var(--bs-primary);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.query-preview-item .query-text {
+    font-family: 'Courier New', monospace;
+    background-color: var(--bs-gray-100);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    word-break: break-all;
+}
+
+/* Error messages */
+.error-details {
+    background-color: var(--bs-danger-bg-subtle);
+    border: 1px solid var(--bs-danger);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.error-details pre {
+    margin-bottom: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Recovery options */
+.recovery-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.recovery-option {
+    flex: 1;
+    min-width: 200px;
+    padding: 1rem;
+    border: 2px solid var(--bs-gray-300);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.recovery-option:hover {
+    border-color: var(--bs-primary);
+    background-color: var(--bs-primary-bg-subtle);
+}
+
+.recovery-option.selected {
+    border-color: var(--bs-primary);
+    background-color: var(--bs-primary-bg-subtle);
+}
+
+.recovery-option h6 {
+    margin-bottom: 0.5rem;
+    color: var(--bs-primary);
+}
+
+.recovery-option p {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    color: var(--bs-gray-600);
+}
+
+/* Timeline view */
+.execution-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.execution-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--bs-gray-300);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.375rem;
+    top: 0.5rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: var(--bs-primary);
+    border: 2px solid var(--bs-white);
+    box-shadow: 0 0 0 2px var(--bs-gray-300);
+}
+
+.timeline-item.completed::before {
+    background-color: var(--bs-success);
+}
+
+.timeline-item.failed::before {
+    background-color: var(--bs-danger);
+}
+
+.timeline-time {
+    font-size: 0.875rem;
+    color: var(--bs-gray-600);
+}
+
+.timeline-content {
+    background-color: var(--bs-gray-100);
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-top: 0.5rem;
+}
+
+/* Auto-refresh toggle */
+.auto-refresh-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.auto-refresh-toggle .form-check-input {
+    cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .cost-estimate .cost-value {
+        font-size: 2rem;
+    }
+    
+    .query-table {
+        font-size: 0.8rem;
+    }
+    
+    .query-table th,
+    .query-table td {
+        padding: 0.5rem;
+    }
+    
+    .recovery-option {
+        min-width: 100%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .cost-estimate {
+        background-color: var(--bs-dark);
+    }
+    
+    .query-preview-item .query-text {
+        background-color: var(--bs-gray-800);
+        color: var(--bs-gray-100);
+    }
+    
+    .timeline-content {
+        background-color: var(--bs-gray-800);
+    }
+    
+    .recovery-option {
+        border-color: var(--bs-gray-700);
+    }
+    
+    .recovery-option:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+}

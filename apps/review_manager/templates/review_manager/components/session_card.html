@@ -1,0 +1,90 @@
+{% load static session_tags %}
+<div class="session-card status-{{ session.status }}">
+    <div class="card-header">
+        <h5 class="card-title">{{ session.title }}</h5>
+        <span class="badge bg-{{ session.status|status_color }}">
+            {{ session.get_status_display }}
+        </span>
+    </div>
+    
+    <div class="card-body">
+        {% if session.description %}
+        <p class="card-text">{{ session.description|truncatewords:20 }}</p>
+        {% endif %}
+        
+        <div class="session-stats">
+            <span class="stat-item">
+                <i class="bi bi-calendar3"></i>
+                Created {{ session.created_at|timesince }} ago
+            </span>
+            {% if session.total_results > 0 %}
+            <span class="stat-item">
+                <i class="bi bi-search"></i>
+                {{ session.total_results }} results
+            </span>
+            {% endif %}
+            {% if session.status == 'under_review' %}
+            <span class="stat-item">
+                <i class="bi bi-progress"></i>
+                {{ session.progress_percentage }}% reviewed
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card-footer">
+        <a href="{% url 'review_manager:session_navigate' session_id=session.id %}" 
+           class="btn btn-primary btn-sm primary-action">
+            <i class="bi bi-arrow-right-circle"></i>
+            {% if session.status == 'draft' %}
+                Define Strategy
+            {% elif session.status == 'defining_search' %}
+                Continue Setup
+            {% elif session.status == 'ready_to_execute' %}
+                Execute Search
+            {% elif session.status == 'executing' %}
+                View Progress
+            {% elif session.status == 'processing_results' %}
+                Processing...
+            {% elif session.status == 'ready_for_review' %}
+                Start Review
+            {% elif session.status == 'under_review' %}
+                Continue Review
+            {% elif session.status == 'completed' %}
+                View Report
+            {% else %}
+                View Details
+            {% endif %}
+        </a>
+        
+        <div class="dropdown">
+            <button class="btn btn-link btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'review_manager:session_detail' session_id=session.id %}">
+                    <i class="bi bi-info-circle"></i> View Details
+                </a></li>
+                {% if session.status in 'draft,defining_search' %}
+                <li><a class="dropdown-item" href="{% url 'review_manager:edit_session' session_id=session.id %}">
+                    <i class="bi bi-pencil"></i> Edit
+                </a></li>
+                {% endif %}
+                <li>
+                    <form method="post" action="{% url 'review_manager:duplicate_session' session_id=session.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">
+                            <i class="bi bi-copy"></i> Duplicate
+                        </button>
+                    </form>
+                </li>
+                {% if session.status == 'draft' %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'review_manager:delete_session' session_id=session.id %}">
+                    <i class="bi bi-trash"></i> Delete
+                </a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>

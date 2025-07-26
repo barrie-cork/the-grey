@@ -1,0 +1,123 @@
+/* Mobile First Approach */
+.dashboard-container {
+    padding: 1rem;
+}
+
+.dashboard-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.welcome-section h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.quick-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.stat i {
+    font-size: 1.2rem;
+    color: var(--bs-primary);
+}
+
+/* Session Grid */
+.sessions-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+}
+
+/* Session Card */
+.session-card {
+    background: var(--bs-white);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.session-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.session-card .status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.75rem;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+    .dashboard-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .sessions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+    .sessions-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+    
+    .dashboard-container {
+        padding: 2rem;
+    }
+}
+
+/* Status-specific styling */
+.status-draft { border-left: 4px solid var(--bs-secondary); }
+.status-defining_search { border-left: 4px solid var(--bs-info); }
+.status-ready_to_execute { border-left: 4px solid var(--bs-primary); }
+.status-executing { border-left: 4px solid var(--bs-warning); }
+.status-processing_results { border-left: 4px solid var(--bs-warning); }
+.status-ready_for_review { border-left: 4px solid var(--bs-success); }
+.status-under_review { border-left: 4px solid var(--bs-success); }
+.status-completed { border-left: 4px solid var(--bs-dark); }
+.status-archived { border-left: 4px solid var(--bs-secondary); }
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    grid-column: 1 / -1;
+}
+
+.empty-state h3 {
+    margin: 1rem 0;
+    color: var(--bs-gray-700);
+}
+
+/* Accessibility */
+.session-card:focus-within {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .session-card {
+        transition: none;
+    }
+}

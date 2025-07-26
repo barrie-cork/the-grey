@@ -2,11 +2,12 @@
 Review analytics service for review_results slice.
 Business capability: Review data export, validation, and analytics.
 """
-
 from typing import Dict, Any, List
+
 from django.utils import timezone
 
 from apps.core.logging import ServiceLoggerMixin
+from apps.review_results.constants import ReviewAnalyticsConstants, ExportConstants
 
 
 class ReviewAnalyticsService(ServiceLoggerMixin):
@@ -57,7 +58,7 @@ class ReviewAnalyticsService(ServiceLoggerMixin):
                 'is_reviewed': len(assignments) > 0,
                 'tags': tags,
                 'tag_count': len(tags),
-                'review_notes': '; '.join([a.notes for a in assignments if a.notes]),
+                'review_notes': ExportConstants.NOTES_SEPARATOR.join([a.notes for a in assignments if a.notes]),
                 'domain': self._safe_get_display_url(result),
                 'processed_at': result.processed_at.isoformat() if result.processed_at else None
             }
@@ -147,8 +148,8 @@ class ReviewAnalyticsService(ServiceLoggerMixin):
         # Check for reasonable distribution of decisions
         tagging_service = TaggingManagementService()
         tag_stats = tagging_service.get_tag_usage_statistics(session_id)
-        include_count = tag_stats['tag_counts'].get('Include', 0)
-        exclude_count = tag_stats['tag_counts'].get('Exclude', 0)
+        include_count = tag_stats['tag_counts'].get(ReviewAnalyticsConstants.INCLUDE_TAG, 0)
+        exclude_count = tag_stats['tag_counts'].get(ReviewAnalyticsConstants.EXCLUDE_TAG, 0)
         
         if include_count == 0:
             validation_results['issues'].append('No results have been marked for inclusion')
@@ -231,8 +232,8 @@ class ReviewAnalyticsService(ServiceLoggerMixin):
         )
         
         tag_stats = tagging_service.get_tag_usage_statistics(session_id)
-        include_count = tag_stats['tag_counts'].get('Include', 0)
-        exclude_count = tag_stats['tag_counts'].get('Exclude', 0)
+        include_count = tag_stats['tag_counts'].get(ReviewAnalyticsConstants.INCLUDE_TAG, 0)
+        exclude_count = tag_stats['tag_counts'].get(ReviewAnalyticsConstants.EXCLUDE_TAG, 0)
         
         return {
             'overall': overall_score,
@@ -252,8 +253,8 @@ class ReviewAnalyticsService(ServiceLoggerMixin):
     def _calculate_balance_score(self, tagging_service, session_id: str) -> float:
         """Calculate tag distribution balance score."""
         tag_stats = tagging_service.get_tag_usage_statistics(session_id)
-        include_count = tag_stats['tag_counts'].get('Include', 0)
-        exclude_count = tag_stats['tag_counts'].get('Exclude', 0)
+        include_count = tag_stats['tag_counts'].get(ReviewAnalyticsConstants.INCLUDE_TAG, 0)
+        exclude_count = tag_stats['tag_counts'].get(ReviewAnalyticsConstants.EXCLUDE_TAG, 0)
         
         if include_count + exclude_count > 0:
             inclusion_rate = include_count / (include_count + exclude_count)

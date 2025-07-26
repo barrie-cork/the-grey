@@ -102,22 +102,12 @@ class ProcessedResult(models.Model):
         default=False,
         help_text="Whether the result is a PDF"
     )
-    file_size_bytes = models.BigIntegerField(
-        null=True,
-        blank=True,
-        help_text="File size if known"
-    )
     
-    # Quality scoring
-    relevance_score = models.FloatField(
-        null=True,
-        blank=True,
-        help_text="Calculated relevance score (0-1)"
-    )
+    # Basic quality indicators (simplified)
     quality_indicators = models.JSONField(
         default=dict,
         blank=True,
-        help_text="Quality indicators (e.g., peer_reviewed, has_doi)"
+        help_text="Basic quality flags (e.g., has_doi, is_peer_reviewed)"
     )
     
     # Processing metadata
@@ -125,20 +115,11 @@ class ProcessedResult(models.Model):
         auto_now_add=True,
         help_text="When this result was processed"
     )
-    processing_version = models.CharField(
-        max_length=20,
-        default='1.0',
-        help_text="Version of processing algorithm used"
-    )
     
     # Review status
     is_reviewed = models.BooleanField(
         default=False,
         help_text="Whether this result has been reviewed"
-    )
-    review_priority = models.IntegerField(
-        default=0,
-        help_text="Priority for review (higher = more important)"
     )
     
     # Timestamps
@@ -147,13 +128,12 @@ class ProcessedResult(models.Model):
     
     class Meta:
         db_table = 'processed_results'
-        ordering = ['-relevance_score', '-publication_date']
+        ordering = ['-publication_date', '-processed_at']
         indexes = [
             models.Index(fields=['session', 'is_reviewed']),
             models.Index(fields=['url']),
             models.Index(fields=['publication_year']),
             models.Index(fields=['document_type']),
-            models.Index(fields=['relevance_score']),
         ]
     
     def __str__(self) -> str:
@@ -251,8 +231,6 @@ class DuplicateGroup(models.Model):
                 score += 2
             if result.has_full_text:
                 score += 3
-            if result.relevance_score:
-                score += result.relevance_score
             
             if score > best_score:
                 best_score = score
@@ -275,375 +253,5 @@ class DuplicateGroup(models.Model):
             self.save()
 
 
-class ResultMetadata(models.Model):
-    """
-    Additional metadata extracted from results.
-    Stores structured data that doesn't fit in the main model.
-    """
-    
-    # Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
-    # Relationship
-    result = models.OneToOneField(
-        ProcessedResult,
-        on_delete=models.CASCADE,
-        related_name='metadata',
-        help_text="The result this metadata belongs to"
-    )
-    
-    # Identifiers
-    doi = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Digital Object Identifier"
-    )
-    isbn = models.CharField(
-        max_length=20,
-        blank=True,
-        help_text="ISBN for books"
-    )
-    issn = models.CharField(
-        max_length=20,
-        blank=True,
-        help_text="ISSN for journals"
-    )
-    
-    # Additional metadata
-    keywords = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="Extracted keywords"
-    )
-    abstract = models.TextField(
-        blank=True,
-        help_text="Full abstract if available"
-    )
-    funding_info = models.TextField(
-        blank=True,
-        help_text="Funding information"
-    )
-    
-    # Geographic information
-    country = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Country of origin"
-    )
-    region = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Geographic region"
-    )
-    
-    # Classification
-    subject_areas = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="Subject classification"
-    )
-    methodology = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Research methodology if identified"
-    )
-    
-    # Access information
-    access_type = models.CharField(
-        max_length=50,
-        blank=True,
-        choices=[
-            ('open_access', 'Open Access'),
-            ('restricted', 'Restricted Access'),
-            ('subscription', 'Subscription Required'),
-            ('unknown', 'Unknown'),
-        ],
-        default='unknown',
-        help_text="Access restrictions"
-    )
-    license = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="License information"
-    )
-    
-    # Extraction metadata
-    extraction_confidence = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Confidence scores for extracted fields"
-    )
-    extraction_method = models.CharField(
-        max_length=50,
-        blank=True,
-        help_text="Method used for metadata extraction"
-    )
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'result_metadata'
-        verbose_name_plural = 'Result metadata'
-    
-    def __str__(self) -> str:
-        return f"Metadata for: {self.result.title[:50]}..."
-
-
-class ProcessingSession(models.Model):
-    """
-    Tracks the progress of results processing for a search session.
-    This provides real-time status updates and error tracking.
-    """
-    
-    # Status choices
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('partial', 'Partial'),
-    ]
-    
-    # Processing stages
-    STAGE_CHOICES = [
-        ('initialization', 'Initialization'),
-        ('url_normalization', 'URL Normalization'),
-        ('metadata_extraction', 'Metadata Extraction'),
-        ('deduplication', 'Deduplication'),
-        ('quality_scoring', 'Quality Scoring'),
-        ('finalization', 'Finalization'),
-    ]
-    
-    # Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
-    # Relationship
-    search_session = models.OneToOneField(
-        'review_manager.SearchSession',
-        on_delete=models.CASCADE,
-        related_name='processing_session',
-        help_text="The search session being processed"
-    )
-    
-    # Status tracking
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending',
-        help_text="Current processing status"
-    )
-    current_stage = models.CharField(
-        max_length=30,
-        choices=STAGE_CHOICES,
-        blank=True,
-        help_text="Current processing stage"
-    )
-    stage_progress = models.IntegerField(
-        default=0,
-        help_text="Progress within current stage (0-100)"
-    )
-    
-    # Progress metrics
-    total_raw_results = models.IntegerField(
-        default=0,
-        help_text="Total number of raw results to process"
-    )
-    processed_count = models.IntegerField(
-        default=0,
-        help_text="Number of results processed so far"
-    )
-    error_count = models.IntegerField(
-        default=0,
-        help_text="Number of processing errors encountered"
-    )
-    duplicate_count = models.IntegerField(
-        default=0,
-        help_text="Number of duplicates found"
-    )
-    
-    # Timing information
-    started_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When processing started"
-    )
-    completed_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When processing completed"
-    )
-    last_heartbeat = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="Last progress update timestamp"
-    )
-    
-    # Error tracking
-    error_details = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="List of processing errors with details"
-    )
-    retry_count = models.IntegerField(
-        default=0,
-        help_text="Number of retry attempts"
-    )
-    
-    # Configuration and metadata
-    processing_config = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Processing configuration parameters"
-    )
-    celery_task_id = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Associated Celery task ID"
-    )
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'processing_sessions'
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['search_session', 'status']),
-            models.Index(fields=['status', 'started_at']),
-        ]
-    
-    def __str__(self) -> str:
-        return f"Processing: {self.search_session.title} ({self.status})"
-    
-    @property
-    def progress_percentage(self) -> int:
-        """Calculate overall progress percentage."""
-        if self.total_raw_results == 0:
-            return 0
-        return min(100, int((self.processed_count / self.total_raw_results) * 100))
-    
-    @property
-    def duration_seconds(self) -> Optional[int]:
-        """Get processing duration in seconds."""
-        if not self.started_at:
-            return None
-        
-        end_time = self.completed_at or timezone.now()
-        duration = end_time - self.started_at
-        return int(duration.total_seconds())
-    
-    @property
-    def estimated_completion(self) -> Optional[timezone.datetime]:
-        """Estimate completion time based on current progress."""
-        if not self.started_at or self.processed_count == 0:
-            return None
-        
-        elapsed = timezone.now() - self.started_at
-        rate = self.processed_count / elapsed.total_seconds()  # results per second
-        
-        remaining = self.total_raw_results - self.processed_count
-        if remaining <= 0 or rate <= 0:
-            return None
-        
-        estimated_seconds = remaining / rate
-        return timezone.now() + timezone.timedelta(seconds=estimated_seconds)
-    
-    def update_progress(
-        self,
-        stage: str,
-        stage_progress: int,
-        processed_count: Optional[int] = None,
-        error_count: Optional[int] = None,
-        duplicate_count: Optional[int] = None
-    ) -> None:
-        """
-        Update processing progress.
-        
-        Args:
-            stage: Current processing stage
-            stage_progress: Progress within stage (0-100)
-            processed_count: Total processed count (optional)
-            error_count: Total error count (optional)
-            duplicate_count: Total duplicate count (optional)
-        """
-        self.current_stage = stage
-        self.stage_progress = stage_progress
-        self.last_heartbeat = timezone.now()
-        
-        if processed_count is not None:
-            self.processed_count = processed_count
-        if error_count is not None:
-            self.error_count = error_count
-        if duplicate_count is not None:
-            self.duplicate_count = duplicate_count
-        
-        self.save(update_fields=[
-            'current_stage', 'stage_progress', 'last_heartbeat',
-            'processed_count', 'error_count', 'duplicate_count', 'updated_at'
-        ])
-    
-    def add_error(self, error_message: str, error_details: Optional[Dict[str, Any]] = None) -> None:
-        """
-        Add an error to the processing session.
-        
-        Args:
-            error_message: Error message
-            error_details: Additional error details
-        """
-        error_entry = {
-            'timestamp': timezone.now().isoformat(),
-            'message': error_message,
-            'details': error_details or {}
-        }
-        
-        self.error_details.append(error_entry)
-        self.error_count += 1
-        self.save(update_fields=['error_details', 'error_count', 'updated_at'])
-    
-    def start_processing(self, total_raw_results: int, celery_task_id: str = '') -> None:
-        """
-        Mark processing as started.
-        
-        Args:
-            total_raw_results: Total number of results to process
-            celery_task_id: Associated Celery task ID
-        """
-        self.status = 'in_progress'
-        self.total_raw_results = total_raw_results
-        self.started_at = timezone.now()
-        self.celery_task_id = celery_task_id
-        self.current_stage = 'initialization'
-        self.stage_progress = 0
-        
-        self.save(update_fields=[
-            'status', 'total_raw_results', 'started_at', 'celery_task_id',
-            'current_stage', 'stage_progress', 'updated_at'
-        ])
-    
-    def complete_processing(self) -> None:
-        """Mark processing as completed."""
-        self.status = 'completed'
-        self.completed_at = timezone.now()
-        self.current_stage = 'finalization'
-        self.stage_progress = 100
-        
-        self.save(update_fields=[
-            'status', 'completed_at', 'current_stage', 'stage_progress', 'updated_at'
-        ])
-    
-    def fail_processing(self, error_message: str, error_details: Optional[Dict[str, Any]] = None) -> None:
-        """
-        Mark processing as failed.
-        
-        Args:
-            error_message: Failure reason
-            error_details: Additional error details
-        """
-        self.status = 'failed'
-        self.completed_at = timezone.now()
-        self.add_error(error_message, error_details)
-        
-        self.save(update_fields=['status', 'completed_at', 'updated_at'])
+# Removed ResultMetadata and ProcessingSession models to simplify the system
+# These added unnecessary complexity for the core requirement of simple Include/Exclude review

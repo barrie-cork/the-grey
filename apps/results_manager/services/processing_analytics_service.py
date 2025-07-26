@@ -2,12 +2,13 @@
 Processing analytics service for results_manager slice.
 Business capability: Processing statistics, result prioritization, and export functionality.
 """
+from typing import Dict, Any, List
 
-from typing import Dict, Any
 from django.db.models import QuerySet, Count, Avg
 from django.utils import timezone
 
 from apps.core.logging import ServiceLoggerMixin
+from apps.results_manager.constants import ProcessingConstants
 
 
 class ProcessingAnalyticsService(ServiceLoggerMixin):
@@ -54,16 +55,16 @@ class ProcessingAnalyticsService(ServiceLoggerMixin):
             'processed_results': total_results,
             'duplicate_groups': duplicate_groups,
             'unique_results': unique_results,
-            'average_relevance': round(avg_relevance, 3),
+            'average_relevance': round(avg_relevance, ProcessingConstants.DECIMAL_PLACES['relevance']),
             'document_types': document_types,
             'publication_years': dict(sorted(publication_years.items(), reverse=True)),
             'has_full_text_count': has_full_text_count,
             'academic_results': academic_results,
-            'full_text_percentage': round((has_full_text_count / total_results * 100), 1) if total_results > 0 else 0,
-            'academic_percentage': round((academic_results / total_results * 100), 1) if total_results > 0 else 0
+            'full_text_percentage': round((has_full_text_count / total_results * ProcessingConstants.PERCENTAGE_MULTIPLIER), ProcessingConstants.DECIMAL_PLACES['percentage']) if total_results > 0 else 0,
+            'academic_percentage': round((academic_results / total_results * ProcessingConstants.PERCENTAGE_MULTIPLIER), ProcessingConstants.DECIMAL_PLACES['percentage']) if total_results > 0 else 0
         }
     
-    def prioritize_results_for_review(self, session_id: str, limit: int = 50) -> QuerySet:
+    def prioritize_results_for_review(self, session_id: str, limit: int = ProcessingConstants.DEFAULT_PRIORITIZATION_LIMIT) -> QuerySet:
         """
         Get prioritized results for manual review.
         
@@ -91,13 +92,13 @@ class ProcessingAnalyticsService(ServiceLoggerMixin):
         # Calculate priority scores and order results
         prioritized = results.extra(
             select={
-                'priority_score': """
-                    COALESCE(relevance_score, 0) * 40 +
-                    CASE WHEN has_full_text THEN 20 ELSE 0 END +
-                    CASE WHEN duplicate_group_id IS NULL THEN 15 ELSE 0 END +
-                    CASE WHEN publication_year >= 2020 THEN 10 ELSE 0 END +
-                    CASE WHEN publication_year >= 2015 THEN 5 ELSE 0 END +
-                    CASE WHEN quality_indicators ? 'peer_reviewed' THEN 10 ELSE 0 END
+                'priority_score': f"""
+                    COALESCE(relevance_score, 0) * {ProcessingConstants.PRIORITY_WEIGHTS['relevance_score']} +
+                    CASE WHEN has_full_text THEN {ProcessingConstants.PRIORITY_WEIGHTS['has_full_text']} ELSE 0 END +
+                    CASE WHEN duplicate_group_id IS NULL THEN {ProcessingConstants.PRIORITY_WEIGHTS['not_duplicate']} ELSE 0 END +
+                    CASE WHEN publication_year >= {ProcessingConstants.PRIORITY_YEAR_THRESHOLDS['very_recent']} THEN {ProcessingConstants.PRIORITY_WEIGHTS['very_recent']} ELSE 0 END +
+                    CASE WHEN publication_year >= {ProcessingConstants.PRIORITY_YEAR_THRESHOLDS['recent']} THEN {ProcessingConstants.PRIORITY_WEIGHTS['recent']} ELSE 0 END +
+                    CASE WHEN quality_indicators ? 'peer_reviewed' THEN {ProcessingConstants.PRIORITY_WEIGHTS['peer_reviewed']} ELSE 0 END
                 """
             }
         ).order_by('-priority_score', '-publication_year')
@@ -122,7 +123,7 @@ class ProcessingAnalyticsService(ServiceLoggerMixin):
         # Get sample results for each document type
         sample_results = {}
         for doc_type in stats['document_types'].keys():
-            samples = results.filter(document_type=doc_type).order_by('-relevance_score')[:3]
+            samples = results.filter(document_type=doc_type).order_by('-relevance_score')[:ProcessingConstants.SAMPLE_RESULTS_LIMIT]
             sample_results[doc_type] = [
                 {
                     'title': result.title,
@@ -164,16 +165,19 @@ class ProcessingAnalyticsService(ServiceLoggerMixin):
         total = results.count()
         
         # Relevance score distribution
-        high_relevance = results.filter(relevance_score__gte=0.8).count()
-        medium_relevance = results.filter(relevance_score__gte=0.5, relevance_score__lt=0.8).count()
-        low_relevance = results.filter(relevance_score__lt=0.5).count()
+        high_relevance = results.filter(relevance_score__gte=ProcessingConstants.RELEVANCE_THRESHOLDS['high']).count()
+        medium_relevance = results.filter(
+            relevance_score__gte=ProcessingConstants.RELEVANCE_THRESHOLDS['medium'], 
+            relevance_score__lt=ProcessingConstants.RELEVANCE_THRESHOLDS['high']
+        ).count()
+        low_relevance = results.filter(relevance_score__lt=ProcessingConstants.RELEVANCE_THRESHOLDS['medium']).count()
         
         return {
             'total_results': total,
             'relevance_distribution': {
-                'high': {'count': high_relevance, 'percentage': round(high_relevance / total * 100, 1)},
-                'medium': {'count': medium_relevance, 'percentage': round(medium_relevance / total * 100, 1)},
-                'low': {'count': low_relevance, 'percentage': round(low_relevance / total * 100, 1)}
+                'high': {'count': high_relevance, 'percentage': round(high_relevance / total * ProcessingConstants.PERCENTAGE_MULTIPLIER, ProcessingConstants.DECIMAL_PLACES['percentage'])},
+                'medium': {'count': medium_relevance, 'percentage': round(medium_relevance / total * ProcessingConstants.PERCENTAGE_MULTIPLIER, ProcessingConstants.DECIMAL_PLACES['percentage'])},
+                'low': {'count': low_relevance, 'percentage': round(low_relevance / total * ProcessingConstants.PERCENTAGE_MULTIPLIER, ProcessingConstants.DECIMAL_PLACES['percentage'])}
             },
             'quality_indicators': {
                 'has_full_text': results.filter(has_full_text=True).count(),
@@ -185,16 +189,4 @@ class ProcessingAnalyticsService(ServiceLoggerMixin):
     
     def _empty_statistics(self) -> Dict[str, Any]:
         """Return empty statistics structure."""
-        return {
-            'total_results': 0,
-            'processed_results': 0,
-            'duplicate_groups': 0,
-            'unique_results': 0,
-            'average_relevance': 0,
-            'document_types': {},
-            'publication_years': {},
-            'has_full_text_count': 0,
-            'academic_results': 0,
-            'full_text_percentage': 0,
-            'academic_percentage': 0
-        }
+        return ProcessingConstants.EMPTY_STATS_DEFAULTS.copy()

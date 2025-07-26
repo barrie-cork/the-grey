@@ -2,11 +2,15 @@
 Export service for reporting slice.
 Business capability: Data export and format conversion.
 """
+import csv
+import io
+import json
+from typing import Dict, Any, List
 
-from typing import Dict, Any
 from django.utils import timezone
 
 from apps.core.logging import ServiceLoggerMixin
+from apps.reporting.constants import ExportConstants
 
 
 class ExportService(ServiceLoggerMixin):
@@ -37,35 +41,40 @@ class ExportService(ServiceLoggerMixin):
         return export_result
     
     def get_content_type(self, format_type: str) -> str:
-        """Get MIME content type for export format."""
-        content_types = {
-            'json': 'application/json',
-            'csv': 'text/csv',
-            'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'pdf': 'application/pdf',
-            'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'bibtex': 'application/x-bibtex'
-        }
-        return content_types.get(format_type, 'application/octet-stream')
+        """
+        Get MIME content type for export format.
+        
+        Args:
+            format_type: The export format type (e.g., 'json', 'csv', 'pdf')
+            
+        Returns:
+            MIME content type string
+        """
+        return ExportConstants.CONTENT_TYPES.get(
+            format_type, 
+            ExportConstants.DEFAULT_CONTENT_TYPE
+        )
     
     def estimate_file_size(self, data: Dict[str, Any], format_type: str) -> int:
-        """Estimate file size for export format."""
-        import json
+        """
+        Estimate file size for export format.
         
+        Args:
+            data: The data to be exported
+            format_type: The export format type
+            
+        Returns:
+            Estimated file size in bytes
+        """
         # Basic estimation based on JSON size
         json_size = len(json.dumps(data, default=str))
         
-        # Format-specific multipliers
-        multipliers = {
-            'json': 1.0,
-            'csv': 0.7,
-            'xlsx': 1.5,
-            'pdf': 2.0,
-            'docx': 1.8,
-            'bibtex': 0.8
-        }
+        # Get format-specific multiplier
+        multiplier = ExportConstants.SIZE_MULTIPLIERS.get(
+            format_type, 
+            ExportConstants.DEFAULT_SIZE_MULTIPLIER
+        )
         
-        multiplier = multipliers.get(format_type, 1.0)
         return int(json_size * multiplier)
     
     def export_to_csv(self, data: Dict[str, Any], export_type: str = 'studies') -> str:
@@ -79,16 +88,10 @@ class ExportService(ServiceLoggerMixin):
         Returns:
             CSV string
         """
-        import csv
-        import io
-        
         output = io.StringIO()
         
         if export_type == 'studies' and 'studies' in data:
-            writer = csv.DictWriter(output, fieldnames=[
-                'id', 'title', 'authors', 'publication_year', 'document_type',
-                'url', 'has_full_text', 'relevance_score'
-            ])
+            writer = csv.DictWriter(output, fieldnames=ExportConstants.STUDY_CSV_FIELDS)
             writer.writeheader()
             
             for study in data['studies']:
@@ -104,10 +107,7 @@ class ExportService(ServiceLoggerMixin):
                 })
         
         elif export_type == 'queries' and 'queries' in data:
-            writer = csv.DictWriter(output, fieldnames=[
-                'id', 'query_string', 'population', 'interest', 'context',
-                'search_engines', 'total_results', 'success_rate'
-            ])
+            writer = csv.DictWriter(output, fieldnames=ExportConstants.QUERY_CSV_FIELDS)
             writer.writeheader()
             
             for query in data['queries']:
@@ -124,7 +124,7 @@ class ExportService(ServiceLoggerMixin):
         
         return output.getvalue()
     
-    def export_to_bibtex(self, studies: list) -> str:
+    def export_to_bibtex(self, studies: List[Dict[str, Any]]) -> str:
         """
         Export studies to BibTeX format.
         
@@ -169,19 +169,21 @@ class ExportService(ServiceLoggerMixin):
         return '\n'.join(bibtex_entries)
     
     def _map_to_bibtex_type(self, doc_type: str) -> str:
-        """Map document type to BibTeX entry type."""
-        type_mapping = {
-            'journal_article': 'article',
-            'report': 'techreport',
-            'thesis': 'phdthesis',
-            'working_paper': 'unpublished',
-            'book': 'book',
-            'conference': 'inproceedings',
-            'pdf': 'misc'
-        }
-        return type_mapping.get(doc_type, 'misc')
+        """
+        Map document type to BibTeX entry type.
+        
+        Args:
+            doc_type: The document type from the system
+            
+        Returns:
+            Corresponding BibTeX entry type
+        """
+        return ExportConstants.BIBTEX_TYPE_MAPPING.get(
+            doc_type, 
+            ExportConstants.DEFAULT_BIBTEX_TYPE
+        )
     
-    def generate_export_summary(self, session_id: str, export_types: list) -> Dict[str, Any]:
+    def generate_export_summary(self, session_id: str, export_types: List[str]) -> Dict[str, Any]:
         """
         Generate summary of available export options.
         
@@ -193,11 +195,11 @@ class ExportService(ServiceLoggerMixin):
             Dictionary with export options summary
         """
         from apps.results_manager.models import ProcessedResult
-        from apps.review_results.models import ReviewTagAssignment
+        from apps.review_results.models import SimpleReviewDecision
         
         # Count available data
         total_results = ProcessedResult.objects.filter(session_id=session_id).count()
-        included_studies = ReviewTagAssignment.objects.filter(
+        included_studies = SimpleReviewDecision.objects.filter(
             result__session_id=session_id,
             tag__name='Include'
         ).count()
@@ -217,36 +219,18 @@ class ExportService(ServiceLoggerMixin):
         
         # Available export options
         for export_type in export_types:
-            if export_type == 'prisma_flow':
+            if export_type in ExportConstants.EXPORT_TYPE_NAMES:
+                available = True
+                if export_type in ['prisma_flow']:
+                    available = total_results > 0
+                elif export_type in ['study_characteristics', 'bibliography']:
+                    available = included_studies > 0
+                
                 export_summary['export_options'].append({
-                    'type': 'prisma_flow',
-                    'name': 'PRISMA Flow Diagram',
-                    'formats': ['json', 'pdf', 'docx'],
-                    'available': total_results > 0
-                })
-            
-            elif export_type == 'study_characteristics':
-                export_summary['export_options'].append({
-                    'type': 'study_characteristics',
-                    'name': 'Study Characteristics Table',
-                    'formats': ['csv', 'xlsx', 'json'],
-                    'available': included_studies > 0
-                })
-            
-            elif export_type == 'search_strategy':
-                export_summary['export_options'].append({
-                    'type': 'search_strategy',
-                    'name': 'Search Strategy Report',
-                    'formats': ['json', 'pdf', 'docx'],
-                    'available': True
-                })
-            
-            elif export_type == 'bibliography':
-                export_summary['export_options'].append({
-                    'type': 'bibliography',
-                    'name': 'Bibliography',
-                    'formats': ['bibtex', 'csv', 'json'],
-                    'available': included_studies > 0
+                    'type': export_type,
+                    'name': ExportConstants.EXPORT_TYPE_NAMES[export_type],
+                    'formats': ExportConstants.EXPORT_FORMATS.get(export_type, []),
+                    'available': available
                 })
         
         # Recommendations based on data availability

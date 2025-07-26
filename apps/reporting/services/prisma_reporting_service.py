@@ -2,11 +2,20 @@
 PRISMA reporting service for reporting slice.
 Business capability: PRISMA-compliant report generation and flow diagram data.
 """
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 
-from typing import Dict, Any
 from django.utils import timezone
 
 from apps.core.logging import ServiceLoggerMixin
+from apps.reporting.constants import PRISMAConstants
+from apps.results_manager.api import get_deduplication_stats
+from apps.review_manager.models import SearchSession, SessionActivity
+from apps.review_manager.signals import get_session_data
+from apps.review_results.api import get_review_progress_stats
+from apps.review_results.models import SimpleReviewDecision
+from apps.search_strategy.signals import get_session_queries_data
+from apps.serp_execution.api import get_session_executions_data, get_raw_results_count
 
 
 class PrismaReportingService(ServiceLoggerMixin):
@@ -22,13 +31,6 @@ class PrismaReportingService(ServiceLoggerMixin):
         Returns:
             Dictionary with PRISMA flow data
         """
-        # Use internal APIs instead of direct model imports for VSA compliance
-        from apps.review_manager.signals import get_session_data
-        from apps.search_strategy.signals import get_session_queries_data
-        from apps.serp_execution.api import get_session_executions_data, get_raw_results_count
-        from apps.results_manager.api import get_deduplication_stats
-        from apps.review_results.api import get_review_progress_stats
-        
         # Get session data using internal API
         session_data = get_session_data(session_id)
         if not session_data:
@@ -93,9 +95,13 @@ class PrismaReportingService(ServiceLoggerMixin):
     def calculate_review_period_from_data(self, session_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Calculate review period from session data.
-        """
-        from datetime import datetime
         
+        Args:
+            session_data: Session data dictionary
+            
+        Returns:
+            Dictionary with start_date, end_date, and duration_days
+        """
         created_date = datetime.fromisoformat(session_data['created_at'].replace('Z', '+00:00'))
         
         return {
@@ -114,12 +120,10 @@ class PrismaReportingService(ServiceLoggerMixin):
         Returns:
             Dictionary mapping exclusion reasons to counts
         """
-        from apps.review_results.models import ReviewTagAssignment
-        
         # Get exclude tag assignments with reasons in notes
         exclude_assignments = ReviewTagAssignment.objects.filter(
             result__session_id=session_id,
-            tag__name='Exclude'
+            tag__name=PRISMAConstants.EXCLUDE_TAG
         ).exclude(notes='')
         
         reasons = {}
@@ -128,20 +132,23 @@ class PrismaReportingService(ServiceLoggerMixin):
             if reason:
                 # Clean up common reason variations
                 reason = reason.lower()
-                if 'not relevant' in reason or 'irrelevant' in reason:
-                    reason = 'Not relevant to research question'
-                elif 'no full text' in reason or 'full text unavailable' in reason:
-                    reason = 'Full text unavailable'
-                elif 'duplicate' in reason:
-                    reason = 'Duplicate study'
-                elif 'wrong study type' in reason or 'study design' in reason:
-                    reason = 'Inappropriate study design'
-                elif 'language' in reason:
-                    reason = 'Language other than English'
-                else:
-                    reason = reason.title()
                 
-                reasons[reason] = reasons.get(reason, 0) + 1
+                # Map to standardized reasons
+                standardized_reason = None
+                if 'not relevant' in reason or 'irrelevant' in reason:
+                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS['not_relevant']
+                elif 'no full text' in reason or 'full text unavailable' in reason:
+                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS['no_full_text']
+                elif 'duplicate' in reason:
+                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS['duplicate']
+                elif 'wrong study type' in reason or 'study design' in reason:
+                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS['wrong_study_type']
+                elif 'language' in reason:
+                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS['language']
+                else:
+                    standardized_reason = reason.title()
+                
+                reasons[standardized_reason] = reasons.get(standardized_reason, 0) + 1
         
         return reasons
     
@@ -167,8 +174,6 @@ class PrismaReportingService(ServiceLoggerMixin):
             period_info['duration_days'] = duration.days
         
         # Calculate phase durations based on status changes
-        from apps.review_manager.models import SessionActivity
-        
         activities = SessionActivity.objects.filter(
             session=session,
             activity_type='status_changed'
@@ -197,8 +202,6 @@ class PrismaReportingService(ServiceLoggerMixin):
         Returns:
             Dictionary with PRISMA checklist data
         """
-        from apps.review_manager.models import SearchSession
-        
         try:
             session = SearchSession.objects.get(id=session_id)
         except SearchSession.DoesNotExist:
@@ -224,7 +227,7 @@ class PrismaReportingService(ServiceLoggerMixin):
                 'section': 'Rationale',
                 'item': 3,
                 'description': 'Describe the rationale for the review in the context of existing knowledge.',
-                'completed': bool(session.description and len(session.description) > 100),
+                'completed': bool(session.description and len(session.description) > PRISMAConstants.MIN_DESCRIPTION_LENGTH),
                 'evidence': 'Description provided' if session.description else None
             },
             {
@@ -240,7 +243,10 @@ class PrismaReportingService(ServiceLoggerMixin):
         # Calculate completion statistics
         completed_items = sum(1 for item in checklist_items if item['completed'])
         total_items = len(checklist_items)
-        completion_percentage = round(completed_items / total_items * 100, 1)
+        completion_percentage = round(
+            completed_items / total_items * PRISMAConstants.PERCENTAGE_MULTIPLIER, 
+            1
+        )
         
         return {
             'session_id': session_id,

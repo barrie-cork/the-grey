@@ -26,7 +26,7 @@ urlpatterns = [
     path("", include("apps.review_manager.urls")),  # Dashboard at root
     path("api/review-manager/", include("apps.review_manager.api.urls")),
     path("execution/", include("apps.serp_execution.urls")),
-    path("results-manager/", include("apps.results_manager.urls")),
+    # path("results-manager/", include("apps.results_manager.urls")),  # Temporarily disabled
 ]
 
 # Serve static and media files in development

@@ -2,14 +2,15 @@
 Deduplication service for results_manager slice.
 Business capability: Result deduplication and similarity detection.
 """
-
 import re
+from difflib import SequenceMatcher
 from typing import Dict, List, Any, Set
 from urllib.parse import urlparse, parse_qs
+
 from django.db.models import QuerySet
-from difflib import SequenceMatcher
 
 from apps.core.logging import ServiceLoggerMixin
+from apps.results_manager.constants import DeduplicationConstants
 
 
 class DeduplicationService(ServiceLoggerMixin):
@@ -31,10 +32,7 @@ class DeduplicationService(ServiceLoggerMixin):
         parsed = urlparse(url.lower().strip())
         
         # Remove common tracking parameters
-        tracking_params = {
-            'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
-            'gclid', 'fbclid', 'msclkid', '_ga', 'ref', 'source'
-        }
+        tracking_params = DeduplicationConstants.TRACKING_PARAMS
         
         # Parse query parameters and remove tracking ones
         query_params = parse_qs(parsed.query)
@@ -46,12 +44,12 @@ class DeduplicationService(ServiceLoggerMixin):
         # Normalize common patterns
         path = parsed.path.rstrip('/')
         if path == '':
-            path = '/'
+            path = DeduplicationConstants.DEFAULT_PATH
         
         # Remove www prefix
         netloc = parsed.netloc
-        if netloc.startswith('www.'):
-            netloc = netloc[4:]
+        if netloc.startswith(DeduplicationConstants.WWW_PREFIX):
+            netloc = netloc[len(DeduplicationConstants.WWW_PREFIX):]
         
         # Rebuild URL
         normalized = f"{parsed.scheme}://{netloc}{path}"
@@ -100,23 +98,17 @@ class DeduplicationService(ServiceLoggerMixin):
         if not title:
             return set()
         
-        # Remove common stop words
-        stop_words = {
-            'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-            'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
-            'to', 'was', 'were', 'will', 'with', 'this', 'these', 'they', 'been'
-        }
-        
         # Clean and tokenize
         clean_title = re.sub(r'[^\w\s]', ' ', title.lower())
-        words = [word.strip() for word in clean_title.split() if len(word.strip()) > 2]
+        words = [word.strip() for word in clean_title.split() 
+                if len(word.strip()) > DeduplicationConstants.MIN_WORD_LENGTH]
         
         # Filter out stop words and return meaningful keywords
-        keywords = {word for word in words if word not in stop_words}
+        keywords = {word for word in words if word not in DeduplicationConstants.STOP_WORDS}
         
         return keywords
     
-    def detect_duplicates(self, results: QuerySet, similarity_threshold: float = 0.85) -> List[Dict[str, Any]]:
+    def detect_duplicates(self, results: QuerySet, similarity_threshold: float = DeduplicationConstants.DEFAULT_SIMILARITY_THRESHOLD) -> List[Dict[str, Any]]:
         """
         Detect potential duplicates among results using multiple methods.
         
@@ -181,12 +173,12 @@ class DeduplicationService(ServiceLoggerMixin):
             return {
                 'is_duplicate': True,
                 'method': 'exact_url',
-                'confidence': 1.0
+                'confidence': DeduplicationConstants.EXACT_URL_CONFIDENCE
             }
         
         # Title similarity
         title_similarity = self.calculate_similarity_score(result1.title, result2.title)
-        if title_similarity >= 0.9:
+        if title_similarity >= DeduplicationConstants.TITLE_SIMILARITY_THRESHOLD:
             return {
                 'is_duplicate': True,
                 'method': 'title_match',
@@ -203,7 +195,7 @@ class DeduplicationService(ServiceLoggerMixin):
             
             if keywords1 and keywords2:
                 overlap = len(keywords1 & keywords2) / len(keywords1 | keywords2)
-                if overlap >= 0.7:
+                if overlap >= DeduplicationConstants.FUZZY_MATCH_THRESHOLD:
                     return {
                         'is_duplicate': True,
                         'method': 'fuzzy_match',
@@ -213,7 +205,7 @@ class DeduplicationService(ServiceLoggerMixin):
         # Content hash (if snippets are similar enough)
         if result1.snippet and result2.snippet:
             snippet_similarity = self.calculate_similarity_score(result1.snippet, result2.snippet)
-            if snippet_similarity >= 0.8:
+            if snippet_similarity >= DeduplicationConstants.CONTENT_HASH_THRESHOLD:
                 return {
                     'is_duplicate': True,
                     'method': 'content_hash',

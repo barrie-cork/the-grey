@@ -2,11 +2,16 @@
 Search strategy reporting service for reporting slice.
 Business capability: Search strategy documentation and reporting.
 """
+from typing import Dict, Any, List, Optional
 
-from typing import Dict, Any
 from django.db import models
 
 from apps.core.logging import ServiceLoggerMixin
+from apps.reporting.constants import PerformanceConstants, SearchStrategyConstants
+from apps.results_manager.models import ProcessedResult
+from apps.review_manager.models import SearchSession
+from apps.search_strategy.models import SearchQuery
+from apps.serp_execution.models import SearchExecution
 
 
 class SearchStrategyReportingService(ServiceLoggerMixin):
@@ -22,10 +27,6 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
         Returns:
             Dictionary with search strategy report data
         """
-        from apps.review_manager.models import SearchSession
-        from apps.search_strategy.models import SearchQuery
-        from apps.serp_execution.models import SearchExecution
-        
         try:
             session = SearchSession.objects.get(id=session_id)
         except SearchSession.DoesNotExist:
@@ -49,7 +50,7 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
             'queries': [],
             'execution_summary': {
                 'total_executions': executions.count(),
-                'successful_executions': executions.filter(status='completed').count(),
+                'successful_executions': executions.filter(status=PerformanceConstants.COMPLETED_STATUS).count(),
                 'total_results_retrieved': sum(e.results_count for e in executions),
                 'search_engines_used': list(set(e.search_engine for e in executions)),
                 'total_cost': sum(e.estimated_cost for e in executions)
@@ -84,10 +85,14 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
                     'executions_count': query_executions.count(),
                     'total_results': sum(e.results_count for e in query_executions),
                     'avg_results_per_execution': round(
-                        sum(e.results_count for e in query_executions) / max(query_executions.count(), 1), 1
+                        sum(e.results_count for e in query_executions) / max(query_executions.count(), PerformanceConstants.MIN_DIVISOR), 
+                        PerformanceConstants.DECIMAL_PLACES['ratio']
                     ),
                     'success_rate': round(
-                        query_executions.filter(status='completed').count() / max(query_executions.count(), 1) * 100, 1
+                        query_executions.filter(status=PerformanceConstants.COMPLETED_STATUS).count() / 
+                        max(query_executions.count(), PerformanceConstants.MIN_DIVISOR) * 
+                        PerformanceConstants.PERCENTAGE_MULTIPLIER, 
+                        PerformanceConstants.DECIMAL_PLACES['percentage']
                     )
                 }
             }
@@ -106,10 +111,6 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
         Returns:
             Dictionary with query optimization analysis
         """
-        from apps.search_strategy.models import SearchQuery
-        from apps.serp_execution.models import SearchExecution
-        from apps.results_manager.models import ProcessedResult
-        
         queries = SearchQuery.objects.filter(session_id=session_id, is_active=True)
         
         optimization_data = {
@@ -145,10 +146,14 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
                 'total_results': query_results,
                 'avg_relevance': round(query_relevance, 3),
                 'execution_success_rate': round(
-                    executions.filter(status='completed').count() / max(executions.count(), 1) * 100, 1
+                    executions.filter(status=PerformanceConstants.COMPLETED_STATUS).count() / 
+                    max(executions.count(), PerformanceConstants.MIN_DIVISOR) * 
+                    PerformanceConstants.PERCENTAGE_MULTIPLIER, 
+                    PerformanceConstants.DECIMAL_PLACES['percentage']
                 ),
                 'cost_effectiveness': round(
-                    query_results / max(sum(e.estimated_cost for e in executions), 0.01), 2
+                    query_results / max(sum(e.estimated_cost for e in executions), 0.01), 
+                    PerformanceConstants.DECIMAL_PLACES['ratio']
                 )
             }
             
@@ -168,8 +173,14 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
         # Calculate overall metrics
         query_count = queries.count()
         if query_count > 0:
-            optimization_data['overall_metrics']['avg_results_per_query'] = round(total_results / query_count, 1)
-            optimization_data['overall_metrics']['avg_relevance_score'] = round(total_relevance / query_count, 3)
+            optimization_data['overall_metrics']['avg_results_per_query'] = round(
+                total_results / query_count, 
+                PerformanceConstants.DECIMAL_PLACES['ratio']
+            )
+            optimization_data['overall_metrics']['avg_relevance_score'] = round(
+                total_relevance / query_count, 
+                3  # Keep higher precision for relevance scores
+            )
         
         # Most effective engines
         sorted_engines = sorted(
@@ -178,8 +189,14 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
             reverse=True
         )
         optimization_data['overall_metrics']['most_effective_engines'] = [
-            {'engine': engine, 'avg_results': round(data['results'] / data['count'], 1)}
-            for engine, data in sorted_engines[:3]
+            {
+                'engine': engine, 
+                'avg_results': round(
+                    data['results'] / data['count'], 
+                    PerformanceConstants.DECIMAL_PLACES['ratio']
+                )
+            }
+            for engine, data in sorted_engines[:SearchStrategyConstants.TOP_ENGINES_LIMIT]
         ]
         
         return optimization_data

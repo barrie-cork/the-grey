@@ -2,10 +2,13 @@
 Study analysis service for reporting slice.
 Business capability: Study characteristics analysis and reporting.
 """
-
-from typing import Dict, Any
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 
 from apps.core.logging import ServiceLoggerMixin
+from apps.reporting.constants import StudyAnalysisConstants, PerformanceConstants
+from apps.results_manager.models import ProcessedResult
+from apps.review_results.models import SimpleReviewDecision
 
 
 class StudyAnalysisService(ServiceLoggerMixin):
@@ -21,13 +24,10 @@ class StudyAnalysisService(ServiceLoggerMixin):
         Returns:
             Dictionary with study characteristics data
         """
-        from apps.results_manager.models import ProcessedResult
-        from apps.review_results.models import ReviewTagAssignment
-        
         # Get included studies
-        included_result_ids = ReviewTagAssignment.objects.filter(
+        included_result_ids = SimpleReviewDecision.objects.filter(
             result__session_id=session_id,
-            tag__name='Include'
+            tag__name=PerformanceConstants.INCLUDE_TAG
         ).values_list('result_id', flat=True)
         
         included_studies = ProcessedResult.objects.filter(id__in=included_result_ids)
@@ -107,13 +107,10 @@ class StudyAnalysisService(ServiceLoggerMixin):
         Returns:
             Dictionary with quality analysis
         """
-        from apps.results_manager.models import ProcessedResult
-        from apps.review_results.models import ReviewTagAssignment
-        
         # Get included studies
-        included_result_ids = ReviewTagAssignment.objects.filter(
+        included_result_ids = SimpleReviewDecision.objects.filter(
             result__session_id=session_id,
-            tag__name='Include'
+            tag__name=PerformanceConstants.INCLUDE_TAG
         ).values_list('result_id', flat=True)
         
         included_studies = ProcessedResult.objects.filter(id__in=included_result_ids)
@@ -133,9 +130,9 @@ class StudyAnalysisService(ServiceLoggerMixin):
                 'academic_source': 0
             },
             'relevance_distribution': {
-                'high': 0,  # >0.8
-                'medium': 0,  # 0.5-0.8
-                'low': 0  # <0.5
+                'high': 0,  # > high_quality threshold
+                'medium': 0,  # medium_quality to high_quality threshold
+                'low': 0  # < medium_quality threshold
             },
             'publication_recency': {
                 'last_5_years': 0,
@@ -144,7 +141,7 @@ class StudyAnalysisService(ServiceLoggerMixin):
             }
         }
         
-        current_year = 2024  # Should be dynamic
+        current_year = datetime.now().year
         
         for study in included_studies:
             # Quality indicators
@@ -157,7 +154,7 @@ class StudyAnalysisService(ServiceLoggerMixin):
             if study.has_full_text:
                 quality_analysis['quality_indicators']['full_text_available'] += 1
             
-            if study.publication_year and study.publication_year >= current_year - 5:
+            if study.publication_year and study.publication_year >= current_year - StudyAnalysisConstants.RECENCY_PERIODS['recent']:
                 quality_analysis['quality_indicators']['recent_publication'] += 1
             
             if study.quality_indicators.get('is_academic'):
@@ -165,18 +162,18 @@ class StudyAnalysisService(ServiceLoggerMixin):
             
             # Relevance distribution
             if study.relevance_score:
-                if study.relevance_score > 0.8:
+                if study.relevance_score > StudyAnalysisConstants.THRESHOLDS['high_quality']:
                     quality_analysis['relevance_distribution']['high'] += 1
-                elif study.relevance_score >= 0.5:
+                elif study.relevance_score >= StudyAnalysisConstants.THRESHOLDS['medium_quality']:
                     quality_analysis['relevance_distribution']['medium'] += 1
                 else:
                     quality_analysis['relevance_distribution']['low'] += 1
             
             # Publication recency
             if study.publication_year:
-                if study.publication_year >= current_year - 5:
+                if study.publication_year >= current_year - StudyAnalysisConstants.RECENCY_PERIODS['recent']:
                     quality_analysis['publication_recency']['last_5_years'] += 1
-                elif study.publication_year >= current_year - 10:
+                elif study.publication_year >= current_year - StudyAnalysisConstants.RECENCY_PERIODS['fairly_recent']:
                     quality_analysis['publication_recency']['last_10_years'] += 1
                 else:
                     quality_analysis['publication_recency']['older'] += 1
@@ -193,13 +190,10 @@ class StudyAnalysisService(ServiceLoggerMixin):
         Returns:
             Dictionary with geographical analysis
         """
-        from apps.results_manager.models import ProcessedResult
-        from apps.review_results.models import ReviewTagAssignment
-        
         # Get included studies
-        included_result_ids = ReviewTagAssignment.objects.filter(
+        included_result_ids = SimpleReviewDecision.objects.filter(
             result__session_id=session_id,
-            tag__name='Include'
+            tag__name=PerformanceConstants.INCLUDE_TAG
         ).values_list('result_id', flat=True)
         
         included_studies = ProcessedResult.objects.filter(id__in=included_result_ids)
@@ -209,20 +203,6 @@ class StudyAnalysisService(ServiceLoggerMixin):
             'countries': {},
             'regions': {},
             'unknown_geography': 0
-        }
-        
-        # Country mapping for common domains/organizations
-        domain_to_country = {
-            '.gov': 'United States',
-            '.edu': 'United States',
-            '.uk': 'United Kingdom',
-            '.ca': 'Canada',
-            '.au': 'Australia',
-            '.de': 'Germany',
-            '.fr': 'France',
-            '.nl': 'Netherlands',
-            'europa.eu': 'European Union',
-            'who.int': 'International'
         }
         
         for study in included_studies:
@@ -235,7 +215,7 @@ class StudyAnalysisService(ServiceLoggerMixin):
             # Fallback to URL analysis
             if not country and study.url:
                 url_lower = study.url.lower()
-                for domain, mapped_country in domain_to_country.items():
+                for domain, mapped_country in StudyAnalysisConstants.DOMAIN_TO_COUNTRY.items():
                     if domain in url_lower:
                         country = mapped_country
                         break

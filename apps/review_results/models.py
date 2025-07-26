@@ -1,59 +1,68 @@
 import uuid
 from typing import Any
-from django.db import models
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import models
 
 User = get_user_model()
 
 
 class SimpleReviewDecision(models.Model):
     """Simple Include/Exclude decision with optional notes."""
-    
+
     DECISION_CHOICES = [
-        ('pending', 'Pending Review'),
-        ('include', 'Include'),
-        ('exclude', 'Exclude'),
-        ('maybe', 'Maybe/Uncertain'),
+        ("pending", "Pending Review"),
+        ("include", "Include"),
+        ("exclude", "Exclude"),
+        ("maybe", "Maybe/Uncertain"),
     ]
-    
+
     EXCLUSION_REASONS = [
-        ('not_relevant', 'Not Relevant'),
-        ('not_grey_lit', 'Not Grey Literature'),
-        ('duplicate', 'Duplicate'),
-        ('no_access', 'Cannot Access'),
-        ('other', 'Other'),
+        ("not_relevant", "Not Relevant"),
+        ("not_grey_lit", "Not Grey Literature"),
+        ("duplicate", "Duplicate"),
+        ("no_access", "Cannot Access"),
+        ("other", "Other"),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    result = models.OneToOneField('results_manager.ProcessedResult', on_delete=models.CASCADE)
+    result = models.OneToOneField(
+        "results_manager.ProcessedResult", on_delete=models.CASCADE
+    )
     reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    
-    decision = models.CharField(max_length=20, choices=DECISION_CHOICES, default='pending')
-    exclusion_reason = models.CharField(max_length=20, choices=EXCLUSION_REASONS, blank=True)
+
+    decision = models.CharField(
+        max_length=20, choices=DECISION_CHOICES, default="pending"
+    )
+    exclusion_reason = models.CharField(
+        max_length=20, choices=EXCLUSION_REASONS, blank=True
+    )
     notes = models.TextField(blank=True, help_text="Optional reviewer notes")
-    
+
     reviewed_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        db_table = 'simple_review_decisions'
-        ordering = ['-reviewed_at']
-    
+        db_table = "simple_review_decisions"
+        ordering = ["-reviewed_at"]
+
     def __str__(self) -> str:
         return f"{self.get_decision_display()} - {self.result.title[:50]}..."
-    
+
     def clean(self) -> None:
         """Validate exclusion reason is provided when excluding."""
-        if self.decision == 'exclude' and not self.exclusion_reason:
-            raise ValidationError("Exclusion reason is required when excluding a result")
-    
+        if self.decision == "exclude" and not self.exclusion_reason:
+            raise ValidationError(
+                "Exclusion reason is required when excluding a result"
+            )
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Update result review status."""
         self.full_clean()
         super().save(*args, **kwargs)
-        
+
         # Update the processed result's review status
         if self.result:
-            self.result.is_reviewed = (self.decision != 'pending')
-            self.result.save(update_fields=['is_reviewed'])
+            self.result.is_reviewed = self.decision != "pending"
+            self.result.save(update_fields=["is_reviewed"])

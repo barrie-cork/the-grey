@@ -3,32 +3,36 @@ Pydantic schemas for review_results slice.
 VSA-compliant type safety for result review and tagging.
 """
 
-from pydantic import BaseModel, Field, ConfigDict, validator
-from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TagType(str, Enum):
     """Review tag type classifications."""
-    INCLUSION = 'inclusion'
-    EXCLUSION = 'exclusion'
-    METHODOLOGY = 'methodology'
-    QUALITY = 'quality'
-    RELEVANCE = 'relevance'
-    CUSTOM = 'custom'
+
+    INCLUSION = "inclusion"
+    EXCLUSION = "exclusion"
+    METHODOLOGY = "methodology"
+    QUALITY = "quality"
+    RELEVANCE = "relevance"
+    CUSTOM = "custom"
 
 
 class ReviewDecision(str, Enum):
     """Review decision choices."""
-    INCLUDE = 'include'
-    EXCLUDE = 'exclude'
-    UNCERTAIN = 'uncertain'
-    PENDING = 'pending'
+
+    INCLUDE = "include"
+    EXCLUDE = "exclude"
+    UNCERTAIN = "uncertain"
+    PENDING = "pending"
 
 
 class ReviewTagCreate(BaseModel):
     """Schema for creating review tags."""
+
     name: str = Field(..., min_length=1, max_length=100)
     tag_type: TagType
     description: Optional[str] = Field(None, max_length=500)
@@ -38,6 +42,7 @@ class ReviewTagCreate(BaseModel):
 
 class ReviewTagUpdate(BaseModel):
     """Schema for updating review tags."""
+
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
     color: Optional[str] = Field(None, regex="^#[0-9a-fA-F]{6}$")
@@ -46,8 +51,9 @@ class ReviewTagUpdate(BaseModel):
 
 class ReviewTagResponse(BaseModel):
     """Schema for review tag responses."""
+
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     name: str
     tag_type: TagType
@@ -61,6 +67,7 @@ class ReviewTagResponse(BaseModel):
 
 class ReviewTagAssignmentCreate(BaseModel):
     """Schema for creating tag assignments."""
+
     result_id: str
     tag_ids: List[str] = Field(..., min_items=1)
     notes: Optional[str] = Field(None, max_length=2000)
@@ -69,12 +76,14 @@ class ReviewTagAssignmentCreate(BaseModel):
 
 class ReviewTagAssignmentUpdate(BaseModel):
     """Schema for updating tag assignments."""
+
     notes: Optional[str] = Field(None, max_length=2000)
     confidence_level: Optional[int] = Field(None, ge=1, le=5)
 
 
 class ReviewTagAssignmentResponse(BaseModel):
     """Schema for tag assignment responses."""
+
     id: str
     result_id: str
     tag_id: str
@@ -89,6 +98,7 @@ class ReviewTagAssignmentResponse(BaseModel):
 
 class BulkTagRequest(BaseModel):
     """Schema for bulk tagging requests."""
+
     result_ids: List[str] = Field(..., min_items=1, max_items=100)
     tag_ids: List[str] = Field(..., min_items=1)
     notes: Optional[str] = Field(None, max_length=2000)
@@ -97,6 +107,7 @@ class BulkTagRequest(BaseModel):
 
 class ReviewProgressResponse(BaseModel):
     """Schema for review progress responses."""
+
     session_id: str
     total_results: int
     reviewed_results: int
@@ -111,17 +122,18 @@ class ReviewProgressResponse(BaseModel):
 
 class ReviewRecommendation(BaseModel):
     """Schema for review recommendations."""
+
     result_id: str
     title: str
     url: str
-    quality_indicator: float  # Simplified quality instead of relevance
+    quality_indicator: float  # Simplified quality indicator
     recommendation_reason: str
-    priority_score: float
     similar_reviewed_results: List[str]
 
 
 class TagUsageStatistics(BaseModel):
     """Schema for tag usage statistics."""
+
     session_id: str
     tag_counts: Dict[str, int]
     most_used_tags: List[Dict[str, Any]]
@@ -131,6 +143,7 @@ class TagUsageStatistics(BaseModel):
 
 class ReviewVelocity(BaseModel):
     """Schema for review velocity analysis."""
+
     session_id: str
     reviewer_id: str
     results_reviewed_today: int
@@ -142,6 +155,7 @@ class ReviewVelocity(BaseModel):
 
 class ReviewComment(BaseModel):
     """Schema for review comments."""
+
     id: str
     result_id: str
     reviewer_id: str
@@ -154,6 +168,7 @@ class ReviewComment(BaseModel):
 
 class ReviewExport(BaseModel):
     """Schema for review data export."""
+
     session_id: str
     format_type: str = Field(..., regex="^(csv|json|excel|prisma)$")
     include_tags: bool = Field(default=True)
@@ -165,6 +180,7 @@ class ReviewExport(BaseModel):
 
 class ReviewValidation(BaseModel):
     """Schema for review completeness validation."""
+
     session_id: str
     is_complete: bool
     missing_reviews: int

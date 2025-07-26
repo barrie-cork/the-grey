@@ -6,52 +6,63 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('results_manager', '0002_processingsession'),
+        ("results_manager", "0002_processingsession"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='resultmetadata',
-            name='result',
+            model_name="resultmetadata",
+            name="result",
         ),
         migrations.AlterModelOptions(
-            name='processedresult',
-            options={'ordering': ['-publication_date', '-processed_at']},
+            name="processedresult",
+            options={"ordering": ["-publication_date", "-processed_at"]},
         ),
         migrations.RemoveIndex(
-            model_name='processedresult',
-            name='processed_r_relevan_c7948c_idx',
+            model_name="processedresult",
+            name="processed_r_relevan_c7948c_idx",
         ),
         migrations.RemoveField(
-            model_name='processedresult',
-            name='file_size_bytes',
+            model_name="processedresult",
+            name="file_size_bytes",
         ),
         migrations.RemoveField(
-            model_name='processedresult',
-            name='has_full_text',
+            model_name="processedresult",
+            name="has_full_text",
         ),
         migrations.RemoveField(
-            model_name='processedresult',
-            name='processing_version',
+            model_name="processedresult",
+            name="processing_version",
         ),
         migrations.RemoveField(
-            model_name='processedresult',
-            name='quality_indicators',
+            model_name="processedresult",
+            name="quality_indicators",
         ),
         migrations.RemoveField(
-            model_name='processedresult',
-            name='relevance_score',
+            model_name="processedresult",
+            name="relevance_score",
         ),
         migrations.RemoveField(
-            model_name='processedresult',
-            name='review_priority',
+            model_name="processedresult",
+            name="review_priority",
         ),
         migrations.AlterField(
-            model_name='processingsession',
-            name='current_stage',
-            field=models.CharField(blank=True, choices=[('initialization', 'Initialization'), ('url_normalization', 'URL Normalization'), ('deduplication', 'Deduplication'), ('quality_scoring', 'Quality Scoring'), ('finalization', 'Finalization')], help_text='Current processing stage', max_length=30),
+            model_name="processingsession",
+            name="current_stage",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("initialization", "Initialization"),
+                    ("url_normalization", "URL Normalization"),
+                    ("deduplication", "Deduplication"),
+                    ("quality_scoring", "Quality Scoring"),
+                    ("finalization", "Finalization"),
+                ],
+                help_text="Current processing stage",
+                max_length=30,
+            ),
         ),
         migrations.DeleteModel(
-            name='ResultMetadata',
+            name="ResultMetadata",
         ),
     ]

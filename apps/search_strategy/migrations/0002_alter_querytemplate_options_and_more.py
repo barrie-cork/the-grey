@@ -6,44 +6,60 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('search_strategy', '0001_initial'),
+        ("search_strategy", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='querytemplate',
-            options={'ordering': ['-usage_count', 'name']},
+            name="querytemplate",
+            options={"ordering": ["-usage_count", "name"]},
         ),
         migrations.AlterModelOptions(
-            name='searchquery',
-            options={'ordering': ['execution_order', 'created_at'], 'verbose_name': 'Search Query', 'verbose_name_plural': 'Search Queries'},
+            name="searchquery",
+            options={
+                "ordering": ["execution_order", "created_at"],
+                "verbose_name": "Search Query",
+                "verbose_name_plural": "Search Queries",
+            },
         ),
         migrations.AddIndex(
-            model_name='querytemplate',
-            index=models.Index(fields=['is_public', 'category'], name='query_templ_is_publ_f9d435_idx'),
+            model_name="querytemplate",
+            index=models.Index(
+                fields=["is_public", "category"], name="query_templ_is_publ_f9d435_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='querytemplate',
-            index=models.Index(fields=['created_by'], name='query_templ_created_21dcce_idx'),
+            model_name="querytemplate",
+            index=models.Index(
+                fields=["created_by"], name="query_templ_created_21dcce_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='searchquery',
-            index=models.Index(fields=['strategy'], name='search_quer_strateg_95b415_idx'),
+            model_name="searchquery",
+            index=models.Index(
+                fields=["strategy"], name="search_quer_strateg_95b415_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='searchquery',
-            index=models.Index(fields=['is_active'], name='search_quer_is_acti_bc2550_idx'),
+            model_name="searchquery",
+            index=models.Index(
+                fields=["is_active"], name="search_quer_is_acti_bc2550_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='searchstrategy',
-            index=models.Index(fields=['session'], name='search_stra_session_d75ea3_idx'),
+            model_name="searchstrategy",
+            index=models.Index(
+                fields=["session"], name="search_stra_session_d75ea3_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='searchstrategy',
-            index=models.Index(fields=['user'], name='search_stra_user_id_5455c9_idx'),
+            model_name="searchstrategy",
+            index=models.Index(fields=["user"], name="search_stra_user_id_5455c9_idx"),
         ),
         migrations.AddIndex(
-            model_name='searchstrategy',
-            index=models.Index(fields=['is_complete'], name='search_stra_is_comp_51831c_idx'),
+            model_name="searchstrategy",
+            index=models.Index(
+                fields=["is_complete"], name="search_stra_is_comp_51831c_idx"
+            ),
         ),
     ]

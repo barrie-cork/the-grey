@@ -3,25 +3,28 @@ Pydantic schemas for serp_execution slice.
 VSA-compliant type safety for search execution and API integration.
 """
 
-from pydantic import BaseModel, Field, ConfigDict, validator
-from typing import Optional, List, Dict, Any
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExecutionStatus(str, Enum):
     """Search execution status choices."""
-    PENDING = 'pending'
-    RUNNING = 'running'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
-    CANCELLED = 'cancelled'
-    RETRYING = 'retrying'
+
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    RETRYING = "retrying"
 
 
 class SearchExecutionCreate(BaseModel):
     """Schema for creating a search execution."""
+
     query_id: str
     search_engines: List[str] = Field(default=["google"])
     max_results: int = Field(default=100, ge=1, le=1000)
@@ -30,8 +33,9 @@ class SearchExecutionCreate(BaseModel):
 
 class SearchExecutionResponse(BaseModel):
     """Schema for search execution API responses."""
+
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     query_id: str
     status: ExecutionStatus
@@ -49,6 +53,7 @@ class SearchExecutionResponse(BaseModel):
 
 class RawSearchResultResponse(BaseModel):
     """Schema for raw search result responses."""
+
     id: str
     execution_id: str
     position: int
@@ -61,6 +66,7 @@ class RawSearchResultResponse(BaseModel):
 
 class ExecutionMetricsResponse(BaseModel):
     """Schema for execution metrics."""
+
     id: str
     execution_id: str
     api_response_time: float
@@ -73,6 +79,7 @@ class ExecutionMetricsResponse(BaseModel):
 
 class ExecutionConfirmation(BaseModel):
     """Schema for execution confirmation requests."""
+
     confirmed: bool = Field(True)
     estimated_cost: Optional[Decimal] = None
     estimated_time: Optional[int] = None
@@ -81,6 +88,7 @@ class ExecutionConfirmation(BaseModel):
 
 class ExecutionStatusUpdate(BaseModel):
     """Schema for execution status updates."""
+
     status: ExecutionStatus
     error_message: Optional[str] = None
     results_count: Optional[int] = None
@@ -89,6 +97,7 @@ class ExecutionStatusUpdate(BaseModel):
 
 class ExecutionRetry(BaseModel):
     """Schema for execution retry requests."""
+
     retry_reason: str = Field(..., min_length=1, max_length=500)
     max_retries: int = Field(default=3, ge=1, le=5)
     retry_delay_seconds: int = Field(default=60, ge=30, le=3600)
@@ -96,6 +105,7 @@ class ExecutionRetry(BaseModel):
 
 class ApiUsageStats(BaseModel):
     """Schema for API usage statistics."""
+
     total_requests: int
     successful_requests: int
     failed_requests: int
@@ -107,6 +117,7 @@ class ApiUsageStats(BaseModel):
 
 class ExecutionProgress(BaseModel):
     """Schema for execution progress updates."""
+
     session_id: str
     total_executions: int
     completed_executions: int
@@ -118,6 +129,7 @@ class ExecutionProgress(BaseModel):
 
 class FailureAnalysis(BaseModel):
     """Schema for execution failure analysis."""
+
     execution_id: str
     failure_category: str
     failure_reason: str
@@ -128,6 +140,7 @@ class FailureAnalysis(BaseModel):
 
 class RetryStrategy(BaseModel):
     """Schema for retry strategy recommendations."""
+
     execution_id: str
     recommended_delay: int
     max_retries: int
@@ -137,6 +150,7 @@ class RetryStrategy(BaseModel):
 
 class SearchCoverage(BaseModel):
     """Schema for search coverage analysis."""
+
     session_id: str
     total_queries: int
     executed_queries: int
@@ -147,6 +161,7 @@ class SearchCoverage(BaseModel):
 
 class EnginePerformance(BaseModel):
     """Schema for search engine performance comparison."""
+
     engine_name: str
     total_executions: int
     success_rate: float
@@ -158,6 +173,7 @@ class EnginePerformance(BaseModel):
 
 class CostEstimate(BaseModel):
     """Schema for cost estimation."""
+
     session_id: str
     estimated_total_cost: Decimal
     cost_per_query: Decimal

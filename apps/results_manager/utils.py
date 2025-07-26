@@ -5,13 +5,12 @@ This module contains helper functions for result processing.
 Business logic has been moved to dedicated services.
 """
 
-from typing import Dict, List, Optional, Tuple, Any, Set
-from django.db.models import QuerySet
+# Legacy function proxies for backward compatibility - no type hints needed
 
 # Service imports for backward compatibility
 from .services.deduplication_service import DeduplicationService
-from .services.quality_assessment_service import QualityAssessmentService
 from .services.processing_analytics_service import ProcessingAnalyticsService
+from .services.quality_assessment_service import QualityAssessmentService
 
 # Initialize services for backward compatibility
 deduplication_service = DeduplicationService()

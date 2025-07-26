@@ -1,13 +1,10 @@
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from ..models import SearchSession, SessionActivity
-from .serializers import (
-    SearchSessionSerializer, 
-    SearchSessionDetailSerializer,
-    SessionActivitySerializer
-)
+from .serializers import SearchSessionDetailSerializer, SearchSessionSerializer
 
 
 class SearchSessionViewSet(viewsets.ModelViewSet):
@@ -15,102 +12,103 @@ class SearchSessionViewSet(viewsets.ModelViewSet):
     API endpoint for search sessions.
     Provides CRUD operations and custom actions.
     """
+
     permission_classes = [IsAuthenticated]
     serializer_class = SearchSessionSerializer
-    lookup_field = 'id'
-    
+    lookup_field = "id"
+
     def get_queryset(self):
-        return SearchSession.objects.filter(
-            owner=self.request.user
-        ).select_related('owner').prefetch_related(
-            'activities'
+        return (
+            SearchSession.objects.filter(owner=self.request.user)
+            .select_related("owner")
+            .prefetch_related("activities")
         )
-    
+
     def get_serializer_class(self):
-        if self.action == 'retrieve':
+        if self.action == "retrieve":
             return SearchSessionDetailSerializer
         return SearchSessionSerializer
-    
+
     def perform_create(self, serializer):
         session = serializer.save(owner=self.request.user)
         SessionActivity.log_activity(
             session=session,
-            activity_type='created',
-            description='Session created via API',
-            user=self.request.user
+            activity_type="created",
+            description="Session created via API",
+            user=self.request.user,
         )
-    
-    @action(detail=True, methods=['post'])
+
+    @action(detail=True, methods=["post"])
     def transition_status(self, request, id=None):
         """Transition session to new status with validation."""
         session = self.get_object()
-        new_status = request.data.get('status')
-        
+        new_status = request.data.get("status")
+
         if not new_status:
             return Response(
-                {'error': 'Status field is required'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Status field is required"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         if not session.can_transition_to(new_status):
             return Response(
-                {'error': f'Cannot transition from {session.status} to {new_status}'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": f"Cannot transition from {session.status} to {new_status}"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         old_status = session.status
         session.status = new_status
         session.save()
-        
+
         SessionActivity.log_activity(
             session=session,
-            activity_type='status_changed',
-            description=f'Status changed from {old_status} to {new_status}',
+            activity_type="status_changed",
+            description=f"Status changed from {old_status} to {new_status}",
             user=request.user,
-            metadata={'old_status': old_status, 'new_status': new_status}
+            metadata={"old_status": old_status, "new_status": new_status},
         )
-        
+
         serializer = self.get_serializer(session)
         return Response(serializer.data)
-    
-    @action(detail=True, methods=['post'])
+
+    @action(detail=True, methods=["post"])
     def duplicate(self, request, id=None):
         """Create a duplicate of the session."""
         original = self.get_object()
-        
+
         duplicate = SearchSession.objects.create(
             title=f"{original.title} (Copy)",
             description=original.description,
             owner=request.user,
-            status='draft',
+            status="draft",
             notes=original.notes,
-            tags=original.tags.copy() if original.tags else []
+            tags=original.tags.copy() if original.tags else [],
         )
-        
+
         SessionActivity.log_activity(
             session=duplicate,
-            activity_type='created',
-            description=f'Duplicated from session {original.id}',
+            activity_type="created",
+            description=f"Duplicated from session {original.id}",
             user=request.user,
-            metadata={'original_session_id': str(original.id)}
+            metadata={"original_session_id": str(original.id)},
         )
-        
+
         serializer = self.get_serializer(duplicate)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
     @action(detail=False)
     def statistics(self, request):
         """Get user's session statistics."""
         sessions = self.get_queryset()
-        
+
         stats = {
-            'total_sessions': sessions.count(),
-            'active_sessions': sessions.exclude(
-                status__in=['completed', 'archived']
+            "total_sessions": sessions.count(),
+            "active_sessions": sessions.exclude(
+                status__in=["completed", "archived"]
             ).count(),
-            'completed_sessions': sessions.filter(status='completed').count(),
-            'total_results_reviewed': sum(s.reviewed_results for s in sessions),
-            'total_results_included': sum(s.included_results for s in sessions),
+            "completed_sessions": sessions.filter(status="completed").count(),
+            "total_results_reviewed": sum(s.reviewed_results for s in sessions),
+            "total_results_included": sum(s.included_results for s in sessions),
         }
-        
+
         return Response(stats)

@@ -6,48 +6,48 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('review_results', '0002_simplify_review_models'),
+        ("review_results", "0002_simplify_review_models"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='reviewdecision',
-            name='result',
+            model_name="reviewdecision",
+            name="result",
         ),
         migrations.RemoveField(
-            model_name='reviewdecision',
-            name='reviewer',
+            model_name="reviewdecision",
+            name="reviewer",
         ),
         migrations.RemoveField(
-            model_name='reviewtag',
-            name='created_by',
+            model_name="reviewtag",
+            name="created_by",
         ),
         migrations.AlterUniqueTogether(
-            name='reviewtagassignment',
+            name="reviewtagassignment",
             unique_together=None,
         ),
         migrations.RemoveField(
-            model_name='reviewtagassignment',
-            name='assigned_by',
+            model_name="reviewtagassignment",
+            name="assigned_by",
         ),
         migrations.RemoveField(
-            model_name='reviewtagassignment',
-            name='result',
+            model_name="reviewtagassignment",
+            name="result",
         ),
         migrations.RemoveField(
-            model_name='reviewtagassignment',
-            name='tag',
+            model_name="reviewtagassignment",
+            name="tag",
         ),
         migrations.DeleteModel(
-            name='ReviewComment',
+            name="ReviewComment",
         ),
         migrations.DeleteModel(
-            name='ReviewDecision',
+            name="ReviewDecision",
         ),
         migrations.DeleteModel(
-            name='ReviewTag',
+            name="ReviewTag",
         ),
         migrations.DeleteModel(
-            name='ReviewTagAssignment',
+            name="ReviewTagAssignment",
         ),
     ]

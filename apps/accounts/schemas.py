@@ -3,13 +3,15 @@ Pydantic schemas for accounts slice.
 VSA-compliant type safety for user authentication and profiles.
 """
 
-from pydantic import BaseModel, Field, EmailStr, ConfigDict, validator
-from typing import Optional, List
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, validator
 
 
 class UserRegistration(BaseModel):
     """Schema for user registration."""
+
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=128)
     password_confirm: str = Field(..., min_length=8, max_length=128)
@@ -17,16 +19,17 @@ class UserRegistration(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=30)
     organization: Optional[str] = Field(None, max_length=100)
     role: Optional[str] = Field(None, max_length=50)
-    
-    @validator('password_confirm')
+
+    @validator("password_confirm")
     def passwords_match(cls, v, values):
-        if 'password' in values and v != values['password']:
-            raise ValueError('Passwords do not match')
+        if "password" in values and v != values["password"]:
+            raise ValueError("Passwords do not match")
         return v
 
 
 class UserLogin(BaseModel):
     """Schema for user login."""
+
     email: EmailStr
     password: str = Field(..., min_length=1)
     remember_me: bool = Field(default=False)
@@ -34,6 +37,7 @@ class UserLogin(BaseModel):
 
 class UserProfileUpdate(BaseModel):
     """Schema for user profile updates."""
+
     first_name: Optional[str] = Field(None, min_length=1, max_length=30)
     last_name: Optional[str] = Field(None, min_length=1, max_length=30)
     organization: Optional[str] = Field(None, max_length=100)
@@ -46,8 +50,9 @@ class UserProfileUpdate(BaseModel):
 
 class UserProfileResponse(BaseModel):
     """Schema for user profile responses."""
+
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     email: str
     first_name: str
@@ -67,37 +72,41 @@ class UserProfileResponse(BaseModel):
 
 class PasswordChange(BaseModel):
     """Schema for password change requests."""
+
     current_password: str = Field(..., min_length=1)
     new_password: str = Field(..., min_length=8, max_length=128)
     new_password_confirm: str = Field(..., min_length=8, max_length=128)
-    
-    @validator('new_password_confirm')
+
+    @validator("new_password_confirm")
     def passwords_match(cls, v, values):
-        if 'new_password' in values and v != values['new_password']:
-            raise ValueError('New passwords do not match')
+        if "new_password" in values and v != values["new_password"]:
+            raise ValueError("New passwords do not match")
         return v
 
 
 class PasswordReset(BaseModel):
     """Schema for password reset requests."""
+
     email: EmailStr
 
 
 class PasswordResetConfirm(BaseModel):
     """Schema for password reset confirmation."""
+
     token: str = Field(..., min_length=1)
     new_password: str = Field(..., min_length=8, max_length=128)
     new_password_confirm: str = Field(..., min_length=8, max_length=128)
-    
-    @validator('new_password_confirm')
+
+    @validator("new_password_confirm")
     def passwords_match(cls, v, values):
-        if 'new_password' in values and v != values['new_password']:
-            raise ValueError('New passwords do not match')
+        if "new_password" in values and v != values["new_password"]:
+            raise ValueError("New passwords do not match")
         return v
 
 
 class UserActivityLog(BaseModel):
     """Schema for user activity logging."""
+
     id: str
     user_id: str
     activity_type: str
@@ -109,8 +118,9 @@ class UserActivityLog(BaseModel):
 
 class UserPreferences(BaseModel):
     """Schema for user preferences."""
-    theme: str = Field(default='light', regex='^(light|dark)$')
-    language: str = Field(default='en', max_length=5)
+
+    theme: str = Field(default="light", regex="^(light|dark)$")
+    language: str = Field(default="en", max_length=5)
     results_per_page: int = Field(default=25, ge=10, le=100)
     auto_save_interval: int = Field(default=300, ge=60, le=3600)  # seconds
     notification_preferences: dict = Field(default_factory=dict)
@@ -119,6 +129,7 @@ class UserPreferences(BaseModel):
 
 class AccountSummary(BaseModel):
     """Schema for account summary information."""
+
     user_id: str
     total_sessions: int
     active_sessions: int

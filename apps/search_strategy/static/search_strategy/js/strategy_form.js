@@ -323,10 +323,7 @@ class SearchStrategyForm {
             errors.push('Must specify domains or enable general search');
         }
         
-        // Check file types
-        if (formData.search_config.file_types.length === 0) {
-            errors.push('Must select at least one file type');
-        }
+        // File types are optional - users can search webpages without file type filters
         
         // Only show errors if validation fails
         if (errors.length > 0) {

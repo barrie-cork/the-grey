@@ -59,7 +59,7 @@ class TestReviewAnalyticsService(TestCase):
                 snippet=f'This study examines topic X with methodology Y',
                 publication_year=2020 + (i % 5),
                 document_type='journal_article' if i % 2 == 0 else 'report',
-                relevance_score=0.5 + (i * 0.025),
+                is_pdf=i % 2 == 0,
                 has_full_text=i % 3 == 0
             )
             self.results.append(result)
@@ -295,7 +295,7 @@ class TestReviewAnalyticsService(TestCase):
             title='Unreviewed Result',
             url='https://example.com',
             snippet='Test',
-            relevance_score=0.5
+            is_pdf=False
         )
         
         metrics = self.service.generate_review_quality_metrics(str(empty_session.id))

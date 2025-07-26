@@ -13,7 +13,7 @@ def get_session_executions_data(session_id: str) -> List[Dict[str, Any]]:
     from .models import SearchExecution, RawSearchResult
     
     executions = SearchExecution.objects.filter(
-        query__session_id=session_id,
+        query__strategy__session_id=session_id,
         status='completed'
     )
     
@@ -37,7 +37,7 @@ def get_raw_results_count(session_id: str) -> int:
     from .models import RawSearchResult
     
     return RawSearchResult.objects.filter(
-        execution__query__session_id=session_id
+        execution__query__strategy__session_id=session_id
     ).count()
 
 
@@ -46,7 +46,7 @@ def get_session_execution_stats(session_id: str) -> Dict[str, Any]:
     from .models import SearchExecution
     from django.db.models import Sum, Avg
     
-    executions = SearchExecution.objects.filter(query__session_id=session_id)
+    executions = SearchExecution.objects.filter(query__strategy__session_id=session_id)
     
     stats = executions.aggregate(
         total_executions=executions.count(),

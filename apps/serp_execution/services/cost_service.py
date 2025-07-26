@@ -54,7 +54,7 @@ class CostService(ServiceLoggerMixin):
         from ..models import SearchExecution
         
         executions = SearchExecution.objects.filter(
-            query__session_id=session_id,
+            query__strategy__session_id=session_id,
             status='completed'
         )
         

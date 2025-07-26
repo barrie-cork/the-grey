@@ -83,10 +83,9 @@ class TestReviewRecommendationService(TestCase):
                 title=f'Historical Result {i}: AI in Healthcare',
                 url=f'https://example.com/historical/{i}',
                 snippet=f'Study examining AI applications in healthcare settings',
-                relevance_score=relevance,
                 document_type=doc_type,
                 publication_year=2020 + (i % 4),
-                has_full_text=relevance > 0.7
+                is_pdf=relevance > 0.7
             )
             
             # Create review pattern
@@ -117,10 +116,9 @@ class TestReviewRecommendationService(TestCase):
                 title=f'Current Result {i}: Machine Learning Study',
                 url=f'https://journal.com/current/{i}',
                 snippet=f'Research on machine learning applications',
-                relevance_score=relevance,
                 document_type=doc_type,
                 publication_year=2023 + (i % 2),
-                has_full_text=i % 3 == 0
+                is_pdf=i % 3 == 0
             )
             self.current_results.append(result)
             
@@ -299,7 +297,7 @@ class TestReviewRecommendationService(TestCase):
             title='Identical Study A',
             url='https://example.com/studyA',
             snippet='Same content about AI',
-            relevance_score=0.85,
+            is_pdf=True,
             document_type='journal_article'
         )
         
@@ -308,7 +306,7 @@ class TestReviewRecommendationService(TestCase):
             title='Identical Study A (duplicate)',
             url='https://other.com/studyA',
             snippet='Same content about AI',
-            relevance_score=0.85,
+            is_pdf=True,
             document_type='journal_article'
         )
         
@@ -344,7 +342,7 @@ class TestReviewRecommendationService(TestCase):
         # Add reviews from second user
         for i in range(5, 10):
             result = self.current_results[i]
-            tag = self.tag_include if result.relevance_score > 0.6 else self.tag_maybe
+            tag = self.tag_include if result.is_pdf else self.tag_maybe
             
             ReviewTagAssignment.objects.create(
                 result=result,
@@ -420,7 +418,7 @@ class TestReviewRecommendationService(TestCase):
             title='New Result',
             url='https://example.com/new',
             snippet='New content',
-            relevance_score=0.75
+            is_pdf=False
         )
         
         # Should still provide recommendations using global patterns

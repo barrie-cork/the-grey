@@ -114,7 +114,7 @@ class ReviewRecommendation(BaseModel):
     result_id: str
     title: str
     url: str
-    relevance_score: float
+    quality_indicator: float  # Simplified quality instead of relevance
     recommendation_reason: str
     priority_score: float
     similar_reviewed_results: List[str]

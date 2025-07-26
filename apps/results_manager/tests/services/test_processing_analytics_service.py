@@ -45,14 +45,14 @@ class TestProcessingAnalyticsService(TestCase):
         
         # Create processing session
         self.processing_session = ProcessingSession.objects.create(
-            session=self.session,
+            search_session=self.session,
             status='completed',
             started_at=timezone.now() - timedelta(hours=2),
             completed_at=timezone.now() - timedelta(hours=1),
             total_raw_results=100,
-            processed_results=85,
-            duplicate_groups=15,
-            errors_count=0
+            processed_count=85,
+            duplicate_count=15,
+            error_count=0
         )
         
         # Create raw results
@@ -72,17 +72,17 @@ class TestProcessingAnalyticsService(TestCase):
                 title=f'Processed Result {i}',
                 url=f'https://example.com/result/{i}',
                 snippet=f'Processed snippet {i}',
-                relevance_score=0.5 + (i * 0.005),
-                processing_session=self.processing_session
+                is_pdf=i % 2 == 0,
+                publication_year=2020 + (i % 5)
             )
         
         # Create duplicate groups
         for i in range(15):
             DuplicateGroup.objects.create(
                 session=self.session,
-                group_key=f'group_{i}',
-                member_count=2 + (i % 3),
-                representative_result_id=f'result_{i}'
+                canonical_url=f'https://example.com/canonical/{i}',
+                similarity_type='normalized_url',
+                result_count=2 + (i % 3)
             )
     
     def test_calculate_processing_metrics(self):
@@ -143,9 +143,9 @@ class TestProcessingAnalyticsService(TestCase):
             started_at=timezone.now() - timedelta(hours=1),
             completed_at=timezone.now() - timedelta(minutes=30),
             total_raw_results=50,
-            processed_results=45,
-            duplicate_groups=3,
-            errors_count=5,
+            processed_count=45,
+            duplicate_count=3,
+            error_count=5,
             error_details={
                 'network_errors': 2,
                 'parsing_errors': 3,
@@ -192,9 +192,9 @@ class TestProcessingAnalyticsService(TestCase):
             started_at=timezone.now() - timedelta(hours=4),
             completed_at=timezone.now() - timedelta(hours=3),
             total_raw_results=150,
-            processed_results=140,
-            duplicate_groups=10,
-            errors_count=0
+            processed_count=140,
+            duplicate_count=10,
+            error_count=0
         )
         
         comparison = self.service.compare_processing_sessions(str(self.session.id))

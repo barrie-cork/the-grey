@@ -10,7 +10,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'review_manager:dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' pk=session.id %}">{{ session.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' session_id=session.id %}">{{ session.title }}</a></li>
                     <li class="breadcrumb-item active">Execute Search</li>
                 </ol>
             </nav>
@@ -174,7 +174,7 @@
                             {% endif %}
                             
                             <div class="d-flex justify-content-between">
-                                <a href="{% url 'review_manager:session_detail' pk=session.id %}" class="btn btn-secondary">
+                                <a href="{% url 'review_manager:session_detail' session_id=session.id %}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary" id="execute-btn">
@@ -192,7 +192,7 @@
                             </p>
                         </div>
                         
-                        <a href="{% url 'review_manager:session_detail' pk=session.id %}" class="btn btn-secondary">
+                        <a href="{% url 'review_manager:session_detail' session_id=session.id %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to Session
                         </a>
                     {% endif %}

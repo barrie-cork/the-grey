@@ -14,69 +14,29 @@ class QualityAssessmentService(ServiceLoggerMixin):
     
     def calculate_relevance_score(self, result, query_terms: List[str]) -> float:
         """
-        Calculate relevance score for a result based on query terms.
+        DEPRECATED: Calculate relevance score for a result based on query terms.
+        This method is deprecated in the simplified approach and returns a basic quality indicator.
         
         Args:
             result: ProcessedResult instance
             query_terms: List of search terms from the original query
             
         Returns:
-            Relevance score between 0 and 1
+            Basic quality score between 0 and 1
         """
-        if not query_terms:
-            return QualityConstants.DEFAULT_RELEVANCE_SCORE  # Default score if no query terms
+        import warnings
+        warnings.warn(
+            "calculate_relevance_score is deprecated. Use simplified quality indicators instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        # Simplified quality score based on basic indicators
+        score = 0.5  # Base score
         
-        score = 0.0
-        total_weight = 0
-        
-        # Title matching (highest weight)
-        if result.title:
-            title_matches = sum(1 for term in query_terms if term.lower() in result.title.lower())
-            title_score = title_matches / len(query_terms)
-            score += title_score * QualityConstants.RELEVANCE_WEIGHTS['title']
-            total_weight += QualityConstants.RELEVANCE_WEIGHTS['title']
-        
-        # Snippet matching
-        if result.snippet:
-            snippet_matches = sum(1 for term in query_terms if term.lower() in result.snippet.lower())
-            snippet_score = snippet_matches / len(query_terms)
-            score += snippet_score * QualityConstants.RELEVANCE_WEIGHTS['snippet']
-            total_weight += QualityConstants.RELEVANCE_WEIGHTS['snippet']
-        
-        # URL matching (domain relevance)
-        if result.url:
-            url_matches = sum(1 for term in query_terms if term.lower() in result.url.lower())
-            url_score = url_matches / len(query_terms)
-            score += url_score * QualityConstants.RELEVANCE_WEIGHTS['url']
-            total_weight += QualityConstants.RELEVANCE_WEIGHTS['url']
-        
-        # Publication recency (newer = slightly higher score)
-        if result.publication_year:
-            current_year = datetime.now().year
-            years_old = max(0, current_year - result.publication_year)
-            recency_score = max(0, 1 - (years_old / QualityConstants.RECENCY_DECAY_YEARS))
-            score += recency_score * QualityConstants.RELEVANCE_WEIGHTS['recency']
-            total_weight += QualityConstants.RELEVANCE_WEIGHTS['recency']
-        
-        # Quality indicators
-        quality_bonus = 0
         if result.has_full_text:
-            quality_bonus += QualityConstants.QUALITY_BONUSES['has_full_text']
-        if result.is_pdf:
-            quality_bonus += QualityConstants.QUALITY_BONUSES['is_pdf']
-        if result.quality_indicators.get('peer_reviewed'):
-            quality_bonus += QualityConstants.QUALITY_BONUSES['peer_reviewed']
-        if result.quality_indicators.get('has_doi'):
-            quality_bonus += QualityConstants.QUALITY_BONUSES['has_doi']
+            score += 0.3
         
-        score += quality_bonus
-        total_weight += QualityConstants.RELEVANCE_WEIGHTS['quality_indicators']
-        
-        # Normalize by total weight
-        if total_weight > 0:
-            score = score / total_weight
-        
-        return min(QualityConstants.MAX_SCORE, max(QualityConstants.MIN_SCORE, score))
+        return min(1.0, max(0.0, score))
     
     def assess_document_quality(self, result) -> dict:
         """
@@ -109,14 +69,7 @@ class QualityAssessmentService(ServiceLoggerMixin):
             score += QualityConstants.QUALITY_SCORES['pdf_format']
             quality['quality_factors'].append('PDF format')
         
-        # Academic indicators
-        if result.quality_indicators.get('peer_reviewed'):
-            score += QualityConstants.QUALITY_SCORES['peer_reviewed']
-            quality['quality_factors'].append('Peer reviewed')
-        
-        if result.quality_indicators.get('has_doi'):
-            score += QualityConstants.QUALITY_SCORES['has_doi']
-            quality['quality_factors'].append('Has DOI')
+        # Academic indicators removed - simplified approach
         
         # Publication year recency
         if result.publication_year:

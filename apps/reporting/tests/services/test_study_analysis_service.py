@@ -57,10 +57,9 @@ class TestStudyAnalysisService(TestCase):
                 title=f'Study {i}: Effects of Intervention X',
                 url=f'https://journal.example.com/study{i}',
                 snippet=f'This study examines the effects of intervention X on outcome Y in population Z.',
-                relevance_score=0.6 + (i * 0.008),
                 publication_year=2020 + (i % 5),
                 document_type='journal_article' if i % 3 == 0 else 'report',
-                has_full_text=i % 2 == 0
+                is_pdf=i % 2 == 0
             )
             self.results.append(result)
             

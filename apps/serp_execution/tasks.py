@@ -15,7 +15,6 @@ from .models import SearchExecution, RawSearchResult, ExecutionMetrics
 from .services.serper_client import SerperClient, SerperAPIError
 from .services.cache_manager import CacheManager
 from .services.usage_tracker import UsageTracker
-from .services.query_builder import QueryBuilder
 from .services.result_processor import ResultProcessor
 from .recovery import recovery_manager
 
@@ -64,9 +63,9 @@ def initiate_search_session_execution_task(self, session_id: str) -> Dict[str, A
         
         # Get active queries
         queries = SearchQuery.objects.filter(
-            session=session,
+            strategy__session=session,
             is_active=True
-        ).order_by('order', 'created_at')
+        ).order_by('execution_order', 'created_at')
         
         if not queries.exists():
             logger.error(f"No active queries found for session {session_id}")
@@ -169,29 +168,23 @@ def perform_serp_query_task(
         
         # Initialize services
         serper_client = SerperClient()
-        query_builder = QueryBuilder()
         result_processor = ResultProcessor()
         usage_tracker = UsageTracker()
         
-        # Build optimized query
-        search_query = query_builder.build_query(
-            population=query.population,
-            interest=query.interest,
-            context=query.context,
-            include_keywords=query.include_keywords,
-            exclude_keywords=query.exclude_keywords,
-            file_types=query.document_types,
-            academic_only=True  # Grey literature focus
-        )
+        # Use the pre-built query text
+        search_query = query.query_text
         
         # Prepare API parameters
+        # Get configuration from the strategy
+        strategy = query.strategy
+        file_types = strategy.search_config.get('file_types', ['pdf'])
+        
         api_params = {
             'q': search_query,
-            'num': min(query.max_results, 100),  # API limit
+            'num': 100,  # Default number of results
             'location': 'United States',
-            'language': query.languages[0] if query.languages else 'en',
-            'date_from': query.date_from.isoformat() if query.date_from else None,
-            'file_types': query.document_types
+            'language': 'en',  # Default language
+            'file_types': file_types
         }
         
         # Store parameters
@@ -373,7 +366,7 @@ def monitor_session_completion_task(session_id: str) -> Dict[str, Any]:
             
             # Check all executions
             executions = SearchExecution.objects.filter(
-                query__session=session
+                query__strategy__session=session
             ).select_related('query')
             
             total_executions = executions.count()
@@ -504,19 +497,19 @@ def _send_execution_notification(execution: SearchExecution, message: str):
     User = get_user_model()
     
     if execution.initiated_by and execution.initiated_by.email:
-        subject = f"Search Execution Alert - {execution.query.session.title}"
+        subject = f"Search Execution Alert - {execution.query.strategy.session.title}"
         
         full_message = f"""
         {message}
         
         Execution Details:
-        - Query: {execution.query.query_string[:100]}...
+        - Query: {execution.query.query_text[:100]}...
         - Status: {execution.status}
         - Attempts: {execution.retry_count + 1}
         - Error: {execution.error_message}
         
         You can view more details at:
-        {settings.SITE_URL}/review/{execution.query.session.id}/executions/{execution.id}/
+        {settings.SITE_URL}/review/{execution.query.strategy.session.id}/executions/{execution.id}/
         """
         
         try:

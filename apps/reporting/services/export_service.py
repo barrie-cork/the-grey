@@ -102,8 +102,7 @@ class ExportService(ServiceLoggerMixin):
                     'publication_year': study.get('publication_year', ''),
                     'document_type': study.get('document_type', ''),
                     'url': study.get('url', ''),
-                    'has_full_text': study.get('has_full_text', False),
-                    'relevance_score': study.get('relevance_score', 0)
+                    'has_full_text': study.get('has_full_text', False)
                 })
         
         elif export_type == 'queries' and 'queries' in data:

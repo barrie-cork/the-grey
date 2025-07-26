@@ -144,31 +144,14 @@ class ContentAnalysisService(ServiceLoggerMixin):
         """
         Analyze the quality indicators of search result content.
         """
-        quality_indicators = {
-            'title_quality': self._assess_title_quality(title),
-            'snippet_quality': self._assess_snippet_quality(snippet),
-            'url_quality': self._assess_url_quality(url),
-            'overall_score': 0.0,
-            'quality_flags': []
+        # Basic content validation (no scoring - simplified approach)
+        basic_validation = {
+            'has_title': bool(title and len(title.strip()) > 0),
+            'has_snippet': bool(snippet and len(snippet.strip()) > 0),
+            'url_looks_valid': bool(url and url.startswith(('http://', 'https://')))
         }
         
-        # Calculate overall quality score
-        scores = [
-            quality_indicators['title_quality'],
-            quality_indicators['snippet_quality'],
-            quality_indicators['url_quality']
-        ]
-        quality_indicators['overall_score'] = sum(scores) / len(scores)
-        
-        # Add quality flags
-        if quality_indicators['title_quality'] < 0.3:
-            quality_indicators['quality_flags'].append('poor_title')
-        if quality_indicators['snippet_quality'] < 0.3:
-            quality_indicators['quality_flags'].append('poor_snippet')
-        if quality_indicators['url_quality'] < 0.3:
-            quality_indicators['quality_flags'].append('suspicious_url')
-        
-        return quality_indicators
+        return basic_validation
     
     def _detect_file_type(self, url: str) -> Optional[str]:
         """Detect file type from URL."""

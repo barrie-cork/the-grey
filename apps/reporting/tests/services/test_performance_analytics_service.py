@@ -198,7 +198,8 @@ class TestPerformanceAnalyticsService(TestCase):
                 title=f'Result {i}',
                 url=f'https://example.com/{i}',
                 snippet=f'Snippet {i}',
-                relevance_score=0.5 + (i * 0.1)
+                is_pdf=i % 2 == 0,
+                publication_year=2020 + (i % 5)
             )
         
         efficiency = self.service.calculate_cost_efficiency_metrics(str(self.session.id))

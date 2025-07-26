@@ -27,7 +27,7 @@ class MonitoringService(ServiceLoggerMixin):
         """
         from ..models import SearchExecution
         
-        executions = SearchExecution.objects.filter(query__session_id=session_id)
+        executions = SearchExecution.objects.filter(query__strategy__session_id=session_id)
         
         if not executions.exists():
             return self._empty_stats()
@@ -59,7 +59,7 @@ class MonitoringService(ServiceLoggerMixin):
         from ..models import SearchExecution
         
         failed_executions = SearchExecution.objects.filter(
-            query__session_id=session_id,
+            query__strategy__session_id=session_id,
             status='failed'
         ).order_by('-created_at')
         
@@ -212,7 +212,7 @@ class MonitoringService(ServiceLoggerMixin):
         """
         from ..models import SearchExecution
         
-        executions = SearchExecution.objects.filter(query__session_id=session_id)
+        executions = SearchExecution.objects.filter(query__strategy__session_id=session_id)
         
         engines = {}
         
@@ -279,7 +279,7 @@ class MonitoringService(ServiceLoggerMixin):
         from .content_analysis_service import ContentAnalysisService
         
         raw_results = RawSearchResult.objects.filter(
-            execution__query__session_id=session_id
+            execution__query__strategy__session_id=session_id
         )
         
         if not raw_results.exists():
@@ -369,7 +369,7 @@ class MonitoringService(ServiceLoggerMixin):
         from ..models import SearchExecution
         
         executions = SearchExecution.objects.filter(
-            query__session_id=session_id
+            query__strategy__session_id=session_id
         ).select_related('query').order_by('created_at')
         
         timeline = []

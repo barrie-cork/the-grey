@@ -251,9 +251,9 @@ class ResultProcessor:
         # Check database for duplicates in same session
         from apps.serp_execution.models import RawSearchResult
         
-        session_id = execution.query.session_id
+        session_id = execution.query.strategy.session_id
         exists = RawSearchResult.objects.filter(
-            execution__query__session_id=session_id,
+            execution__query__strategy__session_id=session_id,
             link__icontains=normalized_url
         ).exists()
         
@@ -542,8 +542,8 @@ class ResultProcessor:
             'is_academic': raw_result.is_academic,
             'language': raw_result.language_code,
             'key_terms': key_terms,
-            'relevance_score': 0.0,  # Will be calculated by processing pipeline
-            'quality_indicators': self._extract_quality_indicators(raw_result),
+            # Relevance score removed in simplified approach
+            'basic_quality': self._assess_basic_quality(raw_result),
             'needs_manual_review': self._needs_manual_review(raw_result)
         }
         
@@ -600,25 +600,19 @@ class ResultProcessor:
         else:
             return 'webpage'
     
-    def _extract_quality_indicators(self, raw_result: 'RawSearchResult') -> Dict[str, Any]:
-        """Extract quality indicators for the result."""
-        indicators = {
-            'has_abstract': 'abstract' in raw_result.snippet.lower(),
-            'has_methodology': any(term in raw_result.snippet.lower() 
-                                 for term in ['method', 'methodology', 'approach']),
-            'has_references': any(term in raw_result.snippet.lower() 
-                                for term in ['references', 'bibliography', 'citation']),
-            'from_known_repository': any(repo in raw_result.link.lower() 
-                                       for repo in ['repository', 'arxiv', 'ssrn', 'researchgate']),
-            'recent_publication': False
+    def _assess_basic_quality(self, raw_result: 'RawSearchResult') -> Dict[str, Any]:
+        """Basic content validation (no complex quality indicators)."""
+        basic_info = {
+            'has_content': bool(raw_result.title and raw_result.snippet),
+            'is_recent': False
         }
         
-        # Check if recent (within last 5 years)
+        # Check if recent (within last 5 years) - simplified
         if raw_result.detected_date:
             years_old = (timezone.now().date() - raw_result.detected_date).days / 365
-            indicators['recent_publication'] = years_old <= 5
+            basic_info['is_recent'] = years_old <= 5
         
-        return indicators
+        return basic_info
     
     def _needs_manual_review(self, raw_result: 'RawSearchResult') -> bool:
         """Determine if result needs manual review."""

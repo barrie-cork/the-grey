@@ -51,7 +51,8 @@ class TestExportService(TestCase):
             title='Test Result 1',
             url='https://example.com/1',
             snippet='Test snippet 1',
-            relevance_score=0.85
+            is_pdf=True,
+            publication_year=2024
         )
         
         self.result2 = ProcessedResult.objects.create(
@@ -59,7 +60,8 @@ class TestExportService(TestCase):
             title='Test Result 2',
             url='https://example.com/2',
             snippet='Test snippet 2',
-            relevance_score=0.75
+            is_pdf=False,
+            publication_year=2023
         )
         
         # Create test tags

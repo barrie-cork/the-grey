@@ -57,15 +57,11 @@ class QualityConstants:
         'snippet': 0.3,
         'url': 0.1,
         'recency': 0.1,
-        'quality_indicators': 0.2
     }
     
     # Quality bonuses
     QUALITY_BONUSES: Dict[str, float] = {
-        'has_full_text': 0.05,
         'is_pdf': 0.03,
-        'peer_reviewed': 0.07,
-        'has_doi': 0.05
     }
     
     # Publication recency
@@ -75,8 +71,6 @@ class QualityConstants:
     QUALITY_SCORES: Dict[str, int] = {
         'full_text_available': 20,
         'pdf_format': 15,
-        'peer_reviewed': 25,
-        'has_doi': 15,
         'recent_publication': 15,
         'moderately_recent': 10,
         'good_title': 5,
@@ -112,14 +106,12 @@ class ProcessingConstants:
         'low': 0.0
     }
     
-    # Priority scoring weights
+    # Priority scoring weights (simplified approach - no relevance scoring)
     PRIORITY_WEIGHTS: Dict[str, int] = {
-        'relevance_score': 40,
-        'has_full_text': 20,
-        'not_duplicate': 15,
-        'very_recent': 10,  # >= 2020
-        'recent': 5,       # >= 2015
-        'peer_reviewed': 10
+        'not_duplicate': 40,
+        'very_recent': 25,  # >= 2020
+        'recent': 15,       # >= 2015
+        'is_pdf': 20
     }
     
     # Publication year thresholds for priority scoring
@@ -146,9 +138,9 @@ class ProcessingConstants:
         'average_relevance': 0,
         'document_types': {},
         'publication_years': {},
-        'has_full_text_count': 0,
+        'pdf_count': 0,
         'academic_results': 0,
-        'full_text_percentage': 0,
+        'pdf_percentage': 0,
         'academic_percentage': 0
     }
     

@@ -56,7 +56,8 @@ class TestReviewProgressService(TestCase):
                 title=f'Result {i}',
                 url=f'https://example.com/result/{i}',
                 snippet=f'Snippet for result {i}',
-                relevance_score=0.5 + (i * 0.015)
+                is_pdf=i % 2 == 0,
+                publication_year=2020 + (i % 5)
             )
             self.results.append(result)
         
@@ -279,7 +280,7 @@ class TestReviewProgressService(TestCase):
                 title=f'Unreviewed Result {i}',
                 url=f'https://example.com/unreviewed/{i}',
                 snippet='Unreviewed snippet',
-                relevance_score=0.5
+                is_pdf=False
             )
         
         progress = self.service.calculate_review_progress(str(empty_session.id))

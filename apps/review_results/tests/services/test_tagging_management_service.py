@@ -84,7 +84,9 @@ class TestTaggingManagementService(TestCase):
                 title=f'Result {i}: Research Study',
                 url=f'https://journal.com/article/{i}',
                 snippet=f'Abstract for research study {i}',
-                relevance_score=0.4 + (i * 0.024)
+                is_pdf=i % 2 == 0,
+                publication_year=2020 + (i % 5),
+                document_type='journal_article' if i % 3 == 0 else 'report'
             )
             self.results.append(result)
         
@@ -401,7 +403,8 @@ class TestTaggingManagementService(TestCase):
         
         # Test with high relevance result
         high_relevance_result = self.results[20]
-        high_relevance_result.relevance_score = 0.85
+        high_relevance_result.is_pdf = True
+        high_relevance_result.publication_year = 2024
         high_relevance_result.save()
         
         recommendations = self.service.apply_tag_recommendation_rules(

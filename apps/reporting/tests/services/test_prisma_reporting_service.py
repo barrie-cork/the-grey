@@ -77,7 +77,8 @@ class TestPrismaReportingService(TestCase):
                 title=f'Processed Result {i}',
                 url=f'https://example.com/{i}',
                 snippet=f'Processed snippet {i}',
-                relevance_score=0.5 + (i * 0.005)
+                is_pdf=i % 2 == 0,
+                publication_year=2020 + (i % 5)
             )
             self.processed_results.append(result)
         

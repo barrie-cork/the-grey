@@ -22,6 +22,7 @@ from django.db.models import Q, Count, Sum, Avg
 from django.db import transaction
 
 from apps.core.bootstrap import get_dependencies
+from apps.search_strategy.models import SearchQuery
 from .models import SearchExecution, RawSearchResult, ExecutionMetrics
 from .forms import ExecutionConfirmationForm, ErrorRecoveryForm
 from .tasks import (
@@ -80,7 +81,7 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
                 request,
                 f"Session must be in 'Ready to Execute' status. Current status: {self.session.get_status_display()}"
             )
-            return redirect('review_manager:session_detail', pk=self.session.id)
+            return redirect('review_manager:session_detail', session_id=self.session.id)
         
         return super().dispatch(request, *args, **kwargs)
     
@@ -90,20 +91,19 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
         
         # Get active queries
         queries = SearchQuery.objects.filter(
-            session=self.session,
+            strategy__session=self.session,
             is_active=True
-        ).order_by('order', 'created_at')
+        ).order_by('execution_order', 'created_at')
         
         # Calculate cost estimation
         usage_tracker = UsageTracker()
         total_queries = queries.count()
-        engines_used = set()
         
-        for query in queries:
-            engines_used.update(query.search_engines)
+        # Since we're using Serper API, we have one engine
+        engines_used = {'serper'}
         
-        # Estimate based on 100 results per query per engine
-        estimated_api_calls = total_queries * len(engines_used)
+        # Estimate based on 100 results per query
+        estimated_api_calls = total_queries
         estimated_credits = estimated_api_calls * 100  # 100 credits per search
         estimated_cost = calculate_api_cost(estimated_credits)
         
@@ -111,12 +111,8 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
         current_usage = usage_tracker.get_current_usage()
         remaining_credits = current_usage.get('remaining_credits', 0)
         
-        # Estimate execution time
-        total_execution_time = 0
-        for query in queries:
-            complexity = len(query.include_keywords) + len(query.exclude_keywords)
-            time_estimate = estimate_execution_time(complexity, query.search_engines)
-            total_execution_time += time_estimate
+        # Estimate execution time (simplified - 5 seconds per query)
+        total_execution_time = total_queries * 5
         
         context.update({
             'session': self.session,
@@ -183,7 +179,7 @@ class SearchExecutionStatusView(LoginRequiredMixin, SessionOwnershipMixin, Detai
         
         # Get all executions for this session
         executions = SearchExecution.objects.filter(
-            query__session=self.object
+            query__strategy__session=self.object
         ).select_related('query').order_by('-created_at')
         
         # Calculate enhanced statistics for our new card layout
@@ -268,7 +264,7 @@ class ErrorRecoveryView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
         """Get execution and validate ownership."""
         execution_id = kwargs.get('execution_id')
         self.execution = get_object_or_404(SearchExecution, id=execution_id)
-        self.session = self.execution.query.session
+        self.session = self.execution.query.strategy.session
         
         # Validate ownership
         if self.session.owner != request.user:
@@ -354,7 +350,7 @@ def execution_status_api(request, execution_id: str) -> JsonResponse:
         execution = get_object_or_404(SearchExecution, id=execution_id)
         
         # Verify ownership
-        if execution.query.session.owner != request.user:
+        if execution.query.strategy.session.owner != request.user:
             return JsonResponse({'error': 'Permission denied'}, status=403)
         
         # Get result count
@@ -410,7 +406,7 @@ def session_progress_api(request, session_id: str) -> JsonResponse:
         
         # Get enhanced execution statistics
         executions = SearchExecution.objects.filter(
-            query__session=session
+            query__strategy__session=session
         ).select_related('query').order_by('-created_at')
         
         stats = SearchExecutionStatusView._calculate_enhanced_statistics(executions, session_id)
@@ -457,7 +453,7 @@ def retry_execution_api(request, execution_id: str) -> JsonResponse:
         execution = get_object_or_404(SearchExecution, id=execution_id)
         
         # Verify ownership
-        if execution.query.session.owner != request.user:
+        if execution.query.strategy.session.owner != request.user:
             return JsonResponse({'error': 'Permission denied'}, status=403)
         
         # Check if can retry

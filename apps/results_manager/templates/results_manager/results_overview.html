@@ -209,13 +209,6 @@
                                 </div>
                                 <div class="col-md-4 text-right">
                                     <div class="result-meta">
-                                        {% if result.relevance_score %}
-                                        <div class="quality-score mb-2">
-                                            <span class="badge badge-{% if result.relevance_score >= 0.8 %}success{% elif result.relevance_score >= 0.6 %}warning{% else %}secondary{% endif %}">
-                                                Quality: {{ result.relevance_score|floatformat:2 }}
-                                            </span>
-                                        </div>
-                                        {% endif %}
                                         {% if result.has_full_text %}
                                         <div class="mb-2">
                                             <span class="badge badge-success">Full Text Available</span>

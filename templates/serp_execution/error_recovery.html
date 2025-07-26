@@ -10,7 +10,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'review_manager:dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' pk=session.id %}">{{ session.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' session_id=session.id %}">{{ session.title }}</a></li>
                     <li class="breadcrumb-item"><a href="{% url 'serp_execution:execution_status' session_id=session.id %}">Execution Status</a></li>
                     <li class="breadcrumb-item active">Error Recovery</li>
                 </ol>

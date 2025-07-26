@@ -27,7 +27,8 @@ urlpatterns = [
     path("api/review-manager/", include("apps.review_manager.api.urls")),
     path("search_strategy/", include("apps.search_strategy.urls")),
     path("execution/", include("apps.serp_execution.urls")),
-    # path("results-manager/", include("apps.results_manager.urls")),  # Temporarily disabled
+    path("results-manager/", include("apps.results_manager.urls")),
+    path("review-results/", include("apps.review_results.urls")),
 ]
 
 # Serve static and media files in development

@@ -1,15 +1,15 @@
 """
 Tests for results_manager models.
 
-Tests for ProcessedResult, DuplicateGroup, and ResultMetadata models
-including result processing, deduplication, and metadata extraction.
+Tests for ProcessedResult, DuplicateGroup, and ProcessingSession models
+including result processing, deduplication, and processing tracking.
 """
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 from apps.review_manager.models import SearchSession
-from ..models import ProcessedResult, DuplicateGroup, ResultMetadata, ProcessingSession
+from ..models import ProcessedResult, DuplicateGroup, ProcessingSession
 
 User = get_user_model()
 

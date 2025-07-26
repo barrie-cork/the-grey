@@ -16,7 +16,7 @@ from apps.review_manager.models import SearchSession
 from apps.serp_execution.models import RawSearchResult
 from .models import ProcessedResult, DuplicateGroup, ProcessingSession
 from .utils import (
-    normalize_url, detect_duplicates, calculate_relevance_score,
+    normalize_url, detect_duplicates,
     get_processing_statistics
 )
 
@@ -302,29 +302,9 @@ def process_single_result(raw_result: RawSearchResult, session_id: str) -> Optio
                 document_type=document_type,
                 language='en',  # Default to English
                 source_organization='',  # Keep simple
-                has_full_text=raw_result.has_pdf,
                 full_text_url=raw_result.link if raw_result.has_pdf else '',
-                is_pdf=raw_result.has_pdf,
-                quality_indicators={},  # Keep simple
-                processing_version='1.0'
+                is_pdf=raw_result.has_pdf
             )
-            
-            # Create extended metadata if available
-            if any([
-                metadata.get('keywords'),
-                metadata.get('subject_areas'),
-                raw_result.raw_data.get('abstract')
-            ]):
-                ResultMetadata.objects.create(
-                    result=processed_result,
-                    keywords=metadata.get('keywords', []),
-                    abstract=raw_result.raw_data.get('abstract', ''),
-                    subject_areas=metadata.get('subject_areas', []),
-                    country=metadata.get('country', ''),
-                    access_type='unknown',
-                    extraction_confidence=metadata.get('confidence_scores', {}),
-                    extraction_method='automated_v1'
-                )
             
             return processed_result
             
@@ -432,16 +412,7 @@ def finalize_processing_task(self, dedup_results: Dict, session_id: str, process
         # Calculate relevance scores
         results = ProcessedResult.objects.filter(session_id=session_id)
         
-        # Get query terms from session queries
-        query_terms = []
-        for query in session.search_queries.all():
-            query_terms.extend(query.terms.split())
-        
-        # Update relevance scores
-        for result in results:
-            relevance_score = calculate_relevance_score(result, query_terms)
-            result.relevance_score = relevance_score
-            result.save(update_fields=['relevance_score'])
+        # Results are now ready for review (relevance scoring removed for simplified approach)
         
         processing_session.update_progress('finalization', 100)
         

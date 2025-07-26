@@ -215,12 +215,18 @@ class TaggingManagementService(ServiceLoggerMixin):
         except ProcessedResult.DoesNotExist:
             return []
         
-        # Find similar results that have been tagged
+        # Find similar results that have been tagged - simplified approach
         similar_results = ProcessedResult.objects.filter(
             session_id=target_result.session_id,
-            relevance_score__gte=target_result.relevance_score - 0.2,
-            relevance_score__lte=target_result.relevance_score + 0.2
+            document_type=target_result.document_type
         ).exclude(id=result_id)
+        
+        # Further filter by publication year if available
+        if target_result.publication_year:
+            similar_results = similar_results.filter(
+                publication_year__gte=target_result.publication_year - 2,
+                publication_year__lte=target_result.publication_year + 2
+            )
         
         # Get tags from similar results
         similar_assignments = ReviewTagAssignment.objects.filter(

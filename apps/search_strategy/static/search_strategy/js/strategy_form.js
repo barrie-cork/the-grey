@@ -42,13 +42,13 @@ class SearchStrategyForm {
         // Form submission
         this.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
         
-        // Auto-save functionality (optional)
-        window.addEventListener('beforeunload', (e) => {
-            if (this.hasUnsavedChanges()) {
-                e.preventDefault();
-                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-            }
-        });
+        // Auto-save functionality - disabled to prevent duplicate warnings
+        // window.addEventListener('beforeunload', (e) => {
+        //     if (this.hasUnsavedChanges()) {
+        //         e.preventDefault();
+        //         e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        //     }
+        // });
     }
     
     initAutoPreview() {
@@ -94,37 +94,63 @@ class SearchStrategyForm {
     }
     
     collectFormData() {
-        const getFieldValue = (fieldName) => {
-            const field = document.getElementById(`id_${fieldName}`);
-            return field ? field.value : '';
-        };
-        
-        const getCheckboxValue = (fieldName) => {
-            const field = document.getElementById(`id_${fieldName}`);
-            return field ? field.checked : false;
-        };
-        
-        const parseTerms = (text) => {
-            return text.split('\\n')
-                      .map(t => t.trim())
-                      .filter(t => t.length > 0);
-        };
-        
-        return {
-            population_terms: parseTerms(getFieldValue('population_terms_text')),
-            interest_terms: parseTerms(getFieldValue('interest_terms_text')),
-            context_terms: parseTerms(getFieldValue('context_terms_text')),
-            search_config: {
-                domains: parseTerms(getFieldValue('organization_domains')),
-                include_general_search: getCheckboxValue('include_general_search'),
-                file_types: [
-                    ...(getCheckboxValue('search_pdf') ? ['pdf'] : []),
-                    ...(getCheckboxValue('search_doc') ? ['doc'] : [])
-                ],
-                search_type: getCheckboxValue('use_google_scholar') ? 'scholar' : 'google',
-                max_results: parseInt(getFieldValue('max_results_per_query')) || 50
-            }
-        };
+        // Check if we're using the global keywordData (inline JS)
+        if (window.keywordData) {
+            // Use the global keywordData that the inline JS manages
+            const getCheckboxValue = (fieldName) => {
+                const field = document.getElementById(`id_${fieldName}`);
+                return field ? field.checked : false;
+            };
+            
+            return {
+                population_terms: window.keywordData.population || [],
+                interest_terms: window.keywordData.interest || [],
+                context_terms: window.keywordData.context || [],
+                search_config: {
+                    domains: window.keywordData.domains || [],
+                    include_general_search: getCheckboxValue('include_general_search'),
+                    file_types: [
+                        ...(getCheckboxValue('search_pdf') ? ['pdf'] : []),
+                        ...(getCheckboxValue('search_doc') ? ['doc'] : [])
+                    ],
+                    search_type: getCheckboxValue('use_google_scholar') ? 'scholar' : 'google',
+                    max_results: parseInt(document.getElementById('id_max_results_per_query')?.value) || 50
+                }
+            };
+        } else {
+            // Fallback to reading from form fields
+            const getFieldValue = (fieldName) => {
+                const field = document.getElementById(`id_${fieldName}`);
+                return field ? field.value : '';
+            };
+            
+            const getCheckboxValue = (fieldName) => {
+                const field = document.getElementById(`id_${fieldName}`);
+                return field ? field.checked : false;
+            };
+            
+            const parseTerms = (text) => {
+                return text.split('\\n')
+                          .map(t => t.trim())
+                          .filter(t => t.length > 0);
+            };
+            
+            return {
+                population_terms: parseTerms(getFieldValue('population_terms_text')),
+                interest_terms: parseTerms(getFieldValue('interest_terms_text')),
+                context_terms: parseTerms(getFieldValue('context_terms_text')),
+                search_config: {
+                    domains: parseTerms(getFieldValue('organization_domains')),
+                    include_general_search: getCheckboxValue('include_general_search'),
+                    file_types: [
+                        ...(getCheckboxValue('search_pdf') ? ['pdf'] : []),
+                        ...(getCheckboxValue('search_doc') ? ['doc'] : [])
+                    ],
+                    search_type: getCheckboxValue('use_google_scholar') ? 'scholar' : 'google',
+                    max_results: parseInt(getFieldValue('max_results_per_query')) || 50
+                }
+            };
+        }
     }
     
     async previewChanges() {
@@ -302,30 +328,50 @@ class SearchStrategyForm {
             errors.push('Must select at least one file type');
         }
         
-        // Display results
+        // Only show errors if validation fails
         if (errors.length > 0) {
-            this.showError('Validation errors:\\n- ' + errors.join('\\n- '));
-        } else {
-            this.showSuccess('Strategy validation passed! Ready to save.');
+            this.showError('Please fix the following issues:\n\n• ' + errors.join('\n• '));
         }
         
         return errors.length === 0;
     }
     
     handleFormSubmit(e) {
-        // Basic client-side validation before submission
-        if (!this.validateStrategy()) {
-            e.preventDefault();
-            return false;
+        // Prevent default to handle validation first
+        e.preventDefault();
+        
+        // Check which button triggered the submission
+        const submitButton = e.submitter || document.activeElement;
+        const isExecuteSearch = submitButton && submitButton.name === 'execute_search';
+        
+        // For execute search, do validation only
+        if (isExecuteSearch) {
+            // Basic validation
+            if (!this.validateStrategy()) {
+                return false;
+            }
+            
+            // Add hidden input to ensure button value is included
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'execute_search';
+            hiddenInput.value = 'execute_search';
+            this.form.appendChild(hiddenInput);
         }
+        
+        // Disable beforeunload temporarily
+        window.onbeforeunload = null;
         
         // Show loading state
         const submitBtns = this.form.querySelectorAll('button[type="submit"]');
         submitBtns.forEach(btn => {
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + 
+                           (isExecuteSearch ? 'Starting execution...' : 'Saving...');
         });
         
+        // Actually submit the form
+        this.form.submit();
         return true;
     }
     
@@ -359,11 +405,6 @@ class SearchStrategyForm {
     }
 }
 
-// Initialize the form when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new SearchStrategyForm();
-});
-
 // Legacy function support for inline onclick handlers
 function previewChanges() {
     if (window.strategyForm) {
@@ -377,8 +418,10 @@ function validateStrategy() {
     }
 }
 
-// Export for global access
+// Initialize only once - prevent duplicate instances
 window.strategyForm = null;
 document.addEventListener('DOMContentLoaded', () => {
-    window.strategyForm = new SearchStrategyForm();
+    if (!window.strategyForm) {
+        window.strategyForm = new SearchStrategyForm();
+    }
 });

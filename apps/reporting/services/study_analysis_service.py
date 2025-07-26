@@ -54,9 +54,7 @@ class StudyAnalysisService(ServiceLoggerMixin):
                 'source_organization': study.source_organization,
                 'language': study.language,
                 'url': study.url,
-                'has_full_text': study.has_full_text,
-                'quality_indicators': study.quality_indicators,
-                'relevance_score': study.relevance_score
+                'has_full_text': study.has_full_text
             }
             
             # Add metadata if available
@@ -144,30 +142,32 @@ class StudyAnalysisService(ServiceLoggerMixin):
         current_year = datetime.now().year
         
         for study in included_studies:
-            # Quality indicators
-            if study.quality_indicators.get('peer_reviewed'):
-                quality_analysis['quality_indicators']['peer_reviewed'] += 1
-            
-            if study.quality_indicators.get('has_doi'):
-                quality_analysis['quality_indicators']['has_doi'] += 1
-            
+            # Quality indicators - simplified approach
             if study.has_full_text:
                 quality_analysis['quality_indicators']['full_text_available'] += 1
             
             if study.publication_year and study.publication_year >= current_year - StudyAnalysisConstants.RECENCY_PERIODS['recent']:
                 quality_analysis['quality_indicators']['recent_publication'] += 1
             
-            if study.quality_indicators.get('is_academic'):
+            # Use document type or URL pattern for academic source detection
+            if study.document_type in ['journal_article', 'thesis', 'dissertation']:
                 quality_analysis['quality_indicators']['academic_source'] += 1
             
-            # Relevance distribution
-            if study.relevance_score:
-                if study.relevance_score > StudyAnalysisConstants.THRESHOLDS['high_quality']:
-                    quality_analysis['relevance_distribution']['high'] += 1
-                elif study.relevance_score >= StudyAnalysisConstants.THRESHOLDS['medium_quality']:
-                    quality_analysis['relevance_distribution']['medium'] += 1
-                else:
-                    quality_analysis['relevance_distribution']['low'] += 1
+            # Simplified quality distribution based on available indicators
+            quality_count = 0
+            if study.has_full_text:
+                quality_count += 1
+            if study.is_pdf:
+                quality_count += 1
+            if study.publication_year and study.publication_year >= current_year - 5:
+                quality_count += 1
+            
+            if quality_count >= 2:
+                quality_analysis['relevance_distribution']['high'] += 1
+            elif quality_count == 1:
+                quality_analysis['relevance_distribution']['medium'] += 1
+            else:
+                quality_analysis['relevance_distribution']['low'] += 1
             
             # Publication recency
             if study.publication_year:

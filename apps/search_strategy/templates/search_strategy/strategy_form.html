@@ -398,7 +398,7 @@
                                 <button type="submit" name="save" class="btn btn-outline-primary">
                                     <i class="fas fa-save"></i> Save Strategy
                                 </button>
-                                <button type="submit" name="execute_search" class="btn btn-success ml-2">
+                                <button type="submit" name="execute_search" value="execute_search" class="btn btn-success ml-2">
                                     <i class="fas fa-play"></i> Execute Search
                                 </button>
                             </div>
@@ -490,7 +490,7 @@
                         <i class="fas fa-bug"></i> Debug Preview
                     </button>
                     <button type="button" class="btn btn-outline-warning btn-sm btn-block mb-2" onclick="testLocalPreview()">
-                        <i class="fas fa-vial"></i> Test Local
+                        <i class="fas fa-vial"></i> Test Local Preview
                     </button>
                     <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="validateStrategy()">
                         <i class="fas fa-check-circle"></i> Validate Strategy
@@ -505,6 +505,8 @@
 {% block extra_js %}
 <script src="{% static 'search_strategy/js/strategy_form.js' %}"></script>
 <script>
+// Prevent duplicate initialization
+window.keywordFormInitialized = window.keywordFormInitialized || false;
 // Global keyword storage
 let keywordData = {
     population: [],
@@ -514,7 +516,9 @@ let keywordData = {
 };
 
 // Initialize keywords from existing data
-document.addEventListener('DOMContentLoaded', function() {
+if (!window.keywordFormInitialized) {
+    window.keywordFormInitialized = true;
+    document.addEventListener('DOMContentLoaded', function() {
     // Initialize from form data if available
     const populationText = document.getElementById('{{ form.population_terms_text.id_for_label }}').value;
     const interestText = document.getElementById('{{ form.interest_terms_text.id_for_label }}').value;
@@ -542,7 +546,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update hidden fields
     updateHiddenFields();
-});
+    });
+}
 
 // Handle keyword input with Enter key
 function handleKeywordInput(event, fieldType) {
@@ -784,6 +789,7 @@ function testLocalPreview() {
     updateQueryPreview(mockQueries);
 }
 
+
 function debugPreview() {
     console.log('=== DEBUG PREVIEW ===');
     console.log('Keyword data:', keywordData);
@@ -808,32 +814,8 @@ function debugPreview() {
     previewChanges();
 }
 
-function validateStrategy() {
-    // Simple client-side validation using keyword data
-    const generalSearch = document.getElementById('{{ form.include_general_search.id_for_label }}').checked;
-    const pdfSearch = document.getElementById('{{ form.search_pdf.id_for_label }}').checked;
-    const docSearch = document.getElementById('{{ form.search_doc.id_for_label }}').checked;
-    
-    let errors = [];
-    
-    if (keywordData.population.length === 0 && keywordData.interest.length === 0 && keywordData.context.length === 0) {
-        errors.push('At least one PIC category must have terms');
-    }
-    
-    if (keywordData.domains.length === 0 && !generalSearch) {
-        errors.push('Must specify domains or enable general search');
-    }
-    
-    if (!pdfSearch && !docSearch) {
-        errors.push('Must select at least one file type');
-    }
-    
-    if (errors.length > 0) {
-        alert('Validation errors:\n- ' + errors.join('\n- '));
-    } else {
-        alert('Strategy validation passed! Ready to save.');
-    }
-}
+// All validation is now handled by SearchStrategyForm class in strategy_form.js
+// This prevents duplicate validation popups
 
 // Auto-preview on input changes (debounced)
 let previewTimeout;

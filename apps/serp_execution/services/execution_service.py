@@ -38,7 +38,7 @@ class ExecutionService(ServiceLoggerMixin):
         """
         from ..models import SearchExecution, RawSearchResult
         
-        executions = SearchExecution.objects.filter(query__session_id=session_id)
+        executions = SearchExecution.objects.filter(query__strategy__session_id=session_id)
         
         if not executions.exists():
             return self._empty_stats()
@@ -111,7 +111,7 @@ class ExecutionService(ServiceLoggerMixin):
         from apps.search_strategy.signals import get_session_queries_data
         
         queries_data = get_session_queries_data(session_id)
-        executions = SearchExecution.objects.filter(query__session_id=session_id)
+        executions = SearchExecution.objects.filter(query__strategy__session_id=session_id)
         
         total_queries = len(queries_data)
         executed_queries = executions.values('query_id').distinct().count()
@@ -146,7 +146,7 @@ class ExecutionService(ServiceLoggerMixin):
         from ..models import SearchExecution
         
         executions = SearchExecution.objects.filter(
-            query__session_id=session_id
+            query__strategy__session_id=session_id
         ).order_by('started_at')
         
         timeline = []

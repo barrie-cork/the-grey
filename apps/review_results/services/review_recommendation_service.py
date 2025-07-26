@@ -47,17 +47,13 @@ class ReviewRecommendationService(ServiceLoggerMixin):
         # 4. Recent publications
         # 5. No duplicates
         
-        recommendations = unreviewed.extra(
-            select={
-                'recommendation_score': """
-                    COALESCE(relevance_score, 0) * 50 +
-                    CASE WHEN quality_indicators ? 'peer_reviewed' THEN 20 ELSE 0 END +
-                    CASE WHEN has_full_text THEN 15 ELSE 0 END +
-                    CASE WHEN duplicate_group_id IS NULL THEN 10 ELSE 0 END +
-                    CASE WHEN publication_year >= 2020 THEN 5 ELSE 0 END
-                """
-            }
-        ).order_by('-recommendation_score', '-publication_year')
+        # Simplified ordering without complex SQL
+        recommendations = unreviewed.order_by(
+            models.F('duplicate_group_id').asc(nulls_first=True),
+            '-publication_year',
+            '-is_pdf',
+            '-processed_at'
+        )
         
         return recommendations[:limit]
     
@@ -84,9 +80,6 @@ class ReviewRecommendationService(ServiceLoggerMixin):
         
         # Analyze user's inclusion patterns
         included_results = user_assignments.filter(tag__name='Include')
-        avg_relevance = included_results.aggregate(
-            avg_relevance=models.Avg('result__relevance_score')
-        )['avg_relevance'] or 0.5
         
         # Get unreviewed results
         reviewed_result_ids = ReviewTagAssignment.objects.filter(
@@ -97,18 +90,12 @@ class ReviewRecommendationService(ServiceLoggerMixin):
             session_id=session_id
         ).exclude(id__in=reviewed_result_ids)
         
-        # Personalized scoring based on user preferences
-        personalized = unreviewed.extra(
-            select={
-                'personalized_score': f"""
-                    COALESCE(relevance_score, 0) * 40 +
-                    CASE WHEN relevance_score >= {avg_relevance} THEN 20 ELSE 0 END +
-                    CASE WHEN has_full_text THEN 15 ELSE 0 END +
-                    CASE WHEN quality_indicators ? 'peer_reviewed' THEN 15 ELSE 0 END +
-                    CASE WHEN duplicate_group_id IS NULL THEN 10 ELSE 0 END
-                """
-            }
-        ).order_by('-personalized_score', '-publication_year')
+        # Simplified personalized ordering
+        personalized = unreviewed.order_by(
+            models.F('duplicate_group_id').asc(nulls_first=True),
+            '-publication_year',
+            '-is_pdf'
+        )
         
         return personalized[:limit]
     
@@ -215,10 +202,10 @@ class ReviewRecommendationService(ServiceLoggerMixin):
         # - Medium priority items (diverse sources)
         # - Some random items for unbiased sampling
         
-        high_priority = unreviewed.filter(relevance_score__gte=0.7).order_by('-relevance_score')[:batch_size//2]
+        # Simplified batch selection based on available indicators
+        high_priority = unreviewed.filter(is_pdf=True, publication_year__gte=2020).order_by('-publication_year')[:batch_size//2]
         medium_priority = unreviewed.filter(
-            relevance_score__lt=0.7,
-            relevance_score__gte=0.4
+            is_pdf=False, publication_year__gte=2018
         ).order_by('?')[:batch_size//3]  # Random sampling
         
         remaining_slots = batch_size - high_priority.count() - medium_priority.count()
@@ -233,10 +220,8 @@ class ReviewRecommendationService(ServiceLoggerMixin):
         # Calculate batch characteristics
         characteristics = {
             'total_results': len(batch_results),
-            'high_relevance_count': len([r for r in batch_results if r.relevance_score >= 0.7]),
             'has_full_text_count': len([r for r in batch_results if r.has_full_text]),
-            'academic_count': len([r for r in batch_results if r.quality_indicators.get('peer_reviewed')]),
-            'avg_relevance': round(sum(r.relevance_score or 0 for r in batch_results) / len(batch_results), 3),
+            'pdf_count': len([r for r in batch_results if r.is_pdf]),
             'document_types': {}
         }
         

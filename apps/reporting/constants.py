@@ -39,7 +39,7 @@ class ExportConstants:
     # CSV export field names
     STUDY_CSV_FIELDS: List[str] = [
         'id', 'title', 'authors', 'publication_year', 'document_type',
-        'url', 'has_full_text', 'relevance_score'
+        'url', 'has_full_text'
     ]
     
     QUERY_CSV_FIELDS: List[str] = [
@@ -308,7 +308,6 @@ class SearchStrategyConstants:
         'precision',
         'recall',
         'f1_score',
-        'relevance_score',
         'coverage_score'
     ]
     

@@ -20,9 +20,9 @@ def get_processed_results_data(session_id: str) -> List[Dict[str, Any]]:
             'title': result.title,
             'url': result.url,
             'snippet': result.snippet,
-            'source_type': result.source_type,
-            'content_type': result.content_type,
-            'relevance_score': result.relevance_score,
+            'document_type': result.document_type,
+            'is_pdf': result.is_pdf,
+            'has_full_text': result.has_full_text,  # Simplified quality indicator
             'publication_date': result.publication_date.isoformat() if result.publication_date else None,
             'is_duplicate': result.duplicate_group_id is not None,
         }
@@ -46,9 +46,9 @@ def get_duplicate_groups_data(session_id: str) -> List[Dict[str, Any]]:
     return [
         {
             'id': str(group.id),
-            'representative_result_id': str(group.representative_result.id),
-            'duplicate_count': group.duplicate_count,
-            'similarity_threshold': group.similarity_threshold,
+            'canonical_url': group.canonical_url,
+            'result_count': group.result_count,
+            'similarity_type': group.similarity_type,
         }
         for group in groups
     ]

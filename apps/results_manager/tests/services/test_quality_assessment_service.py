@@ -53,8 +53,7 @@ class TestQualityAssessmentService(TestCase):
             snippet='This systematic review analyzes 500 studies across 50 medical centers examining the impact of artificial intelligence on patient outcomes, diagnostic accuracy, and healthcare efficiency. Methods include meta-analysis and rigorous quality assessment.',
             publication_year=2024,
             document_type='journal_article',
-            has_full_text=True,
-            relevance_score=0.95
+            is_pdf=True
         ))
         
         # Medium quality result
@@ -65,8 +64,7 @@ class TestQualityAssessmentService(TestCase):
             snippet='Brief overview of AI in healthcare with some statistics.',
             publication_year=2023,
             document_type='blog_post',
-            has_full_text=False,
-            relevance_score=0.60
+            is_pdf=False
         ))
         
         # Low quality result
@@ -77,8 +75,7 @@ class TestQualityAssessmentService(TestCase):
             snippet='AI healthcare stuff',
             publication_year=None,
             document_type='unknown',
-            has_full_text=False,
-            relevance_score=0.30
+            is_pdf=False
         ))
     
     def test_assess_result_quality(self):
@@ -163,10 +160,9 @@ class TestQualityAssessmentService(TestCase):
             snippet='Full snippet',
             publication_year=2024,
             document_type='journal_article',
-            has_full_text=True,
+            is_pdf=True,
             authors=['Smith, J.', 'Doe, A.'],
-            journal_name='Medical AI Journal',
-            relevance_score=0.85
+            source_organization='Medical AI Journal'
         )
         
         completeness = self.service.assess_metadata_completeness(complete_result)
@@ -178,7 +174,7 @@ class TestQualityAssessmentService(TestCase):
             title='Incomplete',
             url='https://example.com/incomplete',
             snippet='Brief',
-            relevance_score=0.50
+            is_pdf=False
         )
         
         completeness = self.service.assess_metadata_completeness(incomplete_result)
@@ -200,7 +196,7 @@ class TestQualityAssessmentService(TestCase):
                 title='Test',
                 url=url,
                 snippet='Test snippet',
-                relevance_score=0.5
+                is_pdf=False
             )
             
             reliability = self.service.evaluate_source_reliability(result)
@@ -287,7 +283,7 @@ class TestQualityAssessmentService(TestCase):
                 url=f'https://journal.com/article{i}',
                 snippet=f'Standard research article about topic {i}',
                 publication_year=2023,
-                relevance_score=0.7 + (i * 0.01)
+                is_pdf=True
             )
         
         all_results = ProcessedResult.objects.filter(session=self.session)
@@ -331,7 +327,7 @@ class TestQualityAssessmentService(TestCase):
                     title=f'Article from {source} #{i}',
                     url=f'https://{source}/article{i}',
                     snippet=f'Content from {source}',
-                    relevance_score=0.5 + (i * 0.1)
+                    is_pdf=i % 2 == 0
                 )
         
         comparison = self.service.compare_quality_across_sources(str(self.session.id))
@@ -379,7 +375,7 @@ class TestQualityAssessmentService(TestCase):
                     url=f'https://journal.com/{year}/study{i}',
                     snippet=f'Research conducted in {year}',
                     publication_year=year,
-                    relevance_score=0.5 + (year - 2020) * 0.05
+                    is_pdf=year >= 2022
                 )
         
         temporal_analysis = self.service.analyze_quality_by_time(str(self.session.id))

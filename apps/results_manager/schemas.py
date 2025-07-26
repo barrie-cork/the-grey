@@ -48,7 +48,6 @@ class ProcessedResultResponse(BaseModel):
     normalized_url: str
     content_type: ContentType
     source_type: SourceType
-    relevance_score: float
     publication_date: Optional[datetime]
     author: Optional[str]
     source_organization: Optional[str]
@@ -153,7 +152,7 @@ class ResultExport(BaseModel):
 class QualityMetrics(BaseModel):
     """Schema for result quality metrics."""
     session_id: str
-    average_relevance_score: float
+    quality_score: float  # Simplified quality metric instead of relevance score
     content_completeness: float
     metadata_completeness: float
     duplicate_detection_accuracy: float

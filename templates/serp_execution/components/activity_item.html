@@ -1,0 +1,7 @@
+<div class="activity-item mb-2 pb-2 border-bottom">
+    <div class="d-flex justify-content-between">
+        <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+        <span class="badge bg-secondary">{{ activity.activity_type|title }}</span>
+    </div>
+    <p class="mb-0 small">{{ activity.description }}</p>
+</div>

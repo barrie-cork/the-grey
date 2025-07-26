@@ -88,11 +88,7 @@ class ProcessedResult(models.Model):
         help_text="Publishing organization"
     )
     
-    # Content indicators
-    has_full_text = models.BooleanField(
-        default=False,
-        help_text="Whether full text is available"
-    )
+    # Content indicators  
     full_text_url = models.URLField(
         max_length=2048,
         blank=True,
@@ -101,13 +97,6 @@ class ProcessedResult(models.Model):
     is_pdf = models.BooleanField(
         default=False,
         help_text="Whether the result is a PDF"
-    )
-    
-    # Basic quality indicators (simplified)
-    quality_indicators = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Basic quality flags (e.g., has_doi, is_peer_reviewed)"
     )
     
     # Processing metadata
@@ -128,12 +117,13 @@ class ProcessedResult(models.Model):
     
     class Meta:
         db_table = 'processed_results'
-        ordering = ['-publication_date', '-processed_at']
+        ordering = ['-processed_at']  # Most recently processed first
         indexes = [
             models.Index(fields=['session', 'is_reviewed']),
             models.Index(fields=['url']),
             models.Index(fields=['publication_year']),
             models.Index(fields=['document_type']),
+            models.Index(fields=['-processed_at']),  # For ordering by processing time
         ]
     
     def __str__(self) -> str:
@@ -150,6 +140,11 @@ class ProcessedResult(models.Model):
         from urllib.parse import urlparse
         parsed = urlparse(self.url)
         return parsed.netloc
+    
+    @property
+    def has_full_text(self) -> bool:
+        """Check if full text is available based on PDF status or full_text_url."""
+        return bool(self.is_pdf or self.full_text_url)
 
 
 class DuplicateGroup(models.Model):
@@ -229,8 +224,8 @@ class DuplicateGroup(models.Model):
                 score += 2
             if result.publication_date:
                 score += 2
-            if result.has_full_text:
-                score += 3
+            if result.is_pdf:
+                score += 2
             
             if score > best_score:
                 best_score = score

@@ -26,7 +26,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from apps.review_manager.models import SearchSession
 from .models import ProcessedResult, DuplicateGroup, ProcessingSession
-from .utils import get_processing_statistics, prioritize_results_for_review
+from .utils import get_processing_statistics, get_results_for_review
 
 
 class ResultsOverviewView(LoginRequiredMixin, TemplateView):
@@ -110,7 +110,7 @@ class ResultsOverviewView(LoginRequiredMixin, TemplateView):
         """Get filtered and sorted results queryset."""
         queryset = ProcessedResult.objects.filter(
             session_id=session_id
-        ).select_related('duplicate_group', 'metadata')
+        ).select_related('duplicate_group')
         
         # Apply filters
         if filters['domain']:
@@ -126,7 +126,9 @@ class ResultsOverviewView(LoginRequiredMixin, TemplateView):
         if filters['quality_min']:
             try:
                 min_quality = float(filters['quality_min'])
-                queryset = queryset.filter(relevance_score__gte=min_quality)
+                # Simple filtering: PDFs only for higher quality threshold
+                if min_quality > 0.5:
+                    queryset = queryset.filter(is_pdf=True)
             except (ValueError, TypeError):
                 pass
         
@@ -145,14 +147,13 @@ class ResultsOverviewView(LoginRequiredMixin, TemplateView):
         
         # Apply sorting
         sort_options = {
-            'relevance': '-relevance_score',
             'date': '-publication_date',
             'title': 'title',
-            'quality': '-relevance_score',
+            'type': '-is_pdf',  # PDFs first, then webpages
         }
         
-        sort_field = sort_options.get(filters['sort_by'], '-relevance_score')
-        queryset = queryset.order_by(sort_field, '-created_at')
+        sort_field = sort_options.get(filters['sort_by'], '-processed_at')
+        queryset = queryset.order_by(sort_field, '-processed_at')
         
         return queryset
     
@@ -184,10 +185,8 @@ class ResultsOverviewView(LoginRequiredMixin, TemplateView):
             'document_types': sorted(document_types),
             'domains': sorted(domains),
             'quality_ranges': [
-                ('0.8', '0.8+ (High Quality)'),
-                ('0.6', '0.6+ (Good Quality)'),
-                ('0.4', '0.4+ (Fair Quality)'),
-                ('0.2', '0.2+ (Low Quality)'),
+                ('0.6', 'PDFs Only'),
+                ('0.0', 'All Documents'),
             ],
             'duplicate_options': [
                 ('all', 'Show All'),
@@ -195,10 +194,9 @@ class ResultsOverviewView(LoginRequiredMixin, TemplateView):
                 ('duplicates', 'Duplicates Only'),
             ],
             'sort_options': [
-                ('relevance', 'Relevance Score'),
                 ('date', 'Publication Date'),
                 ('title', 'Title (A-Z)'),
-                ('quality', 'Quality Score'),
+                ('type', 'Document Type (PDF first)'),
             ]
         }
 
@@ -400,12 +398,14 @@ class ResultsFilterAPIView(APIView):
             if quality_score_min:
                 try:
                     min_score = float(quality_score_min)
-                    queryset = queryset.filter(relevance_score__gte=min_score)
+                    # Simple filtering: PDFs only for higher threshold
+                    if min_score > 0.5:
+                        queryset = queryset.filter(is_pdf=True)
                 except (ValueError, TypeError):
                     pass
             
-            # Paginate
-            paginator = Paginator(queryset.order_by('-relevance_score'), page_size)
+            # Paginate (order by processing time - most recently processed first)
+            paginator = Paginator(queryset.order_by('-processed_at'), page_size)
             
             try:
                 results_page = paginator.page(page)
@@ -422,8 +422,7 @@ class ResultsFilterAPIView(APIView):
                     'snippet': result.snippet,
                     'document_type': result.document_type,
                     'publication_year': result.publication_year,
-                    'relevance_score': result.relevance_score,
-                    'has_full_text': result.has_full_text,
+                    'is_pdf': result.is_pdf,
                     'is_duplicate': bool(result.duplicate_group),
                     'duplicate_count': result.duplicate_group.result_count if result.duplicate_group else 0,
                     'domain': result.get_display_url(),

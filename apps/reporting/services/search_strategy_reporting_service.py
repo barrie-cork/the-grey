@@ -119,7 +119,6 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
             'recommendations': [],
             'overall_metrics': {
                 'avg_results_per_query': 0,
-                'avg_relevance_score': 0,
                 'most_effective_engines': [],
                 'keyword_effectiveness': {}
             }
@@ -136,15 +135,12 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
             )
             
             query_results = sum(e.results_count for e in executions)
-            query_relevance = processed_results.aggregate(
-                avg_relevance=models.Avg('relevance_score')
-            )['avg_relevance'] or 0
+            query_relevance = 0  # Simplified approach - relevance score removed
             
             query_performance = {
                 'query_id': str(query.id),
                 'query_string': query.query_string,
                 'total_results': query_results,
-                'avg_relevance': round(query_relevance, 3),
                 'execution_success_rate': round(
                     executions.filter(status=PerformanceConstants.COMPLETED_STATUS).count() / 
                     max(executions.count(), PerformanceConstants.MIN_DIVISOR) * 
@@ -177,10 +173,7 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
                 total_results / query_count, 
                 PerformanceConstants.DECIMAL_PLACES['ratio']
             )
-            optimization_data['overall_metrics']['avg_relevance_score'] = round(
-                total_relevance / query_count, 
-                3  # Keep higher precision for relevance scores
-            )
+            # Relevance score calculation removed in simplified approach
         
         # Most effective engines
         sorted_engines = sorted(

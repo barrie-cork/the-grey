@@ -109,6 +109,12 @@ class SearchStrategyView(LoginRequiredMixin, SessionOwnershipMixin, TemplateView
                 # Save the strategy
                 strategy = form.save()
                 
+                # Debug: print the saved strategy data
+                logger.info(f"Saved strategy - Population: {strategy.population_terms}")
+                logger.info(f"Saved strategy - Interest: {strategy.interest_terms}")
+                logger.info(f"Saved strategy - Context: {strategy.context_terms}")
+                logger.info(f"Saved strategy - Config: {strategy.search_config}")
+                
                 # Validate completeness
                 is_complete = strategy.validate_completeness()
                 strategy.save(update_fields=['is_complete', 'validation_errors'])
@@ -130,11 +136,69 @@ class SearchStrategyView(LoginRequiredMixin, SessionOwnershipMixin, TemplateView
                 )
                 
                 # Update session status if strategy is complete
-                if is_complete and self.session.status == 'defining_search':
-                    if self.session.can_transition_to('ready_to_execute'):
+                if is_complete:
+                    # Check if we need to transition to ready_to_execute
+                    if self.session.status in ['draft', 'defining_search']:
+                        if self.session.can_transition_to('ready_to_execute'):
+                            old_status = self.session.status
+                            self.session.status = 'ready_to_execute'
+                            self.session.save(update_fields=['status'])
+                            
+                            SessionActivity.log_activity(
+                                session=self.session,
+                                activity_type='status_changed',
+                                description='Session ready for execution',
+                                user=request.user,
+                                metadata={'old_status': old_status, 'new_status': 'ready_to_execute'}
+                            )
+                            
+                            messages.success(
+                                request,
+                                'Search strategy completed! Session is now ready for execution.'
+                            )
+                        else:
+                            messages.warning(
+                                request,
+                                'Search strategy saved, but session status could not be updated.'
+                            )
+                else:
+                    messages.success(request, 'Search strategy saved successfully.')
+                
+                # Redirect based on action
+                print(f"POST data keys: {list(request.POST.keys())}")  # Debug
+                print(f"execute_search in POST: {'execute_search' in request.POST}")  # Debug
+                
+                if 'execute_search' in request.POST:
+                    # Check if strategy is complete
+                    if not is_complete:
+                        messages.error(
+                            request,
+                            "Cannot execute search: Strategy is not complete. Please fill in all required fields."
+                        )
+                        return redirect('search_strategy:strategy_form', session_id=self.session.id)
+                    
+                    # Debug current status
+                    print(f"Current session status: {self.session.status}")
+                    print(f"Can transition to ready_to_execute: {self.session.can_transition_to('ready_to_execute')}")
+                    print(f"Allowed transitions: {self.session.get_allowed_transitions()}")
+                    
+                    # Check if we need to update status
+                    if self.session.status == 'draft':
+                        # First transition to defining_search
+                        self.session.status = 'defining_search'
+                        self.session.save(update_fields=['status'])
+                        SessionActivity.log_activity(
+                            session=self.session,
+                            activity_type='status_changed',
+                            description='Session moved to defining search',
+                            user=request.user,
+                            metadata={'old_status': 'draft', 'new_status': 'defining_search'}
+                        )
+                    
+                    # Now transition to ready_to_execute
+                    if self.session.status == 'defining_search':
                         self.session.status = 'ready_to_execute'
                         self.session.save(update_fields=['status'])
-                        
                         SessionActivity.log_activity(
                             session=self.session,
                             activity_type='status_changed',
@@ -142,23 +206,54 @@ class SearchStrategyView(LoginRequiredMixin, SessionOwnershipMixin, TemplateView
                             user=request.user,
                             metadata={'old_status': 'defining_search', 'new_status': 'ready_to_execute'}
                         )
-                        
-                        messages.success(
-                            request,
-                            'Search strategy completed! Session is now ready for execution.'
-                        )
+                    
+                    # If already ready_to_execute or can execute, proceed
+                    if self.session.status in ['ready_to_execute', 'executing']:
+                        # Start the execution directly and go to progress page
+                        try:
+                            from apps.serp_execution.tasks import initiate_search_session_execution_task
+                            
+                            # Update status to executing
+                            if self.session.status == 'ready_to_execute':
+                                self.session.status = 'executing'
+                                self.session.save(update_fields=['status'])
+                            
+                            # Start the execution task
+                            task = initiate_search_session_execution_task.delay(str(self.session.id))
+                            
+                            # Log the execution start
+                            SessionActivity.log_activity(
+                                session=self.session,
+                                activity_type='search_started',
+                                description='Search execution initiated',
+                                user=request.user,
+                                metadata={'task_id': task.id}
+                            )
+                            
+                            messages.success(
+                                request,
+                                "Search execution has been initiated. You'll be notified when it's complete."
+                            )
+                            
+                            # Redirect directly to execution status/progress page
+                            print(f"Redirecting to serp_execution:execution_status with session_id={self.session.id}")
+                            return redirect('serp_execution:execution_status', session_id=self.session.id)
+                            
+                        except Exception as e:
+                            import logging
+                            logger = logging.getLogger(__name__)
+                            logger.error(f"Failed to initiate search execution: {str(e)}")
+                            messages.error(
+                                request,
+                                f"Failed to start search execution: {str(e)}"
+                            )
+                            return redirect('search_strategy:strategy_form', session_id=self.session.id)
                     else:
-                        messages.warning(
+                        messages.error(
                             request,
-                            'Search strategy saved, but session status could not be updated.'
+                            f"Cannot execute search from status '{self.session.get_status_display()}'"
                         )
-                else:
-                    messages.success(request, 'Search strategy saved successfully.')
-                
-                # Redirect based on action
-                if 'execute_search' in request.POST:
-                    # Redirect to search execution page
-                    return redirect('serp_execution:execute_search', session_id=self.session.id)
+                        return redirect('search_strategy:strategy_form', session_id=self.session.id)
                 elif 'save_and_continue' in request.POST:
                     return redirect('serp_execution:execute_search', session_id=self.session.id)
                 else:
@@ -175,14 +270,27 @@ class SearchStrategyView(LoginRequiredMixin, SessionOwnershipMixin, TemplateView
     
     def _update_search_queries(self, strategy: SearchStrategy) -> None:
         """Update SearchQuery objects based on strategy."""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"Updating search queries for strategy {strategy.id}")
+        
         # Delete existing queries
-        strategy.search_queries.all().delete()
+        deleted_count = strategy.search_queries.all().delete()[0]
+        logger.info(f"Deleted {deleted_count} existing queries")
         
         # Generate new queries
         queries_data = strategy.generate_queries()
+        logger.info(f"Generated {len(queries_data)} new queries")
+        
+        # Log the strategy data
+        logger.info(f"Strategy data - Population: {strategy.population_terms}, Interest: {strategy.interest_terms}, Context: {strategy.context_terms}")
+        logger.info(f"Search config: {strategy.search_config}")
         
         # Create SearchQuery objects
+        created_count = 0
         for i, query_data in enumerate(queries_data):
+            logger.info(f"Creating query {i+1}: {query_data}")
             SearchQuery.objects.create(
                 strategy=strategy,
                 query_text=query_data['query'],
@@ -190,6 +298,13 @@ class SearchStrategyView(LoginRequiredMixin, SessionOwnershipMixin, TemplateView
                 target_domain=query_data.get('domain'),
                 execution_order=i + 1
             )
+            created_count += 1
+        
+        logger.info(f"Created {created_count} SearchQuery objects")
+        
+        # Verify queries were created
+        final_count = strategy.search_queries.count()
+        logger.info(f"Final query count for strategy: {final_count}")
 
 
 @login_required

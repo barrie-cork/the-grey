@@ -7,78 +7,7 @@ numbers and strings in the codebase.
 from typing import Dict, List, Set
 
 
-class MetadataConstants:
-    """Constants for metadata extraction service."""
-    
-    # Confidence score thresholds
-    CONFIDENCE_SCORES: Dict[str, float] = {
-        'pdf_detection': 0.9,
-        'report_detection': 0.7,
-        'thesis_detection': 0.8,
-        'working_paper_detection': 0.7,
-        'author_detection': 0.8,
-        'publication_year': 0.7,
-        'government_org': 0.9,
-        'nonprofit_org': 0.7,
-        'institutional_repo': 0.8,
-        'preprint_server': 0.9,
-        'government_source': 0.95,
-        'nonprofit_source': 0.7
-    }
-    
-    # Academic detection thresholds
-    ACADEMIC_SCORE_THRESHOLD: int = 2
-    ACADEMIC_SCORE_MAX_WEIGHT: int = 4
-    
-    # Publication year validation
-    MIN_PUBLICATION_YEAR: int = 1980
-    
-    # Subject area matching
-    MIN_SUBJECT_MATCHES: int = 2
-    
-    # Default values
-    DEFAULT_DOCUMENT_TYPE: str = 'unknown'
-    DEFAULT_LANGUAGE: str = 'en'
-    DEFAULT_IS_ACADEMIC: bool = False
-    DEFAULT_HAS_AUTHORS: bool = False
-    DEFAULT_ORGANIZATION: str = ''
-    
-    # Regular expression patterns
-    YEAR_PATTERN: str = r'\b(19|20)\d{2}\b'
-    
-    # Academic indicators
-    ACADEMIC_INDICATORS: List[str] = [
-        '.edu', '.ac.', 'university', 'college', 
-        'research', 'journal', 'academic'
-    ]
-    
-    # Author detection patterns
-    AUTHOR_PATTERNS: List[str] = [
-        r'by\s+([A-Z][a-z]+\s+[A-Z][a-z]+)',
-        r'author[s]?[:\s]+([A-Z][a-z]+)',
-        r'([A-Z][a-z]+,\s+[A-Z]\.)',
-    ]
-    
-    # Subject area keywords
-    SUBJECT_KEYWORDS: Dict[str, List[str]] = {
-        'healthcare': ['health', 'medical', 'clinical', 'patient', 'treatment'],
-        'education': ['education', 'learning', 'student', 'academic', 'school'],
-        'technology': ['technology', 'digital', 'software', 'computer', 'internet'],
-        'policy': ['policy', 'government', 'regulation', 'law', 'legislation'],
-        'economics': ['economic', 'financial', 'market', 'business', 'economy'],
-        'environment': ['environment', 'climate', 'sustainability', 'green', 'conservation']
-    }
-    
-    # Document type keywords
-    DOCUMENT_TYPE_KEYWORDS: Dict[str, List[str]] = {
-        'report': ['report', 'white paper', 'policy'],
-        'thesis': ['thesis', 'dissertation'],
-        'working_paper': ['working paper', 'discussion paper']
-    }
-    
-    # Repository patterns
-    REPOSITORY_PATTERNS: List[str] = ['eprints', 'repository', 'repo', 'dspace']
-    PREPRINT_PATTERNS: List[str] = ['arxiv', 'biorxiv', 'medrxiv', 'preprint']
+# MetadataConstants removed - simplified approach no longer needs complex metadata extraction
 
 
 class DeduplicationConstants:

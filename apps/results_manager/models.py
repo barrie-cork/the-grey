@@ -253,5 +253,138 @@ class DuplicateGroup(models.Model):
             self.save()
 
 
-# Removed ResultMetadata and ProcessingSession models to simplify the system
-# These added unnecessary complexity for the core requirement of simple Include/Exclude review
+class ProcessingSession(models.Model):
+    """
+    Tracks the processing status for a search session.
+    Shows progress through various stages of result processing.
+    """
+    
+    PROCESSING_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('partial', 'Partial'),
+    ]
+    
+    PROCESSING_STAGES = [
+        ('initialization', 'Initialization'),
+        ('url_normalization', 'URL Normalization'),
+        ('deduplication', 'Deduplication'),
+        ('quality_scoring', 'Quality Scoring'),
+        ('finalization', 'Finalization'),
+    ]
+    
+    # Primary key
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Relationship
+    search_session = models.OneToOneField(
+        'review_manager.SearchSession',
+        on_delete=models.CASCADE,
+        related_name='processing_session',
+        help_text="The search session being processed"
+    )
+    
+    # Status tracking
+    status = models.CharField(
+        max_length=20,
+        choices=PROCESSING_STATUS_CHOICES,
+        default='pending',
+        help_text="Current processing status"
+    )
+    current_stage = models.CharField(
+        max_length=30,
+        choices=PROCESSING_STAGES,
+        blank=True,
+        help_text="Current processing stage"
+    )
+    stage_progress = models.IntegerField(
+        default=0,
+        help_text="Progress within current stage (0-100)"
+    )
+    
+    # Counts
+    total_raw_results = models.IntegerField(
+        default=0,
+        help_text="Total number of raw results to process"
+    )
+    processed_count = models.IntegerField(
+        default=0,
+        help_text="Number of results processed so far"
+    )
+    error_count = models.IntegerField(
+        default=0,
+        help_text="Number of processing errors encountered"
+    )
+    duplicate_count = models.IntegerField(
+        default=0,
+        help_text="Number of duplicates found"
+    )
+    
+    # Timing
+    started_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When processing started"
+    )
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When processing completed"
+    )
+    last_heartbeat = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last progress update timestamp"
+    )
+    
+    # Error tracking
+    error_details = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of processing errors with details"
+    )
+    retry_count = models.IntegerField(
+        default=0,
+        help_text="Number of retry attempts"
+    )
+    
+    # Configuration
+    processing_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Processing configuration parameters"
+    )
+    celery_task_id = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Associated Celery task ID"
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'processing_sessions'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['search_session', 'status']),
+            models.Index(fields=['status', 'started_at']),
+        ]
+    
+    def __str__(self) -> str:
+        return f"Processing {self.search_session.title} - {self.get_status_display()}"
+    
+    @property
+    def progress_percentage(self) -> int:
+        """Calculate overall progress percentage."""
+        if self.total_raw_results == 0:
+            return 0
+        return min(100, int((self.processed_count / self.total_raw_results) * 100))
+    
+    def update_heartbeat(self) -> None:
+        """Update the last heartbeat timestamp."""
+        self.last_heartbeat = timezone.now()
+        self.save(update_fields=['last_heartbeat'])

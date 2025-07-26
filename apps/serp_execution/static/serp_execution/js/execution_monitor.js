@@ -184,78 +184,124 @@
     }
 
     /**
-     * Update statistics cards
+     * Update statistics cards with smooth number animations
      */
     function updateStatistics(data) {
-        // Total queries
-        const totalQueriesElement = document.getElementById('total-queries');
-        if (totalQueriesElement) {
-            totalQueriesElement.textContent = data.total_queries || 0;
-        }
-
-        // Completed queries
-        const completedElement = document.getElementById('completed-queries');
-        if (completedElement) {
-            completedElement.textContent = data.completed_queries || 0;
-        }
-
-        // Total results
-        const totalResultsElement = document.getElementById('total-results');
-        if (totalResultsElement) {
-            totalResultsElement.textContent = data.total_results || 0;
-        }
-
-        // Total cost
-        const totalCostElement = document.getElementById('total-cost');
-        if (totalCostElement) {
-            totalCostElement.textContent = `$${(data.total_cost || 0).toFixed(3)}`;
-        }
-
-        // Failed queries
-        const failedElement = document.getElementById('failed-queries');
-        if (failedElement) {
-            failedElement.textContent = data.failed_queries || 0;
-            if (data.failed_queries > 0) {
-                failedElement.classList.add('text-danger');
+        const stats = data.statistics || {};
+        
+        // Update all statistics cards with animations
+        animateStatisticCard('total-queries', stats.total_executions || 0);
+        animateStatisticCard('completed-queries', stats.successful_executions || 0);
+        animateStatisticCard('running-queries', stats.running_executions || 0);
+        animateStatisticCard('failed-queries', stats.failed_executions || 0);
+        animateStatisticCard('total-results', stats.total_results || 0);
+        animateStatisticCard('retrying-queries', stats.retrying_executions || 0);
+        
+        // Update progress bar
+        updateProgressBar(stats);
+    }
+    
+    /**
+     * Animate statistic card number updates
+     */
+    function animateStatisticCard(elementId, newValue) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const currentValue = parseInt(element.textContent) || 0;
+        if (currentValue === newValue) return;
+        
+        // Add updating class for visual feedback
+        element.classList.add('updating');
+        
+        // Animate number change
+        const duration = 800;
+        const steps = 20;
+        const difference = newValue - currentValue;
+        const stepValue = difference / steps;
+        const stepDuration = duration / steps;
+        
+        let currentStep = 0;
+        const timer = setInterval(() => {
+            currentStep++;
+            const value = Math.round(currentValue + (stepValue * currentStep));
+            element.textContent = value;
+            
+            if (currentStep >= steps) {
+                clearInterval(timer);
+                element.textContent = newValue;
+                element.classList.remove('updating');
+                
+                // Add pulse effect if value changed significantly
+                if (Math.abs(difference) > 0) {
+                    const card = element.closest('.execution-stats-card');
+                    if (card) {
+                        card.classList.add('active');
+                        setTimeout(() => card.classList.remove('active'), 2000);
+                    }
+                }
             }
+        }, stepDuration);
+    }
+    
+    /**
+     * Update multi-segment progress bar
+     */
+    function updateProgressBar(stats) {
+        const total = stats.total_executions || 1;
+        const success = stats.successful_executions || 0;
+        const failed = stats.failed_executions || 0;
+        const pending = stats.pending_executions || 0;
+        
+        const successWidth = (success / total) * 100;
+        const failedWidth = (failed / total) * 100;
+        const pendingWidth = (pending / total) * 100;
+        
+        const progressBars = document.querySelectorAll('.progress-bar');
+        if (progressBars.length >= 3) {
+            // Animate progress bar changes
+            progressBars[0].style.width = successWidth + '%';
+            progressBars[1].style.width = failedWidth + '%';
+            progressBars[2].style.width = pendingWidth + '%';
         }
     }
 
     /**
-     * Update status message
+     * Update status message with enhanced styling
      */
     function updateStatusMessage(data) {
         const messageContainer = document.getElementById('status-message');
         if (!messageContainer) return;
 
+        const stats = data.statistics || {};
         let message = '';
         let alertClass = 'alert-info';
+        let icon = 'fas fa-info-circle';
 
-        switch (data.session_status) {
-            case 'executing':
-                message = `Executing search queries... ${data.completed_queries} of ${data.total_queries} completed.`;
-                break;
-            case 'processing':
-                message = 'Processing search results...';
-                break;
-            case 'completed':
-                message = `Search completed successfully! Retrieved ${data.total_results} results.`;
-                alertClass = 'alert-success';
-                break;
-            case 'failed':
-                message = `Search failed with ${data.failed_queries} errors. You can retry failed queries.`;
-                alertClass = 'alert-danger';
-                break;
-            case 'partial':
-                message = `Search partially completed. ${data.completed_queries} queries succeeded, ${data.failed_queries} failed.`;
-                alertClass = 'alert-warning';
-                break;
+        if (data.has_running) {
+            message = `<i class="fas fa-spinner fa-spin"></i> <strong>Search Execution In Progress...</strong><br>Processing ${stats.total_executions} queries based on your strategy.`;
+            alertClass = 'alert-primary';
+        } else if (stats.successful_executions === stats.total_executions && stats.total_executions > 0) {
+            message = `<i class="fas fa-check-circle"></i> <strong>Search Completed Successfully!</strong><br>All ${stats.total_executions} queries executed. Retrieved ${stats.total_results} results.`;
+            alertClass = 'alert-success';
+        } else if (stats.failed_executions > 0) {
+            message = `<i class="fas fa-exclamation-triangle"></i> <strong>Search Partially Completed</strong><br>${stats.successful_executions} succeeded, ${stats.failed_executions} failed. You can retry failed executions.`;
+            alertClass = 'alert-warning';
+        } else if (stats.total_executions === 0) {
+            message = `<i class="fas fa-clock"></i> <strong>Search Execution Ready</strong><br>Waiting for search queries to be executed.`;
+            alertClass = 'alert-info';
         }
 
         if (message) {
             messageContainer.className = `alert ${alertClass}`;
-            messageContainer.textContent = message;
+            messageContainer.innerHTML = message;
             messageContainer.style.display = 'block';
+            
+            // Add subtle animation on update
+            messageContainer.style.opacity = '0.8';
+            setTimeout(() => {
+                messageContainer.style.opacity = '1';
+            }, 200);
         }
     }
 
@@ -321,27 +367,60 @@
     }
 
     /**
-     * Show completion notification
+     * Show completion notification with enhanced feedback
      */
     function showCompletionNotification(data) {
+        const stats = data.statistics || {};
         let title, message, type;
 
-        if (data.session_status === 'completed') {
-            title = 'Search Completed!';
-            message = `Successfully retrieved ${data.total_results} results.`;
+        if (stats.successful_executions === stats.total_executions && stats.total_executions > 0) {
+            title = 'Search Completed Successfully!';
+            message = `All ${stats.total_executions} queries executed successfully. Retrieved ${stats.total_results} results.`;
             type = 'success';
-        } else if (data.session_status === 'failed') {
-            title = 'Search Failed';
-            message = `${data.failed_queries} queries failed. You can retry them from the error recovery page.`;
-            type = 'error';
-        } else if (data.failed_queries > 0) {
+        } else if (stats.failed_executions > 0) {
             title = 'Search Partially Completed';
-            message = `Retrieved ${data.total_results} results. ${data.failed_queries} queries failed.`;
+            message = `${stats.successful_executions} queries succeeded, ${stats.failed_executions} failed. Retrieved ${stats.total_results} results.`;
             type = 'warning';
+        } else if (stats.total_executions === 0) {
+            title = 'No Queries to Execute';
+            message = 'No search queries were found to execute.';
+            type = 'info';
         }
 
         if (title && message) {
             showNotification(title, message, type);
+            
+            // Update page elements to reflect completion
+            updateCompletionState(data);
+        }
+    }
+    
+    /**
+     * Update page elements when execution completes
+     */
+    function updateCompletionState(data) {
+        // Hide running spinners
+        const runningBadges = document.querySelectorAll('.badge .spinner-border');
+        runningBadges.forEach(spinner => {
+            spinner.remove();
+        });
+        
+        // Show action buttons
+        const actionContainer = document.querySelector('.btn-block');
+        if (actionContainer) {
+            actionContainer.style.display = 'block';
+        }
+        
+        // Update quick actions visibility
+        const quickActions = document.querySelector('.text-center.text-muted');
+        if (quickActions && data.statistics.successful_executions > 0) {
+            quickActions.style.display = 'none';
+            
+            // Show continue button if results are available
+            const continueBtn = document.querySelector('.btn-outline-success');
+            if (continueBtn) {
+                continueBtn.style.display = 'inline-block';
+            }
         }
     }
 
@@ -487,16 +566,106 @@
     }
 
     /**
-     * Show notification
+     * Show notification with enhanced styling
      */
     function showNotification(title, message, type = 'info') {
-        // If using a notification library like toastr
+        // Create a modern notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} notification-toast`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 400px;
+            z-index: 9999;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideInRight 0.3s ease-out;
+        `;
+        
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <strong>${title}</strong><br>
+                    <small>${message}</small>
+                </div>
+                <button type="button" class="btn-close ms-2" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+        
+        // Fallback for browsers without CSS animation support
         if (window.toastr) {
             toastr[type](message, title);
-        } else {
-            // Fallback to alert
-            alert(`${title}\n\n${message}`);
+            notification.remove();
         }
+    }
+    
+    /**
+     * Update activity feed in real-time
+     */
+    function updateActivityFeed(activities) {
+        const activityContainer = document.querySelector('.card-body[style*="max-height: 400px"]');
+        if (!activityContainer || !activities || activities.length === 0) return;
+        
+        // Clear existing activities
+        activityContainer.innerHTML = '';
+        
+        // Add new activities
+        activities.slice(0, 10).forEach(activity => {
+            const activityElement = createActivityElement(activity);
+            activityContainer.appendChild(activityElement);
+        });
+    }
+    
+    /**
+     * Create activity element
+     */
+    function createActivityElement(activity) {
+        const div = document.createElement('div');
+        div.className = 'activity-item mb-3';
+        
+        const iconClass = getActivityIcon(activity.type);
+        
+        div.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div class="activity-icon me-3">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="activity-content flex-grow-1">
+                    <div class="activity-title small">${activity.title}</div>
+                    <div class="activity-description text-muted small">${activity.description}</div>
+                    <div class="activity-time text-muted small">${activity.time_ago}</div>
+                </div>
+            </div>
+        `;
+        
+        return div;
+    }
+    
+    /**
+     * Get appropriate icon for activity type
+     */
+    function getActivityIcon(type) {
+        const iconMap = {
+            'status_changed': 'fas fa-exchange-alt text-info',
+            'search_executed': 'fas fa-play text-success',
+            'search_defined': 'fas fa-edit text-primary',
+            'created': 'fas fa-plus text-success',
+            'completed': 'fas fa-check-circle text-success',
+            'failed': 'fas fa-times-circle text-danger'
+        };
+        
+        return iconMap[type] || 'fas fa-info-circle text-muted';
     }
 
     /**

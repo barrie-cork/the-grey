@@ -26,13 +26,13 @@ class SessionNavigationMixin:
         """Determine where to send user when they click on a session."""
         navigation_map = {
             'draft': {
-                'url': f'/search-strategy/define/{session.id}/',  # Placeholder URL
+                'url': reverse('search_strategy:strategy_form', kwargs={'session_id': session.id}),
                 'text': 'Define Search Strategy',
                 'icon': 'bi-search',
                 'help': 'Define your Population, Interest, and Context terms'
             },
             'defining_search': {
-                'url': f'/search-strategy/define/{session.id}/',  # Placeholder URL
+                'url': reverse('search_strategy:strategy_form', kwargs={'session_id': session.id}),
                 'text': 'Complete Strategy',
                 'icon': 'bi-pencil',
                 'help': 'Finish defining your search strategy'

@@ -260,12 +260,13 @@ class ArchiveSessionView(LoginRequiredMixin, UserOwnerMixin, View):
 class SessionNavigateView(LoginRequiredMixin, UserOwnerMixin, SessionNavigationMixin, View):
     """Smart navigation based on session status."""
     
+    def get_object(self):
+        """Get the session object for the UserOwnerMixin."""
+        session_id = self.kwargs.get('session_id')
+        return get_object_or_404(SearchSession, pk=session_id)
+    
     def get(self, request, session_id):
-        session = get_object_or_404(SearchSession, pk=session_id)
-        
-        # Check permission
-        if session.owner != request.user:
-            return HttpResponseForbidden()
+        session = self.get_object()
         
         # Get navigation info and redirect
         nav_info = self.get_session_next_url(session)

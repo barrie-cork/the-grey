@@ -143,7 +143,21 @@ class SerperClient:
         Returns:
             Dictionary of API parameters
         """
-        params = {
+        params = self._build_base_params(query, num_results, search_type, location, language)
+        params.update(self._build_date_params(kwargs))
+        params.update(self._build_file_type_params(query, kwargs))
+        return params
+    
+    def _build_base_params(
+        self, 
+        query: str, 
+        num_results: int, 
+        search_type: str, 
+        location: str, 
+        language: str
+    ) -> Dict[str, Any]:
+        """Build base request parameters."""
+        return {
             'q': query,
             'num': min(num_results, 100),  # Serper max is 100
             'type': search_type,
@@ -152,16 +166,20 @@ class SerperClient:
             'hl': language,
             'engine': 'google'
         }
-        
-        # Add optional parameters
+    
+    def _build_date_params(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        """Build date filtering parameters."""
+        params = {}
         if 'date_from' in kwargs and kwargs['date_from']:
             params['tbs'] = f"cdr:1,cd_min:{kwargs['date_from']}"
-        
-        # File type filtering
+        return params
+    
+    def _build_file_type_params(self, query: str, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        """Build file type filtering parameters."""
+        params = {}
         if 'file_types' in kwargs and kwargs['file_types']:
             file_type_query = ' OR '.join([f'filetype:{ft}' for ft in kwargs['file_types']])
             params['q'] = f"{query} ({file_type_query})"
-        
         return params
     
     def search(

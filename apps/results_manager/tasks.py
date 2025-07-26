@@ -14,10 +14,10 @@ from celery.exceptions import Retry
 
 from apps.review_manager.models import SearchSession
 from apps.serp_execution.models import RawSearchResult
-from .models import ProcessedResult, ProcessingSession, DuplicateGroup, ResultMetadata
+from .models import ProcessedResult, DuplicateGroup, ProcessingSession
 from .utils import (
     normalize_url, detect_duplicates, calculate_relevance_score,
-    extract_document_metadata, get_processing_statistics
+    get_processing_statistics
 )
 
 logger = logging.getLogger(__name__)
@@ -287,12 +287,8 @@ def process_single_result(raw_result: RawSearchResult, session_id: str) -> Optio
             # Normalize URL
             normalized_url = normalize_url(raw_result.link)
             
-            # Extract metadata
-            metadata = extract_document_metadata(
-                title=raw_result.title,
-                snippet=raw_result.snippet,
-                url=raw_result.link
-            )
+            # Simple document type detection from URL
+            document_type = 'pdf' if '.pdf' in raw_result.link.lower() else 'webpage'
             
             # Create ProcessedResult
             processed_result = ProcessedResult.objects.create(
@@ -302,14 +298,14 @@ def process_single_result(raw_result: RawSearchResult, session_id: str) -> Optio
                 url=normalized_url,
                 snippet=raw_result.snippet,
                 publication_date=raw_result.detected_date,
-                publication_year=metadata.get('publication_year'),
-                document_type=metadata.get('document_type', ''),
-                language=metadata.get('language', 'en'),
-                source_organization=metadata.get('organization', ''),
+                publication_year=raw_result.detected_date.year if raw_result.detected_date else None,
+                document_type=document_type,
+                language='en',  # Default to English
+                source_organization='',  # Keep simple
                 has_full_text=raw_result.has_pdf,
                 full_text_url=raw_result.link if raw_result.has_pdf else '',
                 is_pdf=raw_result.has_pdf,
-                quality_indicators=metadata.get('confidence_scores', {}),
+                quality_indicators={},  # Keep simple
                 processing_version='1.0'
             )
             

@@ -21,9 +21,7 @@ from django.utils import timezone
 from django.db.models import Q, Count, Sum, Avg
 from django.db import transaction
 
-from apps.review_manager.models import SearchSession
-from apps.review_manager.signals import get_session_data
-from apps.search_strategy.signals import get_session_queries_data
+from apps.core.bootstrap import get_dependencies
 from .models import SearchExecution, RawSearchResult, ExecutionMetrics
 from .forms import ExecutionConfirmationForm, ErrorRecoveryForm
 from .tasks import (
@@ -49,12 +47,17 @@ logger = logging.getLogger(__name__)
 class SessionOwnershipMixin:
     """Mixin to ensure user owns the search session."""
     
-    def get_session(self) -> SearchSession:
+    def get_session(self):
         """Get and validate session ownership."""
         session_id = self.kwargs.get('session_id')
-        session = get_object_or_404(SearchSession, id=session_id)
+        deps = get_dependencies()
+        session_provider = deps.get_session_provider()
         
-        if session.owner != self.request.user:
+        # Get session through provider
+        session = session_provider.get_session(session_id)
+        
+        # Verify ownership through provider
+        if not session_provider.verify_session_ownership(session_id, self.request.user):
             raise PermissionDenied("You don't have permission to access this session.")
         
         return session
@@ -68,7 +71,7 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
     template_name = 'serp_execution/execute_search.html'
     form_class = ExecutionConfirmationForm
     
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         """Validate session status before processing."""
         self.session = self.get_session()
         
@@ -81,7 +84,7 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
         
         return super().dispatch(request, *args, **kwargs)
     
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         """Add queries and cost estimation to context."""
         context = super().get_context_data(**kwargs)
         
@@ -174,8 +177,8 @@ class SearchExecutionStatusView(LoginRequiredMixin, SessionOwnershipMixin, Detai
         """Get the search session."""
         return self.get_session()
     
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
-        """Add execution details to context."""
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        """Add execution details to context with enhanced statistics for card layout."""
         context = super().get_context_data(**kwargs)
         
         # Get all executions for this session
@@ -183,8 +186,8 @@ class SearchExecutionStatusView(LoginRequiredMixin, SessionOwnershipMixin, Detai
             query__session=self.object
         ).select_related('query').order_by('-created_at')
         
-        # Calculate statistics
-        stats = get_execution_statistics(str(self.object.id))
+        # Calculate enhanced statistics for our new card layout
+        stats = self._calculate_enhanced_statistics(executions, str(self.object.id))
         
         # Get failed executions with analysis
         failed_executions = get_failed_executions_with_analysis(str(self.object.id))
@@ -207,6 +210,50 @@ class SearchExecutionStatusView(LoginRequiredMixin, SessionOwnershipMixin, Detai
         })
         
         return context
+    
+    @staticmethod
+    def _calculate_enhanced_statistics(executions, session_id: str = None) -> Dict[str, Any]:
+        """Calculate enhanced statistics for the new card-based layout."""
+        # Get basic statistics if session_id is provided
+        basic_stats = {}
+        if session_id:
+            basic_stats = get_execution_statistics(session_id)
+        
+        # Calculate additional statistics for our cards
+        total_executions = executions.count()
+        successful_executions = executions.filter(status='completed').count()
+        failed_executions = executions.filter(status='failed').count()
+        running_executions = executions.filter(status='running').count()
+        pending_executions = executions.filter(status='pending').count()
+        retrying_executions = executions.filter(status='pending', retry_count__gt=0).count()
+        
+        # Calculate total results
+        total_results = sum(execution.results_count for execution in executions if execution.results_count)
+        
+        # Calculate success rate
+        success_rate = (successful_executions / total_executions * 100) if total_executions > 0 else 0
+        
+        # Get timing information
+        last_execution_date = executions.filter(completed_at__isnull=False).first()
+        last_execution_date = last_execution_date.completed_at if last_execution_date else None
+        
+        # Enhanced statistics dictionary
+        enhanced_stats = {
+            'total_executions': total_executions,
+            'successful_executions': successful_executions,
+            'failed_executions': failed_executions,
+            'running_executions': running_executions,
+            'pending_executions': pending_executions,
+            'retrying_executions': retrying_executions,
+            'total_results': total_results,
+            'success_rate': round(success_rate, 1),
+            'last_execution_date': last_execution_date,
+        }
+        
+        # Merge with basic stats for backward compatibility
+        enhanced_stats.update(basic_stats)
+        
+        return enhanced_stats
 
 
 class ErrorRecoveryView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
@@ -217,7 +264,7 @@ class ErrorRecoveryView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
     template_name = 'serp_execution/error_recovery.html'
     form_class = ErrorRecoveryForm
     
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         """Get execution and validate ownership."""
         execution_id = kwargs.get('execution_id')
         self.execution = get_object_or_404(SearchExecution, id=execution_id)
@@ -234,7 +281,7 @@ class ErrorRecoveryView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
         
         return super().dispatch(request, *args, **kwargs)
     
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         """Add execution details and retry strategy to context."""
         context = super().get_context_data(**kwargs)
         
@@ -353,19 +400,23 @@ def session_progress_api(request, session_id: str) -> JsonResponse:
     Returns aggregated statistics and status.
     """
     try:
-        session = get_object_or_404(SearchSession, id=session_id)
+        deps = get_dependencies()
+        session_provider = deps.get_session_provider()
         
-        # Verify ownership
-        if session.owner != request.user:
+        # Get session and verify ownership through provider
+        session = session_provider.get_session(session_id)
+        if not session_provider.verify_session_ownership(session_id, request.user):
             return JsonResponse({'error': 'Permission denied'}, status=403)
         
-        # Get execution statistics
-        stats = get_execution_statistics(session_id)
-        
-        # Get current executions
+        # Get enhanced execution statistics
         executions = SearchExecution.objects.filter(
             query__session=session
-        ).values('id', 'status', 'results_count', 'error_message')
+        ).select_related('query').order_by('-created_at')
+        
+        stats = SearchExecutionStatusView._calculate_enhanced_statistics(executions, session_id)
+        
+        # Get current executions data
+        executions_data = executions.values('id', 'status', 'results_count', 'error_message')
         
         # Calculate overall progress
         total_queries = stats['total_executions']
@@ -373,16 +424,16 @@ def session_progress_api(request, session_id: str) -> JsonResponse:
         progress = (completed_queries / total_queries * 100) if total_queries > 0 else 0
         
         # Determine if still running
-        has_running = any(e['status'] in ['pending', 'running'] for e in executions)
+        has_running = any(e['status'] in ['pending', 'running'] for e in executions_data)
         
         response_data = {
             'session_id': session_id,
             'session_status': session.status,
             'progress': round(progress, 1),
             'statistics': stats,
-            'executions': list(executions),
+            'executions': list(executions_data),
             'has_running': has_running,
-            'total_results': session.total_results,
+            'total_results': stats['total_results'],
             'updated_at': timezone.now().isoformat(),
         }
         

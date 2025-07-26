@@ -18,16 +18,21 @@ def get_session_queries_data(session_id: str) -> List[Dict[str, Any]]:
     """
     Internal API for accessing search query data without exposing models.
     """
-    queries = SearchQuery.objects.filter(session_id=session_id, is_active=True)
+    from apps.review_manager.models import SearchSession
+    try:
+        session = SearchSession.objects.get(id=session_id)
+        strategy = session.search_strategy
+        queries = strategy.search_queries.filter(is_active=True)
+    except (SearchSession.DoesNotExist, AttributeError):
+        return []
+    
     return [
         {
             'id': str(query.id),
-            'title': query.title,
-            'query_string': query.query_string,
-            'population': query.population,
-            'interest': query.interest,
-            'context': query.context,
-            'search_engines': query.search_engines,
+            'query_text': query.query_text,
+            'query_type': query.query_type,
+            'target_domain': query.target_domain,
+            'execution_order': query.execution_order,
             'created_at': query.created_at.isoformat(),
         }
         for query in queries
@@ -36,7 +41,13 @@ def get_session_queries_data(session_id: str) -> List[Dict[str, Any]]:
 
 def get_query_count(session_id: str) -> int:
     """Get count of active queries for a session."""
-    return SearchQuery.objects.filter(session_id=session_id, is_active=True).count()
+    from apps.review_manager.models import SearchSession
+    try:
+        session = SearchSession.objects.get(id=session_id)
+        strategy = session.search_strategy
+        return strategy.search_queries.filter(is_active=True).count()
+    except (SearchSession.DoesNotExist, AttributeError):
+        return 0
 
 
 @receiver(post_save, sender=SearchQuery)
@@ -47,31 +58,38 @@ def check_strategy_completion(sender, instance, created, **kwargs):
     This signal fires after a SearchQuery is saved and checks if the search
     strategy is complete (has at least one active query with proper PIC fields).
     """
-    if not instance.session:
+    if not instance.strategy or not instance.strategy.session:
         return
     
-    session = instance.session
+    session = instance.strategy.session
     
     # Only process if session is in the right state
     if session.status not in ['draft', 'defining_search']:
         return
     
-    # Check if we have at least one active query with PIC fields
-    active_queries = session.search_queries.filter(is_active=True)
-    
-    if not active_queries.exists():
+    # Get the search strategy for this session
+    try:
+        strategy = session.search_strategy
+    except AttributeError:
+        logger.debug(f"Session {session.id} has no search strategy")
         return
     
-    # Force refresh the query count from database
-    query_count = active_queries.count()
+    # Check if strategy is complete
+    if not strategy.validate_completeness():
+        logger.debug(f"Strategy for session {session.id} is not complete")
+        return
     
-    # Check if all active queries have required fields
+    # Check if we have at least one active query
+    active_queries = strategy.search_queries.filter(is_active=True)
+    
+    if not active_queries.exists():
+        logger.debug(f"No active queries for strategy {strategy.id}")
+        return
+    
+    # Check if all active queries have required fields  
     for query in active_queries:
-        if not (query.population or query.interest or query.context):
-            logger.debug(f"Query {query.id} missing PIC fields")
-            return
-        if not query.query_string:
-            logger.debug(f"Query {query.id} missing query string")
+        if not query.query_text:
+            logger.debug(f"Query {query.id} missing query text")
             return
     
     # Emit signal to request status transition instead of direct import
@@ -98,18 +116,26 @@ def mark_strategy_complete(session):
     Returns:
         Tuple of (success, error_message)
     """
+    # Get the search strategy for this session
+    try:
+        strategy = session.search_strategy
+    except AttributeError:
+        return False, "No search strategy defined for this session"
+    
+    # Validate strategy completeness
+    if not strategy.validate_completeness():
+        return False, "Search strategy is not complete"
+    
     # Validate session has queries
-    active_queries = session.search_queries.filter(is_active=True)
+    active_queries = strategy.search_queries.filter(is_active=True)
     
     if not active_queries.exists():
         return False, "No active search queries defined"
     
     # Validate all queries have required fields
     for query in active_queries:
-        if not (query.population or query.interest or query.context):
-            return False, f"Query '{query}' missing required PIC fields"
-        if not query.query_string:
-            return False, f"Query '{query}' missing query string"
+        if not query.query_text:
+            return False, f"Query '{query}' missing query text"
     
     # Emit signal to request status transition
     session_status_changed.send(

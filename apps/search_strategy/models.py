@@ -1,180 +1,248 @@
 import uuid
 from typing import Any, Dict, List, Optional
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from apps.review_manager.models import SearchSession
 
 User = get_user_model()
 
 
-class SearchQuery(models.Model):
+class SearchStrategy(models.Model):
     """
-    Represents a search query following the PIC framework.
-    PIC: Population, Interest/Intervention, Context
+    Represents a search strategy using the PIC framework.
+    Generates Boolean queries for multiple domains and file types.
     """
     
-    # Primary key
+    # Primary key and relationships
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
-    # Relationship to SearchSession
-    session = models.ForeignKey(
-        'review_manager.SearchSession',
+    session = models.OneToOneField(
+        SearchSession, 
+        on_delete=models.CASCADE, 
+        related_name='search_strategy'
+    )
+    user = models.ForeignKey(
+        User, 
         on_delete=models.CASCADE,
-        related_name='search_queries',
-        help_text="The search session this query belongs to"
+        related_name='search_strategies'
     )
     
-    # PIC Framework fields
-    population = models.TextField(
-        help_text="Target population for the search (e.g., 'elderly adults', 'software developers')"
-    )
-    interest = models.TextField(
-        help_text="The intervention, exposure, or phenomenon of interest"
-    )
-    context = models.TextField(
-        help_text="The context or setting (e.g., 'healthcare', 'education', 'workplace')"
-    )
-    
-    # Query construction
-    query_string = models.TextField(
-        help_text="The final constructed search query"
-    )
-    search_engines = models.JSONField(
-        default=list,
-        help_text="List of search engines to use (e.g., ['google', 'bing'])"
-    )
-    
-    # Query parameters
-    include_keywords = models.JSONField(
+    # PIC Framework fields using PostgreSQL ArrayField
+    population_terms = ArrayField(
+        models.CharField(max_length=200),
         default=list,
         blank=True,
-        help_text="Additional keywords to include"
+        help_text="Terms describing the population (e.g., 'elderly', 'children with autism')"
     )
-    exclude_keywords = models.JSONField(
+    interest_terms = ArrayField(
+        models.CharField(max_length=200),
         default=list,
         blank=True,
-        help_text="Keywords to exclude from results"
+        help_text="Terms describing the intervention/interest (e.g., 'telehealth', 'cognitive therapy')"
     )
-    
-    # Search filters
-    date_from = models.DateField(
-        null=True,
-        blank=True,
-        help_text="Start date for results filter"
-    )
-    date_to = models.DateField(
-        null=True,
-        blank=True,
-        help_text="End date for results filter"
-    )
-    languages = models.JSONField(
+    context_terms = ArrayField(
+        models.CharField(max_length=200),
         default=list,
         blank=True,
-        help_text="List of language codes to filter by (e.g., ['en', 'es'])"
+        help_text="Terms describing the context/setting (e.g., 'rural', 'low-income countries')"
     )
-    document_types = models.JSONField(
-        default=list,
+    
+    # Search configuration
+    search_config = models.JSONField(
+        default=dict,
         blank=True,
-        help_text="Types of documents to include (e.g., ['pdf', 'report', 'thesis'])"
+        help_text="Configuration for domains, file types, and search parameters"
     )
+    # Structure: {
+    #     "domains": ["nice.org.uk", "who.int", "custom-domain.com"],
+    #     "include_general_search": true,
+    #     "file_types": ["pdf", "doc"],
+    #     "search_type": "google"  # or "scholar"
+    # }
     
-    # Query metadata
-    is_primary = models.BooleanField(
-        default=True,
-        help_text="Whether this is a primary query (vs. supplementary)"
-    )
-    order = models.IntegerField(
-        default=0,
-        help_text="Order of execution for multiple queries"
-    )
-    max_results = models.IntegerField(
-        default=100,
-        help_text="Maximum number of results to retrieve"
-    )
-    
-    # Status tracking
-    is_active = models.BooleanField(
-        default=True,
-        help_text="Whether this query should be executed"
-    )
-    last_executed = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When this query was last executed"
-    )
-    execution_count = models.IntegerField(
-        default=0,
-        help_text="Number of times this query has been executed"
-    )
-    
-    # Timestamps
+    # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_complete = models.BooleanField(default=False)
+    validation_errors = models.JSONField(default=dict, blank=True)
+    
+    class Meta:
+        db_table = 'search_strategies'
+        verbose_name = 'Search Strategy'
+        verbose_name_plural = 'Search Strategies'
+        indexes = [
+            models.Index(fields=['session']),
+            models.Index(fields=['user']),
+            models.Index(fields=['is_complete']),
+        ]
+    
+    def __str__(self):
+        return f"Strategy for {self.session.title}"
+    
+    def validate_completeness(self):
+        """Validate that the strategy has all required components."""
+        errors = {}
+        
+        # At least one PIC category must have terms
+        if not any([self.population_terms, self.interest_terms, self.context_terms]):
+            errors['pic_terms'] = 'At least one PIC category must have terms'
+        
+        # Must have at least one domain or general search enabled
+        domains = self.search_config.get('domains', [])
+        include_general = self.search_config.get('include_general_search', False)
+        if not domains and not include_general:
+            errors['domains'] = 'At least one domain or general search must be selected'
+        
+        # Must have at least one file type
+        if not self.search_config.get('file_types'):
+            errors['file_types'] = 'At least one file type must be selected'
+        
+        self.validation_errors = errors
+        self.is_complete = len(errors) == 0
+        return self.is_complete
+    
+    def generate_base_query(self):
+        """Generate the base Boolean query from PIC terms."""
+        query_parts = []
+        
+        # Build query parts for each PIC category
+        if self.population_terms:
+            pop_query = ' OR '.join(f'"{term}"' for term in self.population_terms)
+            query_parts.append(f'({pop_query})')
+        
+        if self.interest_terms:
+            int_query = ' OR '.join(f'"{term}"' for term in self.interest_terms)
+            query_parts.append(f'({int_query})')
+        
+        if self.context_terms:
+            ctx_query = ' OR '.join(f'"{term}"' for term in self.context_terms)
+            query_parts.append(f'({ctx_query})')
+        
+        # Combine with AND operators
+        return ' AND '.join(query_parts) if query_parts else ''
+    
+    def generate_queries(self):
+        """Generate all search queries based on domains and file types."""
+        base_query = self.generate_base_query()
+        if not base_query:
+            return []
+        
+        queries = []
+        file_types = self.search_config.get('file_types', [])
+        domains = self.search_config.get('domains', [])
+        include_general = self.search_config.get('include_general_search', False)
+        
+        # Build file type filter
+        file_type_parts = []
+        for ft in file_types:
+            if ft == 'pdf':
+                file_type_parts.append('filetype:pdf')
+            elif ft == 'doc':
+                # Include both .doc and .docx
+                file_type_parts.append('(filetype:doc OR filetype:docx)')
+        
+        file_type_filter = ' OR '.join(file_type_parts) if file_type_parts else ''
+        
+        # Generate domain-specific queries
+        for domain in domains:
+            domain_query = f'site:{domain} {base_query}'
+            if file_type_filter:
+                domain_query += f' ({file_type_filter})'
+            queries.append({
+                'query': domain_query,
+                'domain': domain,
+                'type': 'domain-specific'
+            })
+        
+        # Generate general search query if enabled
+        if include_general:
+            general_query = base_query
+            if file_type_filter:
+                general_query += f' ({file_type_filter})'
+            queries.append({
+                'query': general_query,
+                'domain': None,
+                'type': 'general'
+            })
+        
+        return queries
+    
+    def get_stats(self):
+        """Get statistics about the search strategy."""
+        return {
+            'population_count': len(self.population_terms),
+            'interest_count': len(self.interest_terms),
+            'context_count': len(self.context_terms),
+            'total_terms': sum([
+                len(self.population_terms),
+                len(self.interest_terms),
+                len(self.context_terms)
+            ]),
+            'domain_count': len(self.search_config.get('domains', [])),
+            'query_count': len(self.generate_queries()),
+            'is_complete': self.is_complete
+        }
+
+
+class SearchQuery(models.Model):
+    """
+    Represents an individual search query generated from the strategy.
+    Tracks execution and results for each query.
+    """
+    
+    # Primary key and relationships
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    strategy = models.ForeignKey(
+        SearchStrategy,
+        on_delete=models.CASCADE,
+        related_name='search_queries'
+    )
+    
+    # Query details
+    query_text = models.TextField(help_text="The complete search query string")
+    query_type = models.CharField(
+        max_length=50,
+        choices=[
+            ('domain-specific', 'Domain Specific'),
+            ('general', 'General Search')
+        ]
+    )
+    target_domain = models.CharField(
+        max_length=200, 
+        blank=True, 
+        null=True,
+        help_text="Domain for site-specific searches"
+    )
+    
+    # Execution tracking
+    execution_order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    estimated_results = models.IntegerField(default=0)
     
     class Meta:
         db_table = 'search_queries'
-        ordering = ['session', 'order', 'created_at']
+        verbose_name = 'Search Query'
+        verbose_name_plural = 'Search Queries'
+        ordering = ['execution_order', 'created_at']
         indexes = [
-            models.Index(fields=['session', 'is_active']),
-            models.Index(fields=['is_primary']),
+            models.Index(fields=['strategy']),
+            models.Index(fields=['is_active']),
         ]
-        verbose_name_plural = 'Search queries'
     
-    def __str__(self) -> str:
-        return f"Query for {self.session.title}: {self.query_string[:50]}..."
-    
-    def clean(self) -> None:
-        """Validate query fields."""
-        if self.date_from and self.date_to:
-            if self.date_from > self.date_to:
-                raise ValidationError("Start date must be before end date")
-        
-        if self.max_results < 1:
-            raise ValidationError("Max results must be at least 1")
-        
-        if not self.population and not self.interest and not self.context:
-            raise ValidationError("At least one PIC field must be filled")
-    
-    def generate_query_string(self) -> str:
-        """
-        Generate the search query string based on PIC fields and keywords.
-        This is a basic implementation that can be enhanced.
-        """
-        components = []
-        
-        # Add PIC components
-        if self.population:
-            components.append(f'("{self.population}")')
-        if self.interest:
-            components.append(f'("{self.interest}")')
-        if self.context:
-            components.append(f'("{self.context}")')
-        
-        # Add include keywords
-        for keyword in self.include_keywords:
-            components.append(keyword)
-        
-        # Build base query
-        base_query = " AND ".join(components)
-        
-        # Add exclusions
-        if self.exclude_keywords:
-            exclusions = " ".join([f"-{keyword}" for keyword in self.exclude_keywords])
-            base_query = f"{base_query} {exclusions}"
-        
-        return base_query.strip()
-    
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        """Auto-generate query string if not provided."""
-        if not self.query_string:
-            self.query_string = self.generate_query_string()
-        super().save(*args, **kwargs)
+    def __str__(self):
+        return f"{self.query_type}: {self.query_text[:50]}..."
 
 
+# Keep QueryTemplate for backward compatibility but mark as deprecated
 class QueryTemplate(models.Model):
     """
-    Reusable search query templates for common search patterns.
+    DEPRECATED: Reusable search query templates for common search patterns.
+    This model is kept for backward compatibility. New implementations should use SearchStrategy.
     """
     
     # Primary key
@@ -260,16 +328,10 @@ class QueryTemplate(models.Model):
     def __str__(self) -> str:
         return f"{self.name} ({self.category or 'Uncategorized'})"
     
-    def create_query(self, session: 'SearchSession', **kwargs: Any) -> 'SearchQuery':
+    def create_query_from_template(self, session: SearchSession, **kwargs: Any) -> SearchStrategy:
         """
-        Create a new SearchQuery from this template.
-        
-        Args:
-            session: The SearchSession to attach the query to
-            **kwargs: Values to substitute in template placeholders
-        
-        Returns:
-            SearchQuery instance
+        DEPRECATED: Create a new SearchStrategy from this template.
+        This method is kept for backward compatibility.
         """
         # Simple template substitution
         population = self.population_template
@@ -283,19 +345,23 @@ class QueryTemplate(models.Model):
             interest = interest.replace(placeholder, str(value))
             context = context.replace(placeholder, str(value))
         
-        # Create the query
-        query = SearchQuery.objects.create(
+        # Create the strategy with basic terms
+        strategy = SearchStrategy.objects.create(
             session=session,
-            population=population,
-            interest=interest,
-            context=context,
-            include_keywords=self.default_keywords,
-            exclude_keywords=self.default_exclusions,
-            search_engines=self.default_engines or ['google']
+            user=session.owner,
+            population_terms=[population] if population else [],
+            interest_terms=[interest] if interest else [],
+            context_terms=[context] if context else [],
+            search_config={
+                'domains': [],
+                'include_general_search': True,
+                'file_types': ['pdf'],
+                'search_type': 'google'
+            }
         )
         
         # Increment usage count
         self.usage_count += 1
         self.save(update_fields=['usage_count'])
         
-        return query
+        return strategy

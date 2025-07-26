@@ -119,43 +119,8 @@ class DeduplicationService(ServiceLoggerMixin):
         Returns:
             List of duplicate groups with metadata
         """
-        duplicate_groups = []
-        processed_ids = set()
-        
-        results_list = list(results)
-        
-        for i, result1 in enumerate(results_list):
-            if result1.id in processed_ids:
-                continue
-            
-            group = {
-                'canonical_result': result1,
-                'duplicates': [],
-                'similarity_type': 'none',
-                'confidence': 0.0
-            }
-            
-            for j, result2 in enumerate(results_list[i+1:], i+1):
-                if result2.id in processed_ids:
-                    continue
-                
-                # Check for various types of duplicates
-                similarity_info = self.check_duplicate_methods(result1, result2)
-                
-                if similarity_info['is_duplicate'] and similarity_info['confidence'] >= similarity_threshold:
-                    group['duplicates'].append(result2)
-                    processed_ids.add(result2.id)
-                    
-                    # Use the highest confidence similarity type
-                    if similarity_info['confidence'] > group['confidence']:
-                        group['similarity_type'] = similarity_info['method']
-                        group['confidence'] = similarity_info['confidence']
-            
-            if group['duplicates']:
-                processed_ids.add(result1.id)
-                duplicate_groups.append(group)
-        
-        return duplicate_groups
+        detector = DuplicateDetector(similarity_threshold, self)
+        return detector.process_results(results)
     
     def check_duplicate_methods(self, result1, result2) -> Dict[str, Any]:
         """
@@ -217,3 +182,66 @@ class DeduplicationService(ServiceLoggerMixin):
             'method': 'none',
             'confidence': 0.0
         }
+
+
+class DuplicateDetector:
+    """Handles the logic for detecting duplicates among results."""
+    
+    def __init__(self, threshold: float, service: 'DeduplicationService'):
+        self.threshold = threshold
+        self.service = service
+    
+    def process_results(self, results: QuerySet) -> List[Dict[str, Any]]:
+        """Process results to find duplicate groups."""
+        duplicate_groups = []
+        processed_ids = set()
+        results_list = list(results)
+        
+        for i, result1 in enumerate(results_list):
+            if result1.id in processed_ids:
+                continue
+            
+            group = self._create_empty_group(result1)
+            
+            for result2 in results_list[i+1:]:
+                if result2.id in processed_ids:
+                    continue
+                
+                similarity_info = self._compare_results(result1, result2)
+                
+                if self._is_duplicate_match(similarity_info):
+                    self._add_to_group(group, result2, similarity_info)
+                    processed_ids.add(result2.id)
+            
+            if group['duplicates']:
+                processed_ids.add(result1.id)
+                duplicate_groups.append(group)
+        
+        return duplicate_groups
+    
+    def _create_empty_group(self, canonical_result) -> Dict[str, Any]:
+        """Create an empty duplicate group."""
+        return {
+            'canonical_result': canonical_result,
+            'duplicates': [],
+            'similarity_type': 'none',
+            'confidence': 0.0
+        }
+    
+    def _compare_results(self, result1, result2) -> Dict[str, Any]:
+        """Compare two results using the service's comparison methods."""
+        return self.service.check_duplicate_methods(result1, result2)
+    
+    def _is_duplicate_match(self, similarity_info: Dict[str, Any]) -> bool:
+        """Check if similarity meets threshold for duplicate match."""
+        return (similarity_info['is_duplicate'] and 
+                similarity_info['confidence'] >= self.threshold)
+    
+    def _add_to_group(self, group: Dict[str, Any], result, similarity_info: Dict[str, Any]) -> None:
+        """Add a result to the duplicate group."""
+        group['duplicates'].append(result)
+        
+        # Use the highest confidence similarity type
+        if similarity_info['confidence'] > group['confidence']:
+            group['similarity_type'] = similarity_info['method']
+            group['confidence'] = similarity_info['confidence']

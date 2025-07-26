@@ -25,7 +25,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from apps.review_manager.models import SearchSession
-from .models import ProcessedResult, DuplicateGroup
+from .models import ProcessedResult, DuplicateGroup, ProcessingSession
 from .utils import get_processing_statistics, prioritize_results_for_review
 
 

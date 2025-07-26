@@ -713,7 +713,180 @@ VITE_WS_BASE_URL=ws://localhost:8000/ws
 
 ---
 
-**Contract Version**: 1.0  
+## Research Insights and Implementation Recommendations
+
+### Critical Implementation Insights
+
+Based on comprehensive research conducted on 2025-01-26, several critical implementation patterns and corrections have been identified:
+
+#### **1. Serper API Integration Corrections**
+**Current Implementation Issues Identified:**
+- ❌ **Wrong Authentication**: Current code uses `X-API-KEY` header instead of `Authorization: Bearer`
+- ❌ **Wrong HTTP Method**: Using GET requests instead of required POST with JSON payload
+- ❌ **Incorrect Pricing**: Calculating $0.001 per query instead of actual $0.30 per 1,000 queries ($0.0003)
+- ❌ **Wrong Rate Limits**: Set to 300/second instead of actual Serper specifications
+
+**Corrected Implementation Pattern:**
+```python
+# Correct authentication and request format
+headers = {
+    'Authorization': f'Bearer {settings.SERPER_API_KEY}',  # NOT X-API-KEY
+    'Content-Type': 'application/json'
+}
+
+# POST request with JSON payload (NOT GET)
+response = requests.post(
+    'https://google.serper.dev/search',
+    headers=headers,
+    json={'q': query, 'gl': 'us', 'hl': 'en', 'num': 10},
+    timeout=30
+)
+
+# Correct pricing calculation
+COST_PER_QUERY = Decimal('0.0003')  # $0.30 per 1,000 queries
+```
+
+#### **2. Django REST Framework Patterns (From Existing Codebase)**
+**Follow Existing Patterns in `/apps/review_manager/api/`:**
+```python
+# Use ModelViewSet with custom actions
+class SearchExecutionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ExecutionSerializer
+    filterset_class = ExecutionFilter
+    
+    @action(detail=True, methods=['post'])
+    def retry(self, request, pk=None):
+        # Custom business logic actions
+```
+
+**URL Structure Convention:**
+- Use `/api/v1/` prefix for versioning (add to existing structure)
+- Follow existing pattern: `/api/review-manager/sessions/` → `/api/v1/executions/`
+
+#### **3. WebSocket Implementation Requirements**
+**Django Channels Integration:**
+```python
+# Installation requirements
+pip install channels[daphne] channels-redis redis
+
+# ASGI configuration required in asgi.py
+# WebSocket consumer for real-time execution updates
+# Redis channel layer for message broadcasting
+```
+
+#### **4. Testing Patterns (From Codebase Analysis)**
+**Follow Existing Test Structure:**
+```
+apps/serp_execution/tests/
+├── test_api_endpoints.py      # New DRF API tests
+├── test_serializers.py        # Serializer validation tests  
+├── test_websocket.py          # WebSocket functionality tests
+└── test_serper_integration.py # Mocked external API tests
+```
+
+**Mock Patterns to Follow:**
+```python
+@patch('apps.serp_execution.services.serper_client.requests.Session.post')
+def test_api_execution_success(self, mock_post):
+    # Use existing mock patterns from codebase
+```
+
+### **Remaining Implementation Tasks**
+
+#### **Phase 1: Critical Fixes (Week 1)**
+1. **Fix Serper Client Authentication**
+   - Change from `X-API-KEY` to `Authorization: Bearer`
+   - Update request format from GET to POST with JSON
+   - Correct pricing calculations throughout codebase
+
+2. **Implement Django REST Framework Structure**
+   - Create `/apps/serp_execution/api/` directory
+   - Implement ViewSets following `/apps/review_manager/api/` patterns
+   - Add URL routing with `/api/v1/executions/` prefix
+
+#### **Phase 2: API Implementation (Week 2-3)**
+3. **Create REST API Endpoints**
+   - Implement all endpoints from contract specification
+   - Add proper serializers with validation
+   - Implement filtering and pagination
+
+4. **Add WebSocket Support**
+   - Install and configure Django Channels
+   - Create WebSocket consumers for real-time updates
+   - Integrate with existing Celery tasks
+
+#### **Phase 3: Testing and Polish (Week 4-5)**
+5. **Comprehensive Testing**
+   - Follow existing test patterns from codebase
+   - Mock external APIs appropriately
+   - Achieve 90%+ test coverage target
+
+6. **Integration and Documentation**
+   - Update API documentation
+   - Ensure backward compatibility
+   - Performance optimization
+
+### **Validation Gates for Implementation**
+
+```bash
+# Code Quality (existing tools in codebase)
+flake8 apps/serp_execution/ --max-line-length=120
+mypy apps/serp_execution/
+black apps/serp_execution/
+
+# Testing (existing patterns)
+python manage.py test apps.serp_execution
+pytest apps/serp_execution/tests/ -v --cov=apps.serp_execution
+
+# Django checks
+python manage.py check --deploy
+python manage.py makemigrations --check --dry-run
+```
+
+### **Resource Requirements**
+
+#### **Dependencies to Add:**
+```python
+# requirements/base.txt additions
+channels[daphne]==4.0.0
+channels-redis==4.2.0
+redis==5.0.1
+
+# Update existing DRF to latest version
+djangorestframework==3.14.0
+django-filter==23.5
+```
+
+#### **Environment Variables:**
+```bash
+# Update .env file
+SERPER_API_KEY=your_bearer_token_here  # Not X-API-KEY format
+REDIS_URL=redis://localhost:6379/0     # For Channels
+```
+
+### **Success Metrics**
+
+1. **Functional Requirements:**
+   - ✅ All API contract endpoints implemented and responding
+   - ✅ WebSocket real-time updates working
+   - ✅ Correct Serper API integration (authentication, pricing, response parsing)
+   - ✅ Test coverage > 90%
+
+2. **Performance Requirements:**
+   - ✅ API response time < 2 seconds
+   - ✅ WebSocket connection handling > 100 concurrent users
+   - ✅ Proper error handling and retry mechanisms
+
+3. **Integration Requirements:**
+   - ✅ Seamless integration with existing review_manager workflows
+   - ✅ Backward compatibility maintained
+   - ✅ Proper cost tracking and budget management
+
+---
+
+**Contract Version**: 1.1  
 **Last Updated**: 2025-01-26  
+**Research Completed**: 2025-01-26  
 **Review Date**: 2025-02-26  
-**Status**: Ready for Implementation
+**Status**: Ready for Implementation with Research Insights

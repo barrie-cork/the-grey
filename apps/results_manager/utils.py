@@ -10,11 +10,9 @@ Business logic has been moved to dedicated services.
 # Service imports for backward compatibility
 from .services.deduplication_service import DeduplicationService
 from .services.processing_analytics_service import ProcessingAnalyticsService
-from .services.quality_assessment_service import QualityAssessmentService
 
 # Initialize services for backward compatibility
 deduplication_service = DeduplicationService()
-quality_assessment_service = QualityAssessmentService()
 processing_analytics_service = ProcessingAnalyticsService()
 
 # Legacy function proxies for backward compatibility

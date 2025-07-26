@@ -400,8 +400,16 @@ function updateFinalStatus(data) {
     // Show completion notification
     if (data.statistics.successful_executions === data.statistics.total_executions) {
         showNotification('Search Completed!', `Successfully retrieved ${data.statistics.total_results} results.`, 'success');
+        // Reload page to show final status and enable action buttons
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     } else if (data.statistics.failed_executions > 0) {
         showNotification('Search Partially Completed', `Retrieved ${data.statistics.total_results} results. ${data.statistics.failed_executions} queries failed.`, 'warning');
+        // Reload page to show final status
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     }
 }
 

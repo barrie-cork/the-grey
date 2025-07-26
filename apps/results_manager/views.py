@@ -34,8 +34,8 @@ class ResultsOverviewView(LoginRequiredMixin, TemplateView):
 
     This view implements the interface described in section 4.2 of the PRP:
     - Summary statistics (total, unique, duplicates, quality)
-    - Filtering by domain, file type, quality score, duplicate status
-    - Paginated results display with quality indicators
+    - Filtering by domain, file type, duplicate status
+    - Paginated results display
     """
 
     template_name = "results_manager/results_overview.html"
@@ -158,7 +158,6 @@ class ProcessingStatusView(LoginRequiredMixin, TemplateView):
             {"name": "URL Normalization", "key": "url_normalization"},
             {"name": "Metadata Extraction", "key": "metadata_extraction"},
             {"name": "Deduplication", "key": "deduplication"},
-            {"name": "Quality Scoring", "key": "quality_scoring"},
             {"name": "Finalization", "key": "finalization"},
         ]
 

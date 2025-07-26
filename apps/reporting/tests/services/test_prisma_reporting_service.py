@@ -238,7 +238,6 @@ class TestPrismaReportingService(TestCase):
 
         self.assertIsInstance(summary, dict)
         self.assertIn("total_assessed", summary)
-        self.assertIn("quality_scores", summary)
         self.assertIn("risk_of_bias", summary)
         self.assertIn("confidence_assessment", summary)
 

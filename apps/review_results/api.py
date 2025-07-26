@@ -6,71 +6,67 @@ VSA-compliant data access without exposing models.
 from typing import Any, Dict, List
 
 
-def get_review_assignments_data(session_id: str) -> List[Dict[str, Any]]:
+def get_review_decisions_data(session_id: str) -> List[Dict[str, Any]]:
     """
-    Get review tag assignments for a session without exposing models.
+    Get review decisions for a session without exposing models.
     """
-    from .models import ReviewTagAssignment
+    from .models import SimpleReviewDecision
 
-    assignments = ReviewTagAssignment.objects.filter(
+    decisions = SimpleReviewDecision.objects.filter(
         result__session_id=session_id
-    ).select_related("tag", "result")
+    ).select_related("result", "reviewer")
 
     return [
         {
-            "id": str(assignment.id),
-            "result_id": str(assignment.result.id),
-            "tag_name": assignment.tag.name,
-            "tag_type": assignment.tag.tag_type,
-            "notes": assignment.notes,
-            "assigned_at": assignment.created_at.isoformat(),
-            "assigned_by": (
-                str(assignment.assigned_by.id) if assignment.assigned_by else None
+            "id": str(decision.id),
+            "result_id": str(decision.result.id),
+            "decision": decision.decision,
+            "decision_display": decision.get_decision_display(),
+            "exclusion_reason": decision.exclusion_reason,
+            "exclusion_reason_display": (
+                decision.get_exclusion_reason_display()
+                if decision.exclusion_reason
+                else ""
             ),
+            "notes": decision.notes,
+            "reviewed_at": decision.reviewed_at.isoformat(),
+            "reviewer_id": str(decision.reviewer.id) if decision.reviewer else None,
         }
-        for assignment in assignments
+        for decision in decisions
     ]
 
 
-def get_tag_counts(session_id: str) -> Dict[str, int]:
-    """Get tag usage counts for a session."""
+def get_decision_counts(session_id: str) -> Dict[str, int]:
+    """Get decision counts for a session."""
     from django.db.models import Count
 
-    from .models import ReviewTagAssignment
+    from .models import SimpleReviewDecision
 
-    tag_counts = (
-        ReviewTagAssignment.objects.filter(result__session_id=session_id)
-        .values("tag__name")
-        .annotate(count=Count("tag__name"))
+    decision_counts = (
+        SimpleReviewDecision.objects.filter(result__session_id=session_id)
+        .values("decision")
+        .annotate(count=Count("decision"))
     )
 
-    return {item["tag__name"]: item["count"] for item in tag_counts}
+    return {item["decision"]: item["count"] for item in decision_counts}
 
 
 def get_review_progress_stats(session_id: str) -> Dict[str, Any]:
     """Get review progress statistics for a session."""
     from apps.results_manager.api import get_processed_results_count
 
-    from .models import ReviewTagAssignment
+    from .models import SimpleReviewDecision
 
     total_results = get_processed_results_count(session_id)
 
-    reviewed_result_ids = (
-        ReviewTagAssignment.objects.filter(result__session_id=session_id)
-        .values_list("result_id", flat=True)
-        .distinct()
-    )
+    decisions = SimpleReviewDecision.objects.filter(result__session_id=session_id)
 
-    reviewed_count = len(reviewed_result_ids)
+    reviewed_count = decisions.exclude(decision="pending").count()
     pending_count = total_results - reviewed_count
 
-    include_count = ReviewTagAssignment.objects.filter(
-        result__session_id=session_id, tag__name="Include"
-    ).count()
-
-    exclude_count = ReviewTagAssignment.objects.filter(
-        result__session_id=session_id, tag__name="Exclude"
-    ).count()
+    include_count = decisions.filter(decision="include").count()
+    exclude_count = decisions.filter(decision="exclude").count()
+    maybe_count = decisions.filter(decision="maybe").count()
 
     return {
         "total_results": total_results,
@@ -81,4 +77,5 @@ def get_review_progress_stats(session_id: str) -> Dict[str, Any]:
         ),
         "included_results": include_count,
         "excluded_results": exclude_count,
+        "maybe_results": maybe_count,
     }

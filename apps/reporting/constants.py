@@ -61,7 +61,7 @@ class ExportConstants:
 
     # BibTeX type mapping
     BIBTEX_TYPE_MAPPING: Dict[str, str] = {
-        "journal_article": "article",
+        "article": "article",
         "report": "techreport",
         "thesis": "phdthesis",
         "working_paper": "unpublished",
@@ -76,7 +76,7 @@ class ExportConstants:
     # Export type names
     EXPORT_TYPE_NAMES: Dict[str, str] = {
         "prisma_flow": "PRISMA Flow Diagram",
-        "study_characteristics": "Study Characteristics Table",
+        "result_summary": "Search Results Summary Table",
         "search_strategy": "Search Strategy Report",
         "bibliography": "Bibliography",
     }
@@ -84,7 +84,7 @@ class ExportConstants:
     # Available formats per export type
     EXPORT_FORMATS: Dict[str, List[str]] = {
         "prisma_flow": ["json", "pdf", "docx"],
-        "study_characteristics": ["csv", "xlsx", "json"],
+        "result_summary": ["csv", "xlsx", "json"],
         "search_strategy": ["json", "pdf", "docx"],
         "bibliography": ["bibtex", "csv", "json"],
     }
@@ -179,7 +179,7 @@ class PRISMAConstants:
         "records_excluded",
         "full_text_assessed",
         "full_text_excluded",
-        "studies_included",
+        "results_included",
     ]
 
     # Exclusion reasons
@@ -188,7 +188,7 @@ class PRISMAConstants:
         "wrong_population",
         "wrong_intervention",
         "wrong_outcome",
-        "wrong_study_design",
+        "wrong_document_type",
         "duplicate",
         "language",
         "no_full_text",
@@ -196,7 +196,7 @@ class PRISMAConstants:
 
     # PRISMA checklist items
     CHECKLIST_SECTIONS: Dict[str, List[str]] = {
-        "title": ["title", "abstract"],
+        "title": ["title", "summary"],
         "introduction": ["rationale", "objectives"],
         "methods": [
             "protocol",
@@ -220,8 +220,8 @@ class PRISMAConstants:
     STANDARD_EXCLUSION_REASONS: Dict[str, str] = {
         "not_relevant": "Not relevant to research question",
         "no_full_text": "Full text unavailable",
-        "duplicate": "Duplicate study",
-        "wrong_study_type": "Inappropriate study design",
+        "duplicate": "Duplicate result",
+        "wrong_document_type": "Inappropriate document type",
         "language": "Language other than English",
     }
 
@@ -233,53 +233,17 @@ class PRISMAConstants:
     PERCENTAGE_MULTIPLIER: int = 100
 
 
-class StudyAnalysisConstants:
-    """Constants for study analysis service."""
+class ResultAnalysisConstants:
+    """Constants for search result analysis service."""
 
-    # Document quality indicators
-    QUALITY_INDICATORS: List[str] = [
-        "has_abstract",
-        "has_methodology",
-        "has_references",
-        "has_author_info",
-        "has_publication_date",
-        "has_doi",
-        "peer_reviewed",
+    # Basic document types we recognize
+    DOCUMENT_TYPES: List[str] = [
+        "pdf",
+        "website", 
+        "report",
+        "document",
+        "unknown"
     ]
-
-    # Quality score weights
-    QUALITY_WEIGHTS: Dict[str, float] = {
-        "has_abstract": 0.15,
-        "has_methodology": 0.20,
-        "has_references": 0.15,
-        "has_author_info": 0.10,
-        "has_publication_date": 0.10,
-        "has_doi": 0.15,
-        "peer_reviewed": 0.15,
-    }
-
-    # Document type priorities
-    DOCUMENT_TYPE_PRIORITY: Dict[str, int] = {
-        "journal_article": 1,
-        "report": 2,
-        "thesis": 3,
-        "working_paper": 4,
-        "conference": 5,
-        "book": 6,
-        "pdf": 7,
-        "website": 8,
-        "blog_post": 9,
-        "other": 10,
-    }
-
-    # Analysis thresholds
-    THRESHOLDS: Dict[str, float] = {
-        "high_quality": 0.8,
-        "medium_quality": 0.6,
-        "low_quality": 0.4,
-        "relevance_threshold": 0.7,
-        "confidence_threshold": 0.75,
-    }
 
     # Time periods for recency analysis (in years)
     RECENCY_PERIODS: Dict[str, int] = {"recent": 5, "fairly_recent": 10}
@@ -327,7 +291,7 @@ class SearchStrategyConstants:
     REPORT_SECTIONS: List[str] = [
         "executive_summary",
         "search_objectives",
-        "methodology",
+        "search_process",
         "search_strings",
         "sources_searched",
         "inclusion_criteria",

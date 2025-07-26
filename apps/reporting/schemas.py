@@ -190,12 +190,3 @@ class ReportSchedule(BaseModel):
     is_active: bool
 
 
-class QualityAssessment(BaseModel):
-    """Schema for quality assessment reports."""
-
-    session_id: str
-    assessment_criteria: List[str]
-    study_quality_scores: Dict[str, float]
-    quality_distribution: Dict[str, int]
-    risk_of_bias: Dict[str, Any]
-    recommendations: List[str]

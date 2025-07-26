@@ -175,55 +175,38 @@ class DuplicateGroup(models.Model):
         return f"Duplicate group: {self.canonical_url} ({self.result_count} results)"
 
     def merge_results(self) -> None:
-        """
-        Merge duplicate results, keeping the best version.
-        This would typically keep the result with the most metadata.
-        """
-        results = self.results.all()
+        """Merge duplicate results, keeping the best version."""
+        results = self.results.select_related("raw_result__execution").all()
         if results.count() <= 1:
             return
-
-        # Find the best result (most complete metadata)
-        # Optimize queries by prefetching related objects
-        results = results.select_related("raw_result__execution")
         
-        best_result: Optional[ProcessedResult] = None
-        best_score: float = 0
-
-        for result in results:
-            score = 0
-            if result.snippet:
-                score += 1
-            if result.authors:
-                score += 2
-            if result.publication_date:
-                score += 2
-            if result.is_pdf:
-                score += 2
-
-            if score > best_score:
-                best_score = score
-                best_result = result
-
-        # Update the canonical result with merged data
+        best_result = self._find_best_result(results)
         if best_result:
-            for result in results:
-                if result != best_result:
-                    # Merge any missing data
-                    if not best_result.snippet and result.snippet:
-                        best_result.snippet = result.snippet
-                    if not best_result.authors and result.authors:
-                        best_result.authors = result.authors
-                    # Add to sources
-                    if (
-                        result.raw_result
-                        and result.raw_result.execution.search_engine
-                        not in self.sources
-                    ):
-                        self.sources.append(result.raw_result.execution.search_engine)
-
+            self._merge_metadata_into_best(best_result, results)
+            self._update_sources(results)
             best_result.save()
             self.save()
+    
+    def _find_best_result(self, results: models.QuerySet) -> Optional['ProcessedResult']:
+        """Find the first available result (no quality scoring)."""
+        return results.first()
+    
+    def _merge_metadata_into_best(self, best_result: 'ProcessedResult', all_results: models.QuerySet) -> None:
+        """Merge missing metadata from other results into the best result."""
+        for result in all_results:
+            if result != best_result:
+                if not best_result.snippet and result.snippet:
+                    best_result.snippet = result.snippet
+                if not best_result.authors and result.authors:
+                    best_result.authors = result.authors
+    
+    def _update_sources(self, results: models.QuerySet) -> None:
+        """Update the sources list with search engines from all results."""
+        for result in results:
+            if (result.raw_result 
+                and result.raw_result.execution.search_engine 
+                and result.raw_result.execution.search_engine not in self.sources):
+                self.sources.append(result.raw_result.execution.search_engine)
 
 
 class ProcessingSession(models.Model):
@@ -244,7 +227,6 @@ class ProcessingSession(models.Model):
         ("initialization", "Initialization"),
         ("url_normalization", "URL Normalization"),
         ("deduplication", "Deduplication"),
-        ("quality_scoring", "Quality Scoring"),
         ("finalization", "Finalization"),
     ]
 
@@ -341,3 +323,35 @@ class ProcessingSession(models.Model):
         """Update the last heartbeat timestamp."""
         self.last_heartbeat = timezone.now()
         self.save(update_fields=["last_heartbeat"])
+
+    def start_processing(self, total_raw_results: int, celery_task_id: str = "") -> None:
+        """Start the processing session."""
+        self.status = "in_progress"
+        self.started_at = timezone.now()
+        self.total_raw_results = total_raw_results
+        self.celery_task_id = celery_task_id
+        self.save(update_fields=["status", "started_at", "total_raw_results", "celery_task_id"])
+
+    def complete_processing(self) -> None:
+        """Mark processing as completed."""
+        self.status = "completed"
+        self.completed_at = timezone.now()
+        self.save(update_fields=["status", "completed_at"])
+
+    def fail_processing(self, error_message: str, error_details: dict = None) -> None:
+        """Mark processing as failed with error details."""
+        self.status = "failed"
+        self.completed_at = timezone.now()
+        
+        # Add error to error_details list
+        error_entry = {
+            "timestamp": timezone.now().isoformat(),
+            "message": error_message,
+            "details": error_details or {}
+        }
+        if not isinstance(self.error_details, list):
+            self.error_details = []
+        self.error_details.append(error_entry)
+        self.error_count += 1
+        
+        self.save(update_fields=["status", "completed_at", "error_details", "error_count"])

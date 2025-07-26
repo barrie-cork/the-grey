@@ -116,10 +116,10 @@ def performance_metric_card(session_id: str, metric_type: str) -> str:
             "color": "success",
         },
         "cost": {
-            "title": "Cost Effectiveness",
-            "icon": "bi-currency-dollar",
-            "value": f"${metrics.get('cost_effectiveness', {}).get('cost_per_included_study', 0):.2f}",
-            "description": "Per Included Study",
+            "title": "Basic Metrics",
+            "icon": "bi-bar-chart",
+            "value": f"{metrics.get('search_efficiency', {}).get('success_rate', 0):.1f}%",
+            "description": "Search Success Rate",
             "color": "info",
         },
     }

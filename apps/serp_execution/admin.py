@@ -179,7 +179,6 @@ class RawSearchResultAdmin(admin.ModelAdmin):
         "title_truncated",
         "domain_display",
         "has_pdf",
-        "is_academic",
         "language_code",
         "is_processed",
         "created_at",
@@ -188,7 +187,6 @@ class RawSearchResultAdmin(admin.ModelAdmin):
     list_filter = [
         "is_processed",
         "has_pdf",
-        "is_academic",
         "language_code",
         "created_at",
         ("execution__search_engine", admin.RelatedOnlyFieldListFilter),
@@ -213,7 +211,6 @@ class RawSearchResultAdmin(admin.ModelAdmin):
                     "has_pdf",
                     "has_date",
                     "detected_date",
-                    "is_academic",
                     "language_code",
                 )
             },
@@ -222,7 +219,7 @@ class RawSearchResultAdmin(admin.ModelAdmin):
         ("Raw Data", {"fields": ("raw_data_pretty",), "classes": ("collapse",)}),
     )
 
-    actions = ["mark_as_processed", "mark_as_unprocessed", "detect_academic_sources"]
+    actions = ["mark_as_processed", "mark_as_unprocessed"]
 
     def title_truncated(self, obj):
         """Display truncated title."""
@@ -261,29 +258,6 @@ class RawSearchResultAdmin(admin.ModelAdmin):
 
     mark_as_unprocessed.short_description = "Mark as unprocessed"
 
-    def detect_academic_sources(self, request, queryset):
-        """Detect and mark academic sources."""
-        count = 0
-        academic_domains = [
-            ".edu",
-            ".ac.uk",
-            "scholar.google",
-            "arxiv.org",
-            "pubmed",
-            "researchgate",
-            "academia.edu",
-        ]
-
-        for result in queryset:
-            domain = result.get_domain().lower()
-            if any(academic in domain for academic in academic_domains):
-                result.is_academic = True
-                result.save(update_fields=["is_academic"])
-                count += 1
-
-        self.message_user(request, f"Detected {count} academic sources.")
-
-    detect_academic_sources.short_description = "Detect academic sources"
 
     def get_queryset(self, request):
         """Optimize queryset with select_related."""

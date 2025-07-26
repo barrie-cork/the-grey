@@ -11,12 +11,12 @@ from .services.performance_analytics_service import PerformanceAnalyticsService
 # Service imports for backward compatibility
 from .services.prisma_reporting_service import PrismaReportingService
 from .services.search_strategy_reporting_service import SearchStrategyReportingService
-from .services.study_analysis_service import StudyAnalysisService
+from .services.result_analysis_service import SearchResultAnalysisService
 
 # Initialize services for backward compatibility
 prisma_reporting_service = PrismaReportingService()
 search_strategy_reporting_service = SearchStrategyReportingService()
-study_analysis_service = StudyAnalysisService()
+result_analysis_service = SearchResultAnalysisService()
 performance_analytics_service = PerformanceAnalyticsService()
 export_service = ExportService()
 
@@ -31,8 +31,8 @@ export_prisma_checklist = prisma_reporting_service.export_prisma_checklist
 generate_search_strategy_report = (
     search_strategy_reporting_service.generate_search_strategy_report
 )
-generate_study_characteristics_table = (
-    study_analysis_service.generate_study_characteristics_table
+generate_result_flow_summary = (
+    result_analysis_service.generate_result_flow_summary
 )
 calculate_search_performance_metrics = (
     performance_analytics_service.calculate_search_performance_metrics

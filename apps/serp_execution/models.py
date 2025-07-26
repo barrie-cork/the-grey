@@ -180,10 +180,7 @@ class RawSearchResult(models.Model):
         null=True, blank=True, help_text="Extracted publication date if available"
     )
 
-    # Quality indicators
-    is_academic = models.BooleanField(
-        default=False, help_text="Whether result appears to be academic"
-    )
+    # Content indicators
     language_code = models.CharField(
         max_length=10, blank=True, help_text="Detected language code"
     )
@@ -270,10 +267,7 @@ class ExecutionMetrics(models.Model):
         help_text="Total estimated cost in USD",
     )
 
-    # Quality metrics
-    academic_results_count = models.IntegerField(
-        default=0, help_text="Number of academic results found"
-    )
+    # Result metrics
     pdf_results_count = models.IntegerField(
         default=0, help_text="Number of PDF results found"
     )

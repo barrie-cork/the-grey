@@ -54,47 +54,20 @@ class PrismaReportingService(ServiceLoggerMixin):
                 search_engines.update(query["search_engines"])
 
         flow_data = {
-            "identification": {
-                "databases_searched": len(search_engines),
-                "search_queries": len(queries_data),
-                "total_records": raw_results_count,
-                "records_by_source": {},
-            },
-            "screening": {
-                "records_after_deduplication": dedup_stats["unique_results"],
-                "duplicates_removed": dedup_stats["duplicated_results"],
-                "records_screened": dedup_stats["total_results"],
-                "records_excluded_screening": 0,  # Would be calculated from screening tags
-            },
-            "eligibility": {
-                "full_text_assessed": review_stats["reviewed_results"],
-                "full_text_excluded": review_stats["excluded_results"],
-                "exclusion_reasons": self.get_exclusion_reasons(session_id),
-            },
-            "included": {
-                "studies_included": review_stats["included_results"],
-                "studies_in_synthesis": review_stats[
-                    "included_results"
-                ],  # Assuming all included are in synthesis
-            },
-            "metadata": {
-                "search_date": session_data["created_at"][:10],  # Extract date part
-                "last_updated": session_data["created_at"][
-                    :10
-                ],  # Use created_at for now
-                "review_period": self.calculate_review_period_from_data(session_data),
+            "raw_search_results": raw_results_count,
+            "duplicates_removed": dedup_stats["duplicated_results"],
+            "processed_results": dedup_stats["unique_results"],
+            "results_included": review_stats["included_results"],
+            "results_excluded": review_stats["excluded_results"],
+            "results_maybe": review_stats.get("maybe_results", 0),
+            "results_pending": review_stats["pending_results"],
+            "session_metadata": {
+                "session_id": session_id,
+                "title": session_data["title"],
+                "created_date": session_data["created_at"][:10],
             },
         }
 
-        # Records by source using executions data
-        for execution in executions_data:
-            # Note: search_engine field might need to be added to the API
-            engine = "google"  # Default for now, can be enhanced later
-            if engine not in flow_data["identification"]["records_by_source"]:
-                flow_data["identification"]["records_by_source"][engine] = 0
-            flow_data["identification"]["records_by_source"][engine] += execution.get(
-                "results_count", 0
-            )
 
         return flow_data
 
@@ -156,9 +129,9 @@ class PrismaReportingService(ServiceLoggerMixin):
                     standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
                         "duplicate"
                     ]
-                elif "wrong study type" in reason or "study design" in reason:
+                elif "wrong document type" in reason or "document type" in reason:
                     standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
-                        "wrong_study_type"
+                        "wrong_document_type"
                     ]
                 elif "language" in reason:
                     standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[

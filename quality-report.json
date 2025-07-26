@@ -1,0 +1,4387 @@
+{
+  "stats": {
+    "files_analyzed": 174,
+    "total_issues": 486,
+    "errors": 148,
+    "warnings": 20,
+    "info": 318,
+    "fixable_issues": 147,
+    "analysis_time": 378.47
+  },
+  "issues": [
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 15,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 20,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 29,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 39,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 47,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 56,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 35,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 68,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 90,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 115,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 122,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 130,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 138,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 39,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 53,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 57,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 80,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 114,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 120,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 126,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 138,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 140,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 13,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 23,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 32,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 38,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 45,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 53,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 62,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 70,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 78,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 86,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 15,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 26,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 59,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 63,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 75,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 90,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 109,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 57,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 68,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 75,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 87,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 104,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 117,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 125,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 131,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/reporting/tests/services/test_export_service.py",
+      "line": 37,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/reporting/tests/services/test_performance_analytics_service.py",
+      "line": 36,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/reporting/tests/services/test_prisma_reporting_service.py",
+      "line": 36,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/reporting/tests/services/test_search_strategy_reporting_service.py",
+      "line": 36,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/reporting/tests/services/test_study_analysis_service.py",
+      "line": 35,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/reporting/tests/test_models.py",
+      "line": 24,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/results_manager/tests/services/test_deduplication_service.py",
+      "line": 34,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/results_manager/tests/services/test_processing_analytics_service.py",
+      "line": 35,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/results_manager/tests/services/test_quality_assessment_service.py",
+      "line": 34,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/results_manager/tests/test_models.py",
+      "line": 25,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/results_manager/tests/test_models.py",
+      "line": 69,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_forms.py",
+      "line": 169,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 24,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 26,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 158,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 160,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 252,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 257,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 259,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 396,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 398,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 500,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 502,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 585,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 590,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 616,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 645,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 652,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 667,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 669,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_workflow.py",
+      "line": 21,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_workflow.py",
+      "line": 229,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/test_workflow.py",
+      "line": 320,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 15,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 70,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 125,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 140,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 147,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 163,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 173,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 198,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 200,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 210,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 225,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests/test_models.py",
+      "line": 25,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests/test_models.py",
+      "line": 84,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests/test_utils.py",
+      "line": 30,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_manager/tests/test_views.py",
+      "line": 25,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_analytics_service.py",
+      "line": 35,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_analytics_service.py",
+      "line": 41,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_progress_service.py",
+      "line": 34,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_progress_service.py",
+      "line": 40,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_recommendation_service.py",
+      "line": 35,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_recommendation_service.py",
+      "line": 41,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 34,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 40,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 46,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/test_models.py",
+      "line": 25,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/test_models.py",
+      "line": 49,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/test_simple_models.py",
+      "line": 23,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/test_simple_services.py",
+      "line": 24,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/review_results/tests/test_simple_services.py",
+      "line": 122,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/search_strategy/tests/test_models.py",
+      "line": 26,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/search_strategy/tests/test_models.py",
+      "line": 99,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/search_strategy/tests/test_utils.py",
+      "line": 31,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/services/cache_manager.py",
+      "line": 56,
+      "column": 22,
+      "severity": "error",
+      "category": "security",
+      "message": "Use of weak MD5 hash for security. Consider usedforsecurity=False (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_additional_services.py",
+      "line": 163,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_additional_services.py",
+      "line": 290,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_additional_services.py",
+      "line": 423,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_forms.py",
+      "line": 25,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_forms.py",
+      "line": 133,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 45,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 49,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 343,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 422,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 426,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 510,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 593,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 32,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 231,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 432,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 41,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded API key detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 321,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 528,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 740,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 41,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 158,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 402,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 581,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 683,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 37,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 39,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 82,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 84,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 219,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 221,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 354,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 356,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 485,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 487,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 618,
+      "column": 0,
+      "severity": "error",
+      "category": "security",
+      "message": "Potential hardcoded Password detected",
+      "fix_available": true
+    },
+    {
+      "file": "apps/accounts/forms.py",
+      "line": 50,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/forms.py",
+      "line": 114,
+      "column": 27,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 12,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'adminpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 17,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 29,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'adminpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 39,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'adminpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 47,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'adminpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_admin.py",
+      "line": 56,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'adminpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 32,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'pass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 65,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 87,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'pass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_forms.py",
+      "line": 112,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_integration.py",
+      "line": 28,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 11,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 20,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 29,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'pass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 35,
+      "column": 12,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'pass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 43,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 51,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 60,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 68,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 76,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_models.py",
+      "line": 84,
+      "column": 16,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'adminpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 12,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 56,
+      "column": 19,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 63,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 73,
+      "column": 15,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'plaintext123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 90,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 125,
+      "column": 12,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_security.py",
+      "line": 135,
+      "column": 12,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 30,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 54,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 68,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 75,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 87,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 101,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/accounts/tests/test_views.py",
+      "line": 131,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/export_service.py",
+      "line": 200,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/export_service.py",
+      "line": 201,
+      "column": 27,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/performance_analytics_service.py",
+      "line": 31,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/performance_analytics_service.py",
+      "line": 32,
+      "column": 28,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/performance_analytics_service.py",
+      "line": 41,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/performance_analytics_service.py",
+      "line": 46,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/performance_analytics_service.py",
+      "line": 118,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/performance_analytics_service.py",
+      "line": 185,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/prisma_reporting_service.py",
+      "line": 124,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/prisma_reporting_service.py",
+      "line": 177,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/prisma_reporting_service.py",
+      "line": 206,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/search_strategy_reporting_service.py",
+      "line": 31,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/search_strategy_reporting_service.py",
+      "line": 35,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/search_strategy_reporting_service.py",
+      "line": 36,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/search_strategy_reporting_service.py",
+      "line": 114,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/search_strategy_reporting_service.py",
+      "line": 132,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/search_strategy_reporting_service.py",
+      "line": 133,
+      "column": 32,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/study_analysis_service.py",
+      "line": 28,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/study_analysis_service.py",
+      "line": 33,
+      "column": 27,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/study_analysis_service.py",
+      "line": 109,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/study_analysis_service.py",
+      "line": 114,
+      "column": 27,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/study_analysis_service.py",
+      "line": 194,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/services/study_analysis_service.py",
+      "line": 199,
+      "column": 27,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/tests/services/test_export_service.py",
+      "line": 34,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/tests/services/test_performance_analytics_service.py",
+      "line": 33,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/tests/services/test_prisma_reporting_service.py",
+      "line": 33,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/tests/services/test_search_strategy_reporting_service.py",
+      "line": 33,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/tests/services/test_study_analysis_service.py",
+      "line": 32,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/tests/test_models.py",
+      "line": 22,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/services/processing_analytics_service.py",
+      "line": 29,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/services/processing_analytics_service.py",
+      "line": 35,
+      "column": 27,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/services/processing_analytics_service.py",
+      "line": 76,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/services/processing_analytics_service.py",
+      "line": 100,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/services/processing_analytics_service.py",
+      "line": 153,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 53,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 70,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 147,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 150,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 206,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 210,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 333,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 337,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 405,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 406,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 411,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 457,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 486,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 504,
+      "column": 8,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tasks.py",
+      "line": 509,
+      "column": 8,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tests/services/test_deduplication_service.py",
+      "line": 31,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tests/services/test_processing_analytics_service.py",
+      "line": 32,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tests/services/test_quality_assessment_service.py",
+      "line": 31,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tests/services/test_quality_assessment_service.py",
+      "line": 289,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tests/test_models.py",
+      "line": 22,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/tests/test_models.py",
+      "line": 66,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 108,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 159,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 323,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 369,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 383,
+      "column": 23,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/models.py",
+      "line": 126,
+      "column": 31,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/signals.py",
+      "line": 25,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/signals.py",
+      "line": 50,
+      "column": 15,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/signals.py",
+      "line": 51,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/signals.py",
+      "line": 79,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_forms.py",
+      "line": 166,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 21,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 26,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 155,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 160,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 171,
+      "column": 8,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 201,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 210,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 220,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 234,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 235,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 249,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 254,
+      "column": 26,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 259,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 310,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 348,
+      "column": 20,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 363,
+      "column": 20,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 393,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 398,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 497,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 502,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 582,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 587,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 616,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 645,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 652,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 664,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_user_criteria.py",
+      "line": 669,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_workflow.py",
+      "line": 18,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_workflow.py",
+      "line": 71,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_workflow.py",
+      "line": 226,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/test_workflow.py",
+      "line": 317,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 12,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 67,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 122,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 140,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 147,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 158,
+      "column": 12,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 163,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 173,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 195,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'otherpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 200,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'otherpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 210,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 218,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests.py",
+      "line": 225,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests/test_models.py",
+      "line": 23,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests/test_models.py",
+      "line": 82,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests/test_utils.py",
+      "line": 28,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests/test_utils.py",
+      "line": 88,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/tests/test_views.py",
+      "line": 23,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/utils.py",
+      "line": 28,
+      "column": 15,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/utils.py",
+      "line": 148,
+      "column": 12,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/utils.py",
+      "line": 189,
+      "column": 15,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/utils.py",
+      "line": 256,
+      "column": 12,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/views.py",
+      "line": 26,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_manager/views.py",
+      "line": 58,
+      "column": 23,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/api.py",
+      "line": 15,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/api.py",
+      "line": 38,
+      "column": 17,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/api.py",
+      "line": 52,
+      "column": 26,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/api.py",
+      "line": 59,
+      "column": 20,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/api.py",
+      "line": 64,
+      "column": 20,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_analytics_service.py",
+      "line": 29,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_analytics_service.py",
+      "line": 47,
+      "column": 26,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_analytics_service.py",
+      "line": 114,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_analytics_service.py",
+      "line": 131,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_analytics_service.py",
+      "line": 184,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_analytics_service.py",
+      "line": 185,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_analytics_service.py",
+      "line": 302,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_progress_service.py",
+      "line": 29,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_progress_service.py",
+      "line": 43,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_progress_service.py",
+      "line": 52,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_progress_service.py",
+      "line": 81,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_progress_service.py",
+      "line": 107,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 35,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 39,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 76,
+      "column": 27,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 85,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 89,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 117,
+      "column": 28,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 122,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 185,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/review_recommendation_service.py",
+      "line": 189,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/simple_review_progress_service.py",
+      "line": 16,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/simple_review_progress_service.py",
+      "line": 17,
+      "column": 20,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 30,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 84,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 85,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 92,
+      "column": 23,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 119,
+      "column": 32,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 145,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 214,
+      "column": 28,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 219,
+      "column": 26,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 232,
+      "column": 30,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/services/tagging_management_service.py",
+      "line": 282,
+      "column": 11,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/templatetags/simple_review_tags.py",
+      "line": 28,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/templatetags/simple_review_tags.py",
+      "line": 93,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/templatetags/simple_review_tags.py",
+      "line": 152,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_analytics_service.py",
+      "line": 32,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_analytics_service.py",
+      "line": 38,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_analytics_service.py",
+      "line": 254,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_progress_service.py",
+      "line": 31,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_progress_service.py",
+      "line": 37,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_recommendation_service.py",
+      "line": 32,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_recommendation_service.py",
+      "line": 38,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_review_recommendation_service.py",
+      "line": 177,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 31,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 37,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 43,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 235,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 257,
+      "column": 20,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 264,
+      "column": 29,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 313,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 507,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/services/test_tagging_management_service.py",
+      "line": 508,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/test_models.py",
+      "line": 23,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/test_models.py",
+      "line": 47,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/test_simple_models.py",
+      "line": 20,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/test_simple_services.py",
+      "line": 21,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/tests/test_simple_services.py",
+      "line": 119,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/signals.py",
+      "line": 23,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/signals.py",
+      "line": 46,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/tests/test_models.py",
+      "line": 24,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/tests/test_models.py",
+      "line": 97,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/tests/test_utils.py",
+      "line": 29,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/utils.py",
+      "line": 201,
+      "column": 16,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/utils.py",
+      "line": 308,
+      "column": 14,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/utils.py",
+      "line": 358,
+      "column": 14,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/views.py",
+      "line": 380,
+      "column": 23,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/api.py",
+      "line": 15,
+      "column": 17,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/api.py",
+      "line": 39,
+      "column": 11,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/api.py",
+      "line": 49,
+      "column": 17,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/models.py",
+      "line": 365,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/recovery.py",
+      "line": 65,
+      "column": 32,
+      "severity": "info",
+      "category": "security",
+      "message": "Standard pseudo-random generators are not suitable for security/cryptographic purposes. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/recovery.py",
+      "line": 334,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/cost_service.py",
+      "line": 56,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/cost_service.py",
+      "line": 171,
+      "column": 28,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/execution_service.py",
+      "line": 41,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/execution_service.py",
+      "line": 114,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/execution_service.py",
+      "line": 148,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/monitoring_service.py",
+      "line": 30,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/monitoring_service.py",
+      "line": 61,
+      "column": 28,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/monitoring_service.py",
+      "line": 215,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/monitoring_service.py",
+      "line": 281,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/monitoring_service.py",
+      "line": 371,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/result_processor.py",
+      "line": 127,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/result_processor.py",
+      "line": 255,
+      "column": 17,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/result_processor.py",
+      "line": 523,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/usage_tracker.py",
+      "line": 171,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/services/usage_tracker.py",
+      "line": 263,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tasks.py",
+      "line": 65,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tasks.py",
+      "line": 123,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tasks.py",
+      "line": 126,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Try, Except, Pass detected. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tasks.py",
+      "line": 161,
+      "column": 16,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tasks.py",
+      "line": 316,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tasks.py",
+      "line": 333,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Try, Except, Pass detected. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tasks.py",
+      "line": 359,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_additional_services.py",
+      "line": 160,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_additional_services.py",
+      "line": 287,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_additional_services.py",
+      "line": 333,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_additional_services.py",
+      "line": 420,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_forms.py",
+      "line": 23,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_forms.py",
+      "line": 78,
+      "column": 8,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_forms.py",
+      "line": 131,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 43,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 49,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 178,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 193,
+      "column": 24,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 212,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 341,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 404,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 405,
+      "column": 19,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 420,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 426,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 508,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 529,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 591,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_integration.py",
+      "line": 637,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 30,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 196,
+      "column": 12,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 212,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 218,
+      "column": 20,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 229,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 416,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 422,
+      "column": 25,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 430,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_models.py",
+      "line": 594,
+      "column": 12,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 319,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 526,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 578,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 697,
+      "column": 26,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 738,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_services.py",
+      "line": 851,
+      "column": 22,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 39,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 95,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 115,
+      "column": 8,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 156,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 400,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 501,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 579,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_tasks.py",
+      "line": 681,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 34,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 39,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 79,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'otherpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 84,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'otherpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 200,
+      "column": 8,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 216,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 221,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 351,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 356,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 482,
+      "column": 20,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 487,
+      "column": 8,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'testpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/tests/test_views.py",
+      "line": 615,
+      "column": 21,
+      "severity": "info",
+      "category": "security",
+      "message": "Possible hardcoded password: 'otherpass123' (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/views.py",
+      "line": 93,
+      "column": 18,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/views.py",
+      "line": 181,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/views.py",
+      "line": 357,
+      "column": 23,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/views.py",
+      "line": 408,
+      "column": 21,
+      "severity": "info",
+      "category": "performance",
+      "message": "Consider adding select_related() or prefetch_related() for better performance",
+      "fix_available": false
+    },
+    {
+      "file": "apps/reporting/templatetags/report_tags.py",
+      "line": 1,
+      "column": 0,
+      "severity": "warning",
+      "category": "security",
+      "message": "Unsafe template rendering detected. Ensure content is properly escaped",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/templatetags/results_tags.py",
+      "line": 1,
+      "column": 0,
+      "severity": "warning",
+      "category": "security",
+      "message": "Unsafe template rendering detected. Ensure content is properly escaped",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/templatetags/results_tags.py",
+      "line": 54,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Potential XSS on mark_safe function. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/templatetags/results_tags.py",
+      "line": 54,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 115,
+      "column": 23,
+      "severity": "warning",
+      "category": "maintainability",
+      "message": "Use of .extra() is discouraged. Consider using Django ORM methods instead",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 170,
+      "column": 23,
+      "severity": "warning",
+      "category": "maintainability",
+      "message": "Use of .extra() is discouraged. Consider using Django ORM methods instead",
+      "fix_available": false
+    },
+    {
+      "file": "apps/results_manager/views.py",
+      "line": 386,
+      "column": 27,
+      "severity": "warning",
+      "category": "maintainability",
+      "message": "Use of .extra() is discouraged. Consider using Django ORM methods instead",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/templatetags/simple_review_tags.py",
+      "line": 1,
+      "column": 0,
+      "severity": "warning",
+      "category": "security",
+      "message": "Unsafe template rendering detected. Ensure content is properly escaped",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/templatetags/simple_review_tags.py",
+      "line": 136,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Potential XSS on mark_safe function. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/review_results/templatetags/simple_review_tags.py",
+      "line": 136,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 1,
+      "column": 0,
+      "severity": "warning",
+      "category": "security",
+      "message": "Unsafe template rendering detected. Ensure content is properly escaped",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 108,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Potential XSS on mark_safe function. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 108,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 164,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Potential XSS on mark_safe function. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 164,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 199,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Potential XSS on mark_safe function. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 199,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 308,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Potential XSS on mark_safe function. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/search_strategy/templatetags/query_tags.py",
+      "line": 308,
+      "column": 11,
+      "severity": "warning",
+      "category": "security",
+      "message": "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed. (CWE-unknown)",
+      "fix_available": false
+    },
+    {
+      "file": "apps/serp_execution/templatetags/execution_tags.py",
+      "line": 1,
+      "column": 0,
+      "severity": "warning",
+      "category": "security",
+      "message": "Unsafe template rendering detected. Ensure content is properly escaped",
+      "fix_available": false
+    }
+  ]
+}

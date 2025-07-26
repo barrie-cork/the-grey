@@ -14,8 +14,8 @@ class ExportReport(models.Model):
     REPORT_TYPES = [
         ("prisma_flow", "PRISMA Flow Diagram"),
         ("full_report", "Full PRISMA Report"),
-        ("included_studies", "Included Studies List"),
-        ("excluded_studies", "Excluded Studies with Reasons"),
+        ("included_results", "Included Results List"),
+        ("excluded_results", "Excluded Results with Reasons"),
         ("search_strategy", "Search Strategy Documentation"),
         ("data_export", "Raw Data Export"),
     ]

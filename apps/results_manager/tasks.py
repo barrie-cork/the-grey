@@ -64,7 +64,7 @@ def process_session_results_task(self, session_id: str) -> Dict[str, Any]:
 
         # Get raw results to process
         raw_results = RawSearchResult.objects.filter(
-            execution__query__session=session, is_processed=False
+            execution__query__strategy__session=session, is_processed=False
         ).select_related("execution", "execution__query")
 
         total_results = raw_results.count()
@@ -149,7 +149,7 @@ def create_processing_workflow(
 
         # Get raw results in batches
         raw_results = RawSearchResult.objects.filter(
-            execution__query__session_id=session_id, is_processed=False
+            execution__query__strategy__session_id=session_id, is_processed=False
         ).values_list("id", flat=True)
 
         batch_ids = [
@@ -507,7 +507,7 @@ def retry_failed_processing_task(session_id: str) -> Dict[str, Any]:
         processing_session.save()
 
         # Reset processed flags on raw results
-        RawSearchResult.objects.filter(execution__query__session_id=session_id).update(
+        RawSearchResult.objects.filter(execution__query__strategy__session_id=session_id).update(
             is_processed=False, processing_error=""
         )
 

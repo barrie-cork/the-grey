@@ -35,7 +35,7 @@ urlpatterns = [
     ),
     path(
         "api/results/<uuid:session_id>/",
-        views.ResultsFilterAPIView.as_view(),
-        name="api_results_filter",
+        views.ResultsListAPIView.as_view(),
+        name="api_results_list",
     ),
 ]

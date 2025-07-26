@@ -58,7 +58,7 @@ class ProcessingAnalyticsService(ServiceLoggerMixin):
 
         # Other metrics
         pdf_count = results.filter(is_pdf=True).count()
-        academic_results = 0  # Removed quality indicators - simplified approach
+        pdf_results = 0  # Count PDF documents
 
         return {
             "total_results": total_results,
@@ -68,23 +68,10 @@ class ProcessingAnalyticsService(ServiceLoggerMixin):
             "document_types": document_types,
             "publication_years": dict(sorted(publication_years.items(), reverse=True)),
             "pdf_count": pdf_count,
-            "academic_results": academic_results,
             "pdf_percentage": (
                 round(
                     (
                         pdf_count
-                        / total_results
-                        * ProcessingConstants.PERCENTAGE_MULTIPLIER
-                    ),
-                    ProcessingConstants.DECIMAL_PLACES["percentage"],
-                )
-                if total_results > 0
-                else 0
-            ),
-            "academic_percentage": (
-                round(
-                    (
-                        academic_results
                         / total_results
                         * ProcessingConstants.PERCENTAGE_MULTIPLIER
                     ),

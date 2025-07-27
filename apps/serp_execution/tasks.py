@@ -4,17 +4,19 @@ Handles search execution, result processing, and session monitoring.
 """
 
 import logging
+from decimal import Decimal
 from typing import Any, Dict
 
 from celery import group, shared_task
 from django.db import transaction
 from django.utils import timezone
 
-from .models import ExecutionMetrics, SearchExecution
+from apps.core.config import get_config
+from .models import SearchExecution
 from .recovery import recovery_manager
 from .services.result_processor import ResultProcessor
 from .services.serper_client import SerperAPIError, SerperClient
-from .services.usage_tracker import UsageTracker
+# from .services.usage_tracker import UsageTracker  # TODO: Create usage_tracker module
 
 logger = logging.getLogger(__name__)
 
@@ -163,23 +165,31 @@ def perform_serp_query_task(self, execution_id: str, query_id: str) -> Dict[str,
         # Initialize services
         serper_client = SerperClient()
         result_processor = ResultProcessor()
-        usage_tracker = UsageTracker()
 
         # Use the pre-built query text
         search_query = query.query_text
 
-        # Prepare API parameters
-        # Get configuration from the strategy
+        # Get configuration
+        config = get_config()
+        
+        # Get configuration from the strategy (allows overrides)
         strategy = query.strategy
-        file_types = strategy.search_config.get("file_types", ["pdf"])
-
+        file_types = strategy.search_config.get("file_types", config.search.default_file_types)
+        
+        # Get search location from strategy or use configured default
+        location = strategy.search_config.get("location", config.search.default_location)
+        
+        # Build API parameters with configuration values
         api_params = {
             "q": search_query,
-            "num": 100,  # Default number of results
-            "location": "United States",
-            "language": "en",  # Default language
+            "num": strategy.search_config.get("num_results", config.search.default_num_results),
+            "language": strategy.search_config.get("language", config.search.default_language),
             "file_types": file_types,
         }
+        
+        # Only add location if specified (None means global search)
+        if location:
+            api_params["location"] = location
 
         # Store parameters
         execution.api_parameters = api_params
@@ -199,24 +209,17 @@ def perform_serp_query_task(self, execution_id: str, query_id: str) -> Dict[str,
             )
 
         except SerperAPIError as e:
-            # Apply recovery strategy
-            strategy = recovery_manager.get_recovery_strategy(
-                error=e,
-                execution_id=execution_id,
-                request_params=api_params,
-                retry_count=execution.retry_count,
-            )
-
-            if strategy.should_retry():
+            # Simple retry logic
+            if recovery_manager.should_retry(e, execution.retry_count):
                 # Update retry count
                 execution.retry_count += 1
                 execution.save(update_fields=["retry_count"])
 
-                # Modify request if needed
-                modified_params = strategy.modify_request()
-
+                # Get retry delay
+                delay = recovery_manager.get_retry_delay(e)
+                
                 # Retry with delay
-                raise self.retry(exc=e, countdown=strategy.get_delay())
+                raise self.retry(exc=e, countdown=delay)
             else:
                 # Can't retry, mark as failed
                 execution.status = "failed"
@@ -226,19 +229,11 @@ def perform_serp_query_task(self, execution_id: str, query_id: str) -> Dict[str,
                     update_fields=["status", "error_message", "completed_at"]
                 )
 
-                # Send notification if needed
-                if strategy.get_notification_message():
-                    _send_execution_notification(
-                        execution, strategy.get_notification_message()
-                    )
-
                 return {
                     "success": False,
                     "execution_id": str(execution_id),
                     "error": str(e),
-                    "manual_intervention_required": recovery_manager.get_manual_intervention_required(
-                        execution_id
-                    ),
+                    "error_category": recovery_manager.get_error_category(str(e)),
                 }
 
         # Process successful results
@@ -260,40 +255,27 @@ def perform_serp_query_task(self, execution_id: str, query_id: str) -> Dict[str,
         # Process and store results
         processed_count, duplicate_count, errors = (
             result_processor.process_search_results(
-                execution_id=execution_id, raw_results=organic_results, batch_size=50
+                execution_id=execution_id, 
+                raw_results=organic_results, 
+                batch_size=config.processing.batch_size
             )
         )
 
         # Update execution with results
         execution.status = "completed"
         execution.results_count = processed_count
-        execution.api_credits_used = metadata.get("credits_used", 1)
-        execution.estimated_cost = serper_client.estimate_cost(
-            execution.api_credits_used
-        )
         execution.completed_at = timezone.now()
         execution.save(
             update_fields=[
                 "status",
                 "results_count",
-                "api_credits_used",
-                "estimated_cost",
                 "completed_at",
             ]
         )
 
-        # Track usage
-        usage_tracker.track_usage(
-            execution=execution,
-            credits_used=execution.api_credits_used,
-            cost=execution.estimated_cost,
-        )
+        # Usage tracking removed for simplification
 
         # Query execution tracking is handled via SearchExecution model
-
-        # Record successful recovery if applicable
-        if execution.retry_count > 0:
-            recovery_manager.record_successful_recovery(execution_id)
 
         logger.info(
             f"Successfully executed query {query_id}: "
@@ -305,7 +287,6 @@ def perform_serp_query_task(self, execution_id: str, query_id: str) -> Dict[str,
             "execution_id": str(execution_id),
             "results_count": processed_count,
             "duplicates_count": duplicate_count,
-            "credits_used": execution.api_credits_used,
             "errors": errors,
         }
 
@@ -331,12 +312,6 @@ def perform_serp_query_task(self, execution_id: str, query_id: str) -> Dict[str,
                     update_fields=["status", "error_message", "completed_at"]
                 )
 
-                # Check if manual intervention needed
-                if recovery_manager.should_abandon_execution(execution_id):
-                    _send_execution_notification(
-                        execution,
-                        "Search execution abandoned after multiple failures. Manual intervention required.",
-                    )
             else:
                 execution.retry_count = self.request.retries
                 execution.save(update_fields=["retry_count"])
@@ -397,22 +372,6 @@ def monitor_session_completion_task(session_id: str) -> Dict[str, Any]:
 
             # Calculate totals
             total_results = sum(e.results_count for e in successful_executions)
-            total_credits = sum(e.api_credits_used for e in executions)
-            total_cost = sum(e.estimated_cost for e in executions)
-
-            # Update or create execution metrics
-            metrics, created = ExecutionMetrics.objects.update_or_create(
-                session=session,
-                defaults={
-                    "total_executions": total_executions,
-                    "successful_executions": successful_executions.count(),
-                    "failed_executions": failed_executions.count(),
-                    "total_results_retrieved": total_results,
-                    "total_api_credits": total_credits,
-                    "total_estimated_cost": total_cost,
-                    "last_execution": timezone.now(),
-                },
-            )
 
             # Update session status
             if failed_executions.exists() and not successful_executions.exists():
@@ -460,8 +419,6 @@ def monitor_session_completion_task(session_id: str) -> Dict[str, Any]:
                     "successful": successful_executions.count(),
                     "failed": failed_executions.count(),
                     "total_results": total_results,
-                    "total_credits": total_credits,
-                    "total_cost": float(total_cost),
                 }
 
     except SearchSession.DoesNotExist:

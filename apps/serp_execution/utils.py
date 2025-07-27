@@ -8,36 +8,18 @@ Business logic has been moved to dedicated services.
 from typing import List, Tuple
 
 from .models import SearchExecution
-from .services.content_analysis_service import ContentAnalysisService
-
-# Service imports for backward compatibility
-from .services.cost_service import CostService
+# Removed complex services - using simplified approach
 from .services.execution_service import ExecutionService
-from .services.monitoring_service import MonitoringService
 
-# Initialize services for backward compatibility
-cost_service = CostService()
+# Initialize simplified services
 execution_service = ExecutionService()
-content_analysis_service = ContentAnalysisService()
-monitoring_service = MonitoringService()
 
-# Legacy function proxies for backward compatibility
-calculate_api_cost = cost_service.calculate_api_cost
-estimate_execution_time = execution_service.estimate_execution_time
-detect_content_type = content_analysis_service.detect_content_type
-extract_publication_date = content_analysis_service.extract_publication_date
-get_execution_statistics = monitoring_service.get_execution_statistics
-get_failed_executions_with_analysis = (
-    monitoring_service.get_failed_executions_with_analysis
-)
-categorize_failure = monitoring_service.categorize_failure
-suggest_retry_action = monitoring_service.suggest_retry_action
-calculate_search_coverage = monitoring_service.calculate_search_coverage
-optimize_retry_strategy = monitoring_service.optimize_retry_strategy
-get_engine_performance_comparison = monitoring_service.get_engine_performance_comparison
-format_execution_status = monitoring_service.format_execution_status
-get_execution_timeline = monitoring_service.get_execution_timeline
-calculate_session_cost_estimate = cost_service.calculate_session_cost_estimate
+# Simplified utility functions
+
+def get_execution_statistics(session_id: str):
+    """Get execution statistics."""
+    return execution_service.get_execution_statistics(session_id)
+
 
 
 def validate_search_execution(execution: SearchExecution) -> Tuple[bool, List[str]]:

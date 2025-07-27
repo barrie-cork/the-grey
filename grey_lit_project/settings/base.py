@@ -38,7 +38,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "django_extensions",
+    "constance",
+    "constance.backends.database",
     # Local apps
+    "apps.core",
     "apps.accounts",
     "apps.review_manager",
     "apps.search_strategy", 
@@ -251,4 +254,74 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+# Thesis Grey Configuration
+THESIS_GREY_CONFIG = {
+    'search': {
+        'default_num_results': 100,
+        'default_location': None,  # None means global search
+        'default_language': 'en',
+        'default_file_types': ['pdf'],
+    },
+    'api': {
+        'serper_timeout': 30,
+        'rate_limit_per_minute': 100,
+        'max_retries': 3,
+    },
+    'processing': {
+        'batch_size': 50,
+        'cache_ttl': 3600,
+        'duplicate_threshold': 0.85,
+    }
+}
+
+# Django Constance Configuration
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+CONSTANCE_DATABASE_PREFIX = 'constance:thesis_grey:'
+
+CONSTANCE_CONFIG = {
+    # Search Configuration
+    'SEARCH_DEFAULT_NUM_RESULTS': (100, 'Default number of search results', int),
+    'SEARCH_DEFAULT_LOCATION': ('', 'Default search location (empty for global)', str),
+    'SEARCH_DEFAULT_LANGUAGE': ('en', 'Default search language', str),
+    'SEARCH_DEFAULT_FILE_TYPES': ('pdf', 'Comma-separated file types', str),
+    
+    # API Configuration
+    'API_SERPER_TIMEOUT': (30, 'Serper API timeout in seconds', int),
+    'API_RATE_LIMIT_PER_MINUTE': (100, 'API rate limit per minute', int),
+    'API_MAX_RETRIES': (3, 'Maximum API retry attempts', int),
+    
+    # Processing Configuration
+    'PROCESSING_BATCH_SIZE': (50, 'Batch size for result processing', int),
+    'PROCESSING_CACHE_TTL': (3600, 'Cache TTL in seconds', int),
+    'PROCESSING_DUPLICATE_THRESHOLD': (0.85, 'Similarity threshold for duplicates', float),
+    
+    # Feature Flags
+    'FEATURE_ADVANCED_SEARCH': (False, 'Enable advanced search features', bool),
+    'FEATURE_AI_SUGGESTIONS': (False, 'Enable AI-powered suggestions', bool),
+}
+
+# Organize settings into fieldsets for better admin UI
+CONSTANCE_CONFIG_FIELDSETS = {
+    'Search Settings': (
+        'SEARCH_DEFAULT_NUM_RESULTS',
+        'SEARCH_DEFAULT_LOCATION', 
+        'SEARCH_DEFAULT_LANGUAGE',
+        'SEARCH_DEFAULT_FILE_TYPES',
+    ),
+    'API Settings': (
+        'API_SERPER_TIMEOUT',
+        'API_RATE_LIMIT_PER_MINUTE',
+        'API_MAX_RETRIES',
+    ),
+    'Processing Settings': (
+        'PROCESSING_BATCH_SIZE',
+        'PROCESSING_CACHE_TTL',
+        'PROCESSING_DUPLICATE_THRESHOLD',
+    ),
+    'Feature Flags': (
+        'FEATURE_ADVANCED_SEARCH',
+        'FEATURE_AI_SUGGESTIONS',
+    ),
 }

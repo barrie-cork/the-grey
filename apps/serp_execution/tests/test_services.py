@@ -1,7 +1,7 @@
 """
 Tests for SERP execution services.
 
-Tests for SerperClient, CacheManager, UsageTracker, QueryBuilder, and ResultProcessor.
+Tests for SerperClient, CacheManager, QueryBuilder, and ResultProcessor.
 """
 
 from decimal import Decimal
@@ -23,7 +23,7 @@ from apps.serp_execution.services.serper_client import (
     SerperQuotaError,
     SerperRateLimitError,
 )
-from apps.serp_execution.services.usage_tracker import UsageTracker
+# Removed usage_tracker - using simplified approach
 
 User = get_user_model()
 
@@ -202,13 +202,6 @@ class TestSerperClient(TestCase):
         self.assertFalse(is_valid)
         self.assertIn("quotes", error)
 
-    def test_estimate_cost(self):
-        """Test cost estimation."""
-        cost = self.client.estimate_cost(100)
-        self.assertEqual(cost, Decimal("0.100"))
-
-        cost = self.client.estimate_cost(1)
-        self.assertEqual(cost, Decimal("0.001"))
 
 
 class TestCacheManager(TestCase):
@@ -294,96 +287,7 @@ class TestCacheManager(TestCase):
         # that supports TTL testing
 
 
-class TestUsageTracker(TestCase):
-    """Test cases for UsageTracker service."""
-
-    def setUp(self):
-        """Set up test data."""
-        self.user = User.objects.create_user(
-            email="test@example.com", password="testpass123"
-        )
-        self.usage_tracker = UsageTracker()
-        cache.clear()
-
-    def test_track_search(self):
-        """Test tracking search usage."""
-        self.usage_tracker.track_search(
-            user_id=str(self.user.id),
-            query="test query",
-            results_count=50,
-            credits_used=100,
-            cache_hit=False,
-        )
-
-        # Get usage stats
-        usage = self.usage_tracker.get_user_usage(str(self.user.id))
-        self.assertEqual(usage["searches_today"], 1)
-        self.assertEqual(usage["credits_used_today"], 100)
-        self.assertEqual(usage["results_retrieved_today"], 50)
-
-    def test_track_multiple_searches(self):
-        """Test tracking multiple searches."""
-        for i in range(3):
-            self.usage_tracker.track_search(
-                user_id=str(self.user.id),
-                query=f"query {i}",
-                results_count=10,
-                credits_used=20,
-                cache_hit=i > 0,  # First is not cached
-            )
-
-        usage = self.usage_tracker.get_user_usage(str(self.user.id))
-        self.assertEqual(usage["searches_today"], 3)
-        self.assertEqual(usage["credits_used_today"], 60)
-        self.assertEqual(usage["cache_hits_today"], 2)
-
-    def test_check_rate_limits(self):
-        """Test rate limit checking."""
-        # Track many searches quickly
-        for i in range(10):
-            self.usage_tracker.track_search(
-                user_id=str(self.user.id),
-                query=f"query {i}",
-                results_count=10,
-                credits_used=10,
-                cache_hit=False,
-            )
-
-        can_search, reason = self.usage_tracker.check_rate_limits(str(self.user.id))
-        # Should still be able to search with reasonable limits
-        self.assertTrue(can_search)
-
-    def test_get_current_usage(self):
-        """Test getting current usage statistics."""
-        usage = self.usage_tracker.get_current_usage()
-
-        self.assertIn("total_searches_today", usage)
-        self.assertIn("total_credits_used_today", usage)
-        self.assertIn("unique_users_today", usage)
-        self.assertIn("cache_hit_rate", usage)
-        self.assertIn("remaining_credits", usage)
-
-    def test_reset_daily_usage(self):
-        """Test resetting daily usage."""
-        # Track some usage
-        self.usage_tracker.track_search(
-            user_id=str(self.user.id),
-            query="test query",
-            results_count=50,
-            credits_used=100,
-            cache_hit=False,
-        )
-
-        # Verify usage exists
-        usage = self.usage_tracker.get_user_usage(str(self.user.id))
-        self.assertEqual(usage["searches_today"], 1)
-
-        # Reset
-        self.usage_tracker.reset_daily_usage()
-
-        # Verify reset
-        usage = self.usage_tracker.get_user_usage(str(self.user.id))
-        self.assertEqual(usage["searches_today"], 0)
+# Removed TestUsageTracker - using simplified approach
 
 
 class TestQueryBuilder(TestCase):
@@ -767,7 +671,7 @@ class TestServiceIntegration(TestCase):
         query_builder = QueryBuilder()
         serper_client = SerperClient()
         result_processor = ResultProcessor()
-        usage_tracker = UsageTracker()
+        # usage_tracker = UsageTracker()  # Removed for simplification
         cache_manager = CacheManager()
 
         # Build query
@@ -814,14 +718,14 @@ class TestServiceIntegration(TestCase):
         self.assertEqual(processed_count, 2)
         self.assertEqual(duplicate_count, 0)
 
-        # Track usage
-        usage_tracker.track_search(
-            user_id=str(self.user.id),
-            query=search_query,
-            results_count=processed_count,
-            credits_used=metadata["credits_used"],
-            cache_hit=metadata.get("cache_hit", False),
-        )
+        # Track usage - removed for simplification
+        # usage_tracker.track_search(
+        #     user_id=str(self.user.id),
+        #     query=search_query,
+        #     results_count=processed_count,
+        #     credits_used=metadata["credits_used"],
+        #     cache_hit=metadata.get("cache_hit", False),
+        # )
 
         # Verify results
         raw_results = RawSearchResult.objects.filter(execution=execution)
@@ -843,14 +747,13 @@ class TestServiceIntegration(TestCase):
         execution.status = "completed"
         execution.results_count = processed_count
         execution.api_credits_used = metadata["credits_used"]
-        execution.estimated_cost = serper_client.estimate_cost(metadata["credits_used"])
         execution.save()
 
-        # Verify usage tracking
-        user_usage = usage_tracker.get_user_usage(str(self.user.id))
-        self.assertEqual(user_usage["searches_today"], 1)
-        self.assertEqual(user_usage["credits_used_today"], 1)
-        self.assertEqual(user_usage["results_retrieved_today"], 2)
+        # Verify usage tracking - removed for simplification
+        # user_usage = usage_tracker.get_user_usage(str(self.user.id))
+        # self.assertEqual(user_usage["searches_today"], 1)
+        # self.assertEqual(user_usage["credits_used_today"], 1)
+        # self.assertEqual(user_usage["results_retrieved_today"], 2)
 
 
 # Import time for rate limiting tests

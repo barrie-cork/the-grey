@@ -8,14 +8,23 @@ from .interfaces import container
 
 def initialize_dependency_injection():
     """Initialize the dependency injection container with providers."""
-
-    # Import providers only when needed to avoid circular imports
-    from apps.review_manager.providers import SessionProviderImpl
-    from apps.search_strategy.providers import QueryProviderImpl
-
-    # Register providers
-    container.register("session_provider", SessionProviderImpl())
-    container.register("query_provider", QueryProviderImpl())
+    
+    # Use dynamic imports to avoid circular dependencies
+    from importlib import import_module
+    
+    try:
+        # Dynamically import provider modules
+        review_manager_providers = import_module('apps.review_manager.providers')
+        search_strategy_providers = import_module('apps.search_strategy.providers')
+        
+        # Register providers
+        container.register("session_provider", review_manager_providers.SessionProviderImpl())
+        container.register("query_provider", search_strategy_providers.QueryProviderImpl())
+    except ImportError as e:
+        # Log the error but don't fail - providers might not be needed in all contexts
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Could not initialize dependency injection: {e}")
 
 
 def get_dependencies():

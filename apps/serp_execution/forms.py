@@ -16,13 +16,7 @@ class ExecutionConfirmationForm(forms.Form):
     confirm_execution = forms.BooleanField(
         required=True,
         label="I confirm that I want to execute this search",
-        help_text="This will consume API credits and may take several minutes.",
-    )
-
-    acknowledge_cost = forms.BooleanField(
-        required=True,
-        label="I understand the estimated cost",
-        help_text="The estimated cost is based on the number of queries and search engines.",
+        help_text="This may take several minutes.",
     )
 
     def __init__(self, *args, **kwargs):

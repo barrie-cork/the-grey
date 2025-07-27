@@ -24,7 +24,7 @@ from apps.serp_execution.models import (
     SearchExecution,
 )
 from apps.serp_execution.services.cache_manager import CacheManager
-from apps.serp_execution.services.usage_tracker import UsageTracker
+# from apps.serp_execution.services.usage_tracker import UsageTracker  # Removed for simplification
 from apps.serp_execution.tasks import (
     initiate_search_session_execution_task,
     monitor_session_completion_task,
@@ -555,32 +555,7 @@ class TestMetricsAndMonitoring(TestCase):
         self.assertEqual(metrics.total_estimated_cost, Decimal("0.30"))
         self.assertAlmostEqual(float(metrics.average_execution_time), 3.0, places=1)
 
-    def test_usage_tracking_integration(self):
-        """Test usage tracking across the system."""
-        usage_tracker = UsageTracker()
-
-        # Track multiple searches
-        for i in range(5):
-            usage_tracker.track_search(
-                user_id=str(self.user.id),
-                query=f"test query {i}",
-                results_count=20,
-                credits_used=50,
-                cache_hit=i > 2,  # Last 2 are cache hits
-            )
-
-        # Get usage statistics
-        user_usage = usage_tracker.get_user_usage(str(self.user.id))
-        self.assertEqual(user_usage["searches_today"], 5)
-        self.assertEqual(user_usage["credits_used_today"], 250)
-        self.assertEqual(user_usage["results_retrieved_today"], 100)
-        self.assertEqual(user_usage["cache_hits_today"], 2)
-
-        # Get system-wide usage
-        system_usage = usage_tracker.get_current_usage()
-        self.assertGreater(system_usage["total_searches_today"], 0)
-        self.assertEqual(system_usage["unique_users_today"], 1)
-        self.assertGreater(system_usage["cache_hit_rate"], 0)
+    # Usage tracking test removed for simplification
 
 
 class TestConcurrentExecution(TransactionTestCase):

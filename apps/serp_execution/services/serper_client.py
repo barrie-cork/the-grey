@@ -12,8 +12,10 @@ from urllib.parse import urlencode
 import requests
 from django.conf import settings
 from django.core.cache import cache
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+
+from apps.core.config import get_config
+from .http_client import HTTPClient
+from .rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 
@@ -41,82 +43,39 @@ class SerperClient:
     """
 
     BASE_URL = "https://google.serper.dev/search"
-    RATE_LIMIT_PER_SECOND = 300  # Serper's rate limit
-    COST_PER_QUERY = Decimal("0.001")  # $0.001 per query
 
-    def __init__(self):
-        """Initialize the Serper client with configuration."""
+    def __init__(
+        self,
+        http_client: Optional[HTTPClient] = None,
+        rate_limiter: Optional[RateLimiter] = None,
+    ):
+        """
+        Initialize the Serper client with configuration.
+        
+        Args:
+            http_client: HTTP client instance (creates one if not provided)
+            rate_limiter: Rate limiter instance (creates one if not provided)
+        """
         self.api_key = getattr(settings, "SERPER_API_KEY", None)
         if not self.api_key:
             raise ValueError("SERPER_API_KEY not configured in settings")
 
-        # Create session with retry logic
-        self.session = self._create_session()
+        # Get configuration
+        self.config = get_config()
 
-        # Rate limiting
-        self.last_request_time = 0
-        self.request_count = 0
-        self.rate_limit_window = 1.0  # 1 second window
-
-    def _create_session(self) -> requests.Session:
-        """
-        Create a requests session with retry logic and connection pooling.
-        """
-        session = requests.Session()
-
-        # Configure retry strategy
-        retry_strategy = Retry(
-            total=3,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST"],
-            backoff_factor=1,
-            respect_retry_after_header=True,
+        # Use provided services or create defaults
+        self.http_client = http_client or HTTPClient(
+            base_url=self.BASE_URL,
+            api_key=self.api_key,
+            timeout=self.config.api.serper_timeout,
+            max_retries=self.config.api.max_retries
+        )
+        
+        # Use Serper's documented rate limit of 300 requests per second
+        self.rate_limiter = rate_limiter or RateLimiter(
+            rate_limit_per_minute=300 * 60  # 300 per second = 18000 per minute
         )
 
-        adapter = HTTPAdapter(
-            max_retries=retry_strategy, pool_connections=10, pool_maxsize=20
-        )
-
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
-
-        # Set default headers
-        session.headers.update(
-            {
-                "X-API-KEY": self.api_key,
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "User-Agent": "ThesisGrey/1.0",
-            }
-        )
-
-        return session
-
-    def _enforce_rate_limit(self):
-        """
-        Enforce rate limiting to prevent exceeding API limits.
-        """
-        current_time = time.time()
-
-        # Reset counter if window has passed
-        if current_time - self.last_request_time >= self.rate_limit_window:
-            self.request_count = 0
-            self.last_request_time = current_time
-
-        # Check if we need to wait
-        if self.request_count >= self.RATE_LIMIT_PER_SECOND:
-            sleep_time = self.rate_limit_window - (
-                current_time - self.last_request_time
-            )
-            if sleep_time > 0:
-                logger.info(
-                    f"Rate limit reached, sleeping for {sleep_time:.2f} seconds"
-                )
-                time.sleep(sleep_time)
-                self.request_count = 0
-                self.last_request_time = time.time()
-
-        self.request_count += 1
 
     def _build_request_params(
         self,
@@ -157,9 +116,13 @@ class SerperClient:
         language: str,
     ) -> Dict[str, Any]:
         """Build base request parameters."""
+        # Use configuration defaults if not specified
+        location = location or self.config.search.default_location or "United States"
+        language = language or self.config.search.default_language
+        
         return {
             "q": query,
-            "num": min(num_results, 100),  # Serper max is 100
+            "num": min(num_results, self.config.search.default_num_results),  # Respect config max
             "type": search_type,
             "location": location,
             "gl": "us",  # Country code
@@ -213,12 +176,12 @@ class SerperClient:
                 return cached_result, {"cache_hit": True, "credits_used": 0}
 
         # Enforce rate limiting
-        self._enforce_rate_limit()
+        self.rate_limiter.wait_if_needed()
 
         try:
             # Make API request
             logger.info(f"Executing Serper search: {query[:50]}...")
-            response = self.session.post(self.BASE_URL, json=params, timeout=30)
+            response = self.http_client.post("", json_data=params)
 
             # Handle different response codes
             if response.status_code == 200:
@@ -239,7 +202,7 @@ class SerperClient:
 
                 # Cache successful results
                 if use_cache:
-                    cache_ttl = 3600 * 24  # 24 hours for general queries
+                    cache_ttl = self.config.processing.cache_ttl
                     cache.set(cache_key, (data, metadata), cache_ttl)
 
                 return data, metadata
@@ -274,10 +237,12 @@ class SerperClient:
             Dictionary with rate limit information
         """
         return {
-            "requests_in_window": self.request_count,
-            "rate_limit": self.RATE_LIMIT_PER_SECOND,
-            "window_start": self.last_request_time,
-            "can_make_request": self.request_count < self.RATE_LIMIT_PER_SECOND,
+            "requests_in_window": self.rate_limiter.request_count,
+            "rate_limit": self.rate_limiter.rate_limit_per_second,
+            "window_start": self.rate_limiter.last_request_time,
+            "can_make_request": self.rate_limiter.check_rate_limit(),
+            "remaining_requests": self.rate_limiter.get_remaining_requests(),
+            "wait_time": self.rate_limiter.get_wait_time(),
         }
 
     def get_usage_stats(self) -> Dict[str, Any]:
@@ -296,17 +261,6 @@ class SerperClient:
             "average_response_time": 0.45,
         }
 
-    def estimate_cost(self, num_queries: int) -> Decimal:
-        """
-        Estimate the cost for a given number of queries.
-
-        Args:
-            num_queries: Number of queries to estimate
-
-        Returns:
-            Estimated cost in USD
-        """
-        return self.COST_PER_QUERY * num_queries
 
     def validate_query(self, query: str) -> Tuple[bool, Optional[str]]:
         """
@@ -329,3 +283,8 @@ class SerperClient:
             return False, "Unmatched quotes in query"
 
         return True, None
+
+    def close(self):
+        """Clean up resources."""
+        if hasattr(self.http_client, 'close'):
+            self.http_client.close()

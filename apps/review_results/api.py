@@ -13,7 +13,7 @@ def get_review_decisions_data(session_id: str) -> List[Dict[str, Any]]:
     from .models import SimpleReviewDecision
 
     decisions = SimpleReviewDecision.objects.filter(
-        result__session_id=session_id
+        session_id=session_id
     ).select_related("result", "reviewer")
 
     return [
@@ -43,7 +43,7 @@ def get_decision_counts(session_id: str) -> Dict[str, int]:
     from .models import SimpleReviewDecision
 
     decision_counts = (
-        SimpleReviewDecision.objects.filter(result__session_id=session_id)
+        SimpleReviewDecision.objects.filter(session_id=session_id)
         .values("decision")
         .annotate(count=Count("decision"))
     )
@@ -59,7 +59,7 @@ def get_review_progress_stats(session_id: str) -> Dict[str, Any]:
 
     total_results = get_processed_results_count(session_id)
 
-    decisions = SimpleReviewDecision.objects.filter(result__session_id=session_id)
+    decisions = SimpleReviewDecision.objects.filter(session_id=session_id)
 
     reviewed_count = decisions.exclude(decision="pending").count()
     pending_count = total_results - reviewed_count

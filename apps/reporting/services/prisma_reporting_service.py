@@ -14,6 +14,7 @@ from apps.results_manager.api import get_deduplication_stats
 from apps.review_manager.models import SearchSession, SessionActivity
 from apps.review_manager.signals import get_session_data
 from apps.review_results.api import get_review_progress_stats
+from apps.review_results.models import SimpleReviewDecision
 from apps.search_strategy.signals import get_session_queries_data
 from apps.serp_execution.api import get_raw_results_count, get_session_executions_data
 
@@ -103,42 +104,45 @@ class PrismaReportingService(ServiceLoggerMixin):
         Returns:
             Dictionary mapping exclusion reasons to counts
         """
-        # Get exclude tag assignments with reasons in notes
-        exclude_assignments = ReviewTagAssignment.objects.filter(
-            result__session_id=session_id, tag__name=PRISMAConstants.EXCLUDE_TAG
-        ).exclude(notes="")
+        # Get excluded decisions with reasons
+        excluded_decisions = SimpleReviewDecision.objects.filter(
+            session_id=session_id, decision="exclude"
+        )
 
         reasons = {}
-        for assignment in exclude_assignments:
-            reason = assignment.notes.strip()
+        for decision in excluded_decisions:
+            # Use exclusion_reason field first, fall back to notes
+            reason = decision.exclusion_reason or decision.notes.strip()
             if reason:
-                # Clean up common reason variations
-                reason = reason.lower()
-
-                # Map to standardized reasons
-                standardized_reason = None
-                if "not relevant" in reason or "irrelevant" in reason:
-                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
-                        "not_relevant"
-                    ]
-                elif "no full text" in reason or "full text unavailable" in reason:
-                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
-                        "no_full_text"
-                    ]
-                elif "duplicate" in reason:
-                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
-                        "duplicate"
-                    ]
-                elif "wrong document type" in reason or "document type" in reason:
-                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
-                        "wrong_document_type"
-                    ]
-                elif "language" in reason:
-                    standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
-                        "language"
-                    ]
+                # Get display name for choice field
+                if decision.exclusion_reason:
+                    standardized_reason = decision.get_exclusion_reason_display()
                 else:
-                    standardized_reason = reason.title()
+                    # Clean up reason from notes
+                    reason = reason.lower()
+                    # Map to standardized reasons
+                    if "not relevant" in reason or "irrelevant" in reason:
+                        standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
+                            "not_relevant"
+                        ]
+                    elif "no full text" in reason or "full text unavailable" in reason:
+                        standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
+                            "no_full_text"
+                        ]
+                    elif "duplicate" in reason:
+                        standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
+                            "duplicate"
+                        ]
+                    elif "wrong document type" in reason or "document type" in reason:
+                        standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
+                            "wrong_document_type"
+                        ]
+                    elif "language" in reason:
+                        standardized_reason = PRISMAConstants.STANDARD_EXCLUSION_REASONS[
+                            "language"
+                        ]
+                    else:
+                        standardized_reason = reason.title()
 
                 reasons[standardized_reason] = reasons.get(standardized_reason, 0) + 1
 

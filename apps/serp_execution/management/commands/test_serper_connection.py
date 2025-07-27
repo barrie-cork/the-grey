@@ -5,7 +5,8 @@ Management command to test Serper API connection.
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.serp_execution.services import CacheManager, SerperClient, UsageTracker
+from apps.serp_execution.services import CacheManager, SerperClient
+# from apps.serp_execution.services import UsageTracker  # Removed for simplification
 
 
 class Command(BaseCommand):
@@ -43,13 +44,13 @@ class Command(BaseCommand):
         try:
             client = SerperClient()
             cache_manager = CacheManager()
-            usage_tracker = UsageTracker()
+            # usage_tracker = UsageTracker()  # Removed for simplification
         except Exception as e:
             raise CommandError(f"Failed to initialize services: {str(e)}")
 
         # Check usage if requested
         if options["check_usage"]:
-            self.check_usage_stats(client, usage_tracker)
+            self.stdout.write("Usage tracking disabled for simplification")
             return
 
         # Test query validation
@@ -121,60 +122,8 @@ class Command(BaseCommand):
                     f'Estimated savings: ${savings["estimated_savings_usd"]:.4f}'
                 )
 
-            # Display cost estimate
-            cost = client.estimate_cost(options["num_results"])
-            self.stdout.write(f"\nEstimated cost for this query: ${cost:.4f}")
 
         except Exception as e:
             raise CommandError(f"Search failed: {str(e)}")
 
-    def check_usage_stats(self, client, usage_tracker):
-        """Check and display API usage statistics."""
-        self.stdout.write(self.style.NOTICE("Checking API usage statistics...\n"))
-
-        # Get usage from API
-        try:
-            api_stats = client.get_usage_stats()
-            self.stdout.write("API Usage (from Serper):")
-            self.stdout.write(f'  Credits remaining: {api_stats["credits_remaining"]}')
-            self.stdout.write(
-                f'  Credits used today: {api_stats["credits_used_today"]}'
-            )
-            self.stdout.write(f'  Requests today: {api_stats["requests_today"]}')
-            self.stdout.write(
-                f'  Average response time: {api_stats["average_response_time"]}s\n'
-            )
-        except Exception as e:
-            self.stdout.write(
-                self.style.WARNING(f"Could not get API stats: {str(e)}\n")
-            )
-
-        # Get local usage tracking
-        budget_status = usage_tracker.check_budget_status()
-        analytics = usage_tracker.get_usage_analytics(days=7)
-
-        self.stdout.write("Budget Status:")
-        self.stdout.write(
-            f'  Daily: ${budget_status["daily"]["used"]:.2f} / ${budget_status["daily"]["budget"]:.2f} ({budget_status["daily"]["percentage"]:.1%})'
-        )
-        self.stdout.write(
-            f'  Monthly: ${budget_status["monthly"]["used"]:.2f} / ${budget_status["monthly"]["budget"]:.2f} ({budget_status["monthly"]["percentage"]:.1%})\n'
-        )
-
-        self.stdout.write("7-Day Analytics:")
-        self.stdout.write(f'  Total queries: {analytics["total_queries"]}')
-        self.stdout.write(f'  Success rate: {analytics["success_rate"]}%')
-        self.stdout.write(f'  Total cost: ${analytics["total_cost"]:.2f}')
-        self.stdout.write(
-            f'  Daily average: ${analytics["daily_avg_cost"]:.2f} ({analytics["daily_avg_queries"]} queries)'
-        )
-        self.stdout.write(
-            f'  Average execution time: {analytics["avg_execution_time"]}s'
-        )
-
-        # Check if we can execute more queries
-        can_execute, reason = usage_tracker.can_execute_queries(10)
-        if can_execute:
-            self.stdout.write(self.style.SUCCESS("\nBudget allows for more queries"))
-        else:
-            self.stdout.write(self.style.WARNING(f"\nBudget restriction: {reason}"))
+    # Usage tracking methods removed for simplification

@@ -10,11 +10,13 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
+from pydantic import ValidationError
 
 from apps.review_manager.models import SearchSession, SessionActivity
 
 from .forms import SearchStrategyForm
 from .models import SearchQuery, SearchStrategy
+from .schemas import QueryGenerationRequest
 
 logger = logging.getLogger(__name__)
 
@@ -331,6 +333,7 @@ class SearchStrategyView(LoginRequiredMixin, SessionOwnershipMixin, TemplateView
             logger.info(f"Creating query {i+1}: {query_data}")
             SearchQuery.objects.create(
                 strategy=strategy,
+                session=strategy.session,  # Add the denormalized session reference
                 query_text=query_data["query"],
                 query_type=query_data["type"],
                 target_domain=query_data.get("domain"),
@@ -363,14 +366,23 @@ def update_strategy_ajax(request, session_id: str) -> JsonResponse:
             session=session, defaults={"user": request.user}
         )
 
-        # Parse form data
-        data = json.loads(request.body)
+        # Parse and validate form data with Pydantic
+        try:
+            raw_data = json.loads(request.body)
+            validated_data = QueryGenerationRequest(**raw_data)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except ValidationError as e:
+            return JsonResponse(
+                {"error": "Validation failed", "details": e.errors()}, 
+                status=400
+            )
 
-        # Update strategy fields temporarily (don't save yet)
-        strategy.population_terms = data.get("population_terms", [])
-        strategy.interest_terms = data.get("interest_terms", [])
-        strategy.context_terms = data.get("context_terms", [])
-        strategy.search_config = data.get("search_config", {})
+        # Update strategy fields with validated data (don't save yet)
+        strategy.population_terms = validated_data.population_terms
+        strategy.interest_terms = validated_data.interest_terms
+        strategy.context_terms = validated_data.context_terms
+        strategy.search_config = validated_data.search_config
 
         # Validate and generate queries
         is_complete = strategy.validate_completeness()

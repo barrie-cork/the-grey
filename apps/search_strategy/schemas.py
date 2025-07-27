@@ -138,3 +138,42 @@ class SessionQueryStatistics(BaseModel):
     total_estimated_results: int
     queries_by_engine: Dict[str, int]
     pic_completeness: Dict[str, bool]
+
+
+class QueryGenerationRequest(BaseModel):
+    """Schema for validating search strategy update requests."""
+    
+    model_config = ConfigDict(str_strip_whitespace=True)
+    
+    population_terms: List[str] = Field(default_factory=list, min_items=0)
+    interest_terms: List[str] = Field(default_factory=list, min_items=0)
+    context_terms: List[str] = Field(default_factory=list, min_items=0)
+    search_config: Dict[str, Any] = Field(default_factory=dict)
+    
+    @validator('population_terms', 'interest_terms', 'context_terms', pre=True)
+    def clean_terms(cls, v):
+        """Clean and filter empty terms."""
+        if isinstance(v, list):
+            return [term.strip() for term in v if term and term.strip()]
+        return v
+    
+    @validator('search_config')
+    def validate_search_config(cls, v):
+        """Validate search configuration structure."""
+        allowed_keys = {'domains', 'include_general_search', 'file_types', 'search_type'}
+        if not isinstance(v, dict):
+            raise ValueError("search_config must be a dictionary")
+        
+        # Remove any unexpected keys
+        clean_config = {k: v[k] for k in v if k in allowed_keys}
+        
+        # Validate file_types if present
+        if 'file_types' in clean_config:
+            if not isinstance(clean_config['file_types'], list):
+                raise ValueError("file_types must be a list")
+            allowed_file_types = ['pdf', 'doc', 'docx', 'txt', 'html', 'xml', 'csv', 'xls', 'xlsx']
+            for ft in clean_config['file_types']:
+                if ft not in allowed_file_types:
+                    raise ValueError(f"Invalid file type: {ft}")
+        
+        return clean_config

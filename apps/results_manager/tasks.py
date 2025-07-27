@@ -26,6 +26,94 @@ MAX_RETRIES = 3
 RETRY_DELAY = 60  # seconds
 
 
+def _validate_session(session_id: str) -> SearchSession:
+    """Validate and retrieve search session."""
+    try:
+        return SearchSession.objects.get(id=session_id)
+    except SearchSession.DoesNotExist:
+        logger.error(f"SearchSession {session_id} not found")
+        raise
+
+
+def _get_or_create_processing_session(session: SearchSession) -> ProcessingSession:
+    """Get or create processing session."""
+    processing_session, created = ProcessingSession.objects.get_or_create(
+        search_session=session, defaults={"status": "pending"}
+    )
+    return processing_session
+
+
+def _check_already_completed(processing_session: ProcessingSession, session_id: str) -> Optional[Dict[str, Any]]:
+    """Check if session is already processed."""
+    if processing_session.status == "completed":
+        logger.info(f"Session {session_id} already processed")
+        return {
+            "status": "already_completed",
+            "session_id": session_id,
+            "processed_count": processing_session.processed_count,
+        }
+    return None
+
+
+def _get_raw_results_count(session: SearchSession) -> int:
+    """Get count of unprocessed raw results."""
+    return RawSearchResult.objects.filter(
+        execution__query__strategy__session=session, is_processed=False
+    ).count()
+
+
+def _handle_no_results(processing_session: ProcessingSession, session_id: str) -> Dict[str, Any]:
+    """Handle case when no raw results found."""
+    logger.warning(f"No raw results found for session {session_id}")
+    processing_session.status = "completed"
+    processing_session.save()
+    return {
+        "status": "no_results",
+        "session_id": session_id,
+        "message": "No raw results to process",
+    }
+
+
+def _start_processing(session: SearchSession, processing_session: ProcessingSession, 
+                     total_results: int, task_id: str) -> None:
+    """Update session status and start processing."""
+    session.status = "processing_results"
+    session.save(update_fields=["status"])
+    processing_session.start_processing(
+        total_raw_results=total_results, celery_task_id=task_id
+    )
+
+
+def _mark_processing_failed(session_id: str, exc: Exception) -> None:
+    """Mark processing session as failed."""
+    try:
+        processing_session = ProcessingSession.objects.get(
+            search_session_id=session_id
+        )
+        processing_session.fail_processing(
+            error_message=f"Failed to start processing: {str(exc)}",
+            error_details={"exception_type": type(exc).__name__},
+        )
+    except ProcessingSession.DoesNotExist:
+        pass
+
+
+def _handle_processing_error(session_id: str, exc: Exception, retries: int) -> Dict[str, Any]:
+    """Handle processing errors and retries."""
+    _mark_processing_failed(session_id, exc)
+
+    # Check if should retry
+    if retries < MAX_RETRIES:
+        retry_countdown = RETRY_DELAY * (2**retries)
+        logger.info(
+            f"Retrying processing for session {session_id} in {retry_countdown}s"
+        )
+        # Caller will handle the retry
+        raise
+
+    return {"status": "failed", "error": str(exc)}
+
+
 @shared_task(bind=True, max_retries=MAX_RETRIES)
 def process_session_results_task(self, session_id: str) -> Dict[str, Any]:
     """
@@ -46,48 +134,27 @@ def process_session_results_task(self, session_id: str) -> Dict[str, Any]:
     logger.info(f"Starting results processing for session {session_id}")
 
     try:
-        # Get the search session
-        session = SearchSession.objects.get(id=session_id)
-
-        # Create or get processing session
-        processing_session, created = ProcessingSession.objects.get_or_create(
-            search_session=session, defaults={"status": "pending"}
-        )
-
-        if processing_session.status == "completed":
-            logger.info(f"Session {session_id} already processed")
-            return {
-                "status": "already_completed",
-                "session_id": session_id,
-                "processed_count": processing_session.processed_count,
-            }
-
-        # Get raw results to process
-        raw_results = RawSearchResult.objects.filter(
-            execution__query__strategy__session=session, is_processed=False
-        ).select_related("execution", "execution__query")
-
-        total_results = raw_results.count()
-
+        # Validate and get session
+        session = _validate_session(session_id)
+        
+        # Get or create processing session
+        processing_session = _get_or_create_processing_session(session)
+        
+        # Check if already completed
+        completed_result = _check_already_completed(processing_session, session_id)
+        if completed_result:
+            return completed_result
+        
+        # Get raw results count
+        total_results = _get_raw_results_count(session)
+        
+        # Handle no results case
         if total_results == 0:
-            logger.warning(f"No raw results found for session {session_id}")
-            processing_session.status = "completed"
-            processing_session.save()
-            return {
-                "status": "no_results",
-                "session_id": session_id,
-                "message": "No raw results to process",
-            }
-
-        # Update session status to processing_results
-        session.status = "processing_results"
-        session.save(update_fields=["status"])
-
+            return _handle_no_results(processing_session, session_id)
+        
         # Start processing
-        processing_session.start_processing(
-            total_raw_results=total_results, celery_task_id=self.request.id
-        )
-
+        _start_processing(session, processing_session, total_results, self.request.id)
+        
         # Create processing workflow
         workflow = create_processing_workflow.delay(
             session_id=session_id, processing_session_id=str(processing_session.id)
@@ -101,33 +168,18 @@ def process_session_results_task(self, session_id: str) -> Dict[str, Any]:
         }
 
     except SearchSession.DoesNotExist:
-        logger.error(f"SearchSession {session_id} not found")
         return {"status": "error", "message": f"Session {session_id} not found"}
 
     except Exception as exc:
         logger.error(f"Error starting processing for session {session_id}: {str(exc)}")
-
-        # Mark processing as failed if processing session exists
-        try:
-            processing_session = ProcessingSession.objects.get(
-                search_session_id=session_id
-            )
-            processing_session.fail_processing(
-                error_message=f"Failed to start processing: {str(exc)}",
-                error_details={"exception_type": type(exc).__name__},
-            )
-        except ProcessingSession.DoesNotExist:
-            pass
-
-        # Retry with exponential backoff
+        result = _handle_processing_error(session_id, exc, self.request.retries)
+        
+        # Re-raise for Celery retry if needed
         if self.request.retries < MAX_RETRIES:
             retry_countdown = RETRY_DELAY * (2**self.request.retries)
-            logger.info(
-                f"Retrying processing for session {session_id} in {retry_countdown}s"
-            )
             raise self.retry(countdown=retry_countdown, exc=exc)
-
-        return {"status": "failed", "error": str(exc)}
+        
+        return result
 
 
 @shared_task(bind=True)

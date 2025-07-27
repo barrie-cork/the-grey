@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .models import ExecutionMetrics, RawSearchResult, SearchExecution
+from .models import RawSearchResult, SearchExecution
 
 
 @admin.register(SearchExecution)
@@ -19,8 +19,6 @@ class SearchExecutionAdmin(admin.ModelAdmin):
         "status_display",
         "search_engine",
         "results_count",
-        "api_credits_used",
-        "cost_display",
         "duration_display",
         "created_at",
     ]
@@ -49,8 +47,6 @@ class SearchExecutionAdmin(admin.ModelAdmin):
         "duration_seconds",
         "api_request_id",
         "results_count",
-        "api_credits_used",
-        "estimated_cost",
     ]
 
     fieldsets = (
@@ -80,8 +76,6 @@ class SearchExecutionAdmin(admin.ModelAdmin):
                 "fields": (
                     "results_count",
                     "results_offset",
-                    "api_credits_used",
-                    "estimated_cost",
                 )
             },
         ),
@@ -131,11 +125,6 @@ class SearchExecutionAdmin(admin.ModelAdmin):
 
     status_display.short_description = "Status"
 
-    def cost_display(self, obj):
-        """Display cost in USD."""
-        return f"${obj.estimated_cost:.4f}"
-
-    cost_display.short_description = "Cost"
 
     def duration_display(self, obj):
         """Display duration in human-readable format."""
@@ -264,119 +253,3 @@ class RawSearchResultAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related("execution")
 
 
-@admin.register(ExecutionMetrics)
-class ExecutionMetricsAdmin(admin.ModelAdmin):
-    """Admin interface for ExecutionMetrics model."""
-
-    list_display = [
-        "session_title",
-        "total_executions",
-        "successful_executions",
-        "failed_executions",
-        "total_results_retrieved",
-        "unique_results",
-        "total_cost_display",
-        "last_execution",
-    ]
-
-    list_filter = [
-        "last_execution",
-        "created_at",
-    ]
-
-    search_fields = ["session__title", "session__id"]
-
-    readonly_fields = [
-        "id",
-        "created_at",
-        "updated_at",
-        "last_execution",
-        "success_rate",
-        "cost_per_result",
-    ]
-
-    fieldsets = (
-        ("Session Information", {"fields": ("id", "session")}),
-        (
-            "Execution Statistics",
-            {
-                "fields": (
-                    "total_executions",
-                    "successful_executions",
-                    "failed_executions",
-                    "success_rate",
-                    "average_execution_time",
-                )
-            },
-        ),
-        (
-            "Results Statistics",
-            {
-                "fields": (
-                    "total_results_retrieved",
-                    "unique_results",
-                    "academic_results_count",
-                    "pdf_results_count",
-                )
-            },
-        ),
-        (
-            "Cost Metrics",
-            {
-                "fields": (
-                    "total_api_credits",
-                    "total_estimated_cost",
-                    "cost_per_result",
-                )
-            },
-        ),
-        ("Rate Limiting", {"fields": ("rate_limit_hits", "last_rate_limit")}),
-        ("Timestamps", {"fields": ("created_at", "updated_at", "last_execution")}),
-    )
-
-    actions = ["update_metrics", "export_metrics_report"]
-
-    def session_title(self, obj):
-        """Display session title."""
-        return obj.session.title
-
-    session_title.short_description = "Session"
-
-    def total_cost_display(self, obj):
-        """Display total cost in USD."""
-        return f"${obj.total_estimated_cost:.2f}"
-
-    total_cost_display.short_description = "Total Cost"
-
-    def success_rate(self, obj):
-        """Calculate and display success rate."""
-        if obj.total_executions > 0:
-            rate = (obj.successful_executions / obj.total_executions) * 100
-            return f"{rate:.1f}%"
-        return "N/A"
-
-    success_rate.short_description = "Success Rate"
-
-    def cost_per_result(self, obj):
-        """Calculate cost per result."""
-        if obj.total_results_retrieved > 0:
-            cost = obj.total_estimated_cost / obj.total_results_retrieved
-            return f"${cost:.4f}"
-        return "N/A"
-
-    cost_per_result.short_description = "Cost/Result"
-
-    def update_metrics(self, request, queryset):
-        """Update metrics for selected sessions."""
-        count = 0
-        for metrics in queryset:
-            metrics.update_metrics()
-            count += 1
-
-        self.message_user(request, f"Updated metrics for {count} sessions.")
-
-    update_metrics.short_description = "Update metrics"
-
-    def get_queryset(self, request):
-        """Optimize queryset with select_related."""
-        return super().get_queryset(request).select_related("session")

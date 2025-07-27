@@ -64,17 +64,6 @@ class RawSearchResultResponse(BaseModel):
     created_at: datetime
 
 
-class ExecutionMetricsResponse(BaseModel):
-    """Schema for execution metrics."""
-
-    id: str
-    execution_id: str
-    api_response_time: float
-    results_processed: int
-    cache_hit_rate: float
-    error_rate: float
-    throughput_per_second: float
-    cost_per_result: Decimal
 
 
 class ExecutionConfirmation(BaseModel):
@@ -103,16 +92,6 @@ class ExecutionRetry(BaseModel):
     retry_delay_seconds: int = Field(default=60, ge=30, le=3600)
 
 
-class ApiUsageStats(BaseModel):
-    """Schema for API usage statistics."""
-
-    total_requests: int
-    successful_requests: int
-    failed_requests: int
-    total_credits_used: int
-    average_response_time: float
-    success_rate: float
-    cost_estimate: Decimal
 
 
 class ExecutionProgress(BaseModel):
@@ -167,16 +146,4 @@ class EnginePerformance(BaseModel):
     success_rate: float
     average_response_time: float
     average_results_count: int
-    cost_efficiency: float
     reliability_score: float
-
-
-class CostEstimate(BaseModel):
-    """Schema for cost estimation."""
-
-    session_id: str
-    estimated_total_cost: Decimal
-    cost_per_query: Decimal
-    estimated_credits: int
-    budget_remaining: Decimal
-    budget_warning: bool

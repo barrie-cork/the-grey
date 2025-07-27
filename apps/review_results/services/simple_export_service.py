@@ -15,7 +15,7 @@ class SimpleExportService:
         from ..models import SimpleReviewDecision
 
         decisions = SimpleReviewDecision.objects.filter(
-            result__session_id=session_id
+            session_id=session_id
         ).select_related("result", "reviewer")
 
         export_data = []

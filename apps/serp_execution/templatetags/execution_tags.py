@@ -11,8 +11,9 @@ from django import template
 from django.utils.html import format_html
 from django.utils.timesince import timesince
 
-from ..models import ExecutionMetrics, SearchExecution
-from ..utils import categorize_failure, get_execution_statistics
+from ..models import SearchExecution
+from ..utils import get_execution_statistics
+from ..recovery import recovery_manager
 
 register = template.Library()
 
@@ -67,21 +68,6 @@ def format_duration(seconds: float) -> str:
         return f"{hours:.1f}h"
 
 
-@register.filter
-def format_cost(cost) -> str:
-    """
-    Format cost with currency symbol.
-
-    Args:
-        cost: Cost amount (Decimal)
-
-    Returns:
-        Formatted cost string
-    """
-    if not cost:
-        return "$0.00"
-
-    return f"${cost:.4f}"
 
 
 @register.simple_tag
@@ -134,7 +120,6 @@ def execution_summary_card(execution: SearchExecution):
         "execution": execution,
         "can_retry": execution.can_retry(),
         "duration_formatted": format_duration(execution.duration_seconds or 0),
-        "cost_formatted": format_cost(execution.estimated_cost),
         "time_since_created": timesince(execution.created_at),
     }
 
@@ -201,7 +186,7 @@ def failure_category_badge(execution: SearchExecution) -> str:
     if execution.status != "failed":
         return ""
 
-    category = categorize_failure(execution.error_message)
+    category = recovery_manager.get_error_category(execution.error_message)
 
     category_colors = {
         "rate_limit": "warning",
@@ -244,37 +229,15 @@ def execution_metrics_dashboard(session):
     Returns:
         Context for the metrics dashboard template
     """
-    try:
-        metrics = session.execution_metrics
-    except ExecutionMetrics.DoesNotExist:
-        metrics = None
-
     stats = get_execution_statistics(str(session.id))
 
     return {
         "session": session,
-        "metrics": metrics,
         "stats": stats,
         "has_executions": stats["total_executions"] > 0,
     }
 
 
-@register.filter
-def results_per_credit(execution: SearchExecution) -> str:
-    """
-    Calculate results per API credit used.
-
-    Args:
-        execution: SearchExecution instance
-
-    Returns:
-        Formatted ratio string
-    """
-    if not execution.api_credits_used or execution.api_credits_used == 0:
-        return "N/A"
-
-    ratio = execution.results_count / execution.api_credits_used
-    return f"{ratio:.1f}"
 
 
 @register.simple_tag
@@ -344,20 +307,3 @@ def api_health_indicator(success_rate: float) -> str:
         return '<span class="badge bg-danger">Poor</span>'
 
 
-@register.simple_tag
-def cost_per_result(total_cost, total_results) -> str:
-    """
-    Calculate cost per result.
-
-    Args:
-        total_cost: Total cost (Decimal)
-        total_results: Total number of results
-
-    Returns:
-        Formatted cost per result string
-    """
-    if not total_results or total_results == 0:
-        return "N/A"
-
-    cost_per_result = float(total_cost) / total_results
-    return f"${cost_per_result:.4f}"

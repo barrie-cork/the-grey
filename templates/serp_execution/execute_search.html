@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <!-- Cost Estimation Summary -->
+    <!-- Search Execution Summary -->
     <div class="row mb-4">
         <div class="col-md-8">
             <div class="card">
@@ -32,38 +32,26 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-3 text-center">
+                        <div class="col-md-4 text-center">
                             <h3 class="text-primary">{{ total_queries }}</h3>
                             <p class="text-muted mb-0">Total Queries</p>
                         </div>
-                        <div class="col-md-3 text-center">
+                        <div class="col-md-4 text-center">
                             <h3 class="text-info">{{ engines_used|length }}</h3>
                             <p class="text-muted mb-0">Search Engines</p>
                         </div>
-                        <div class="col-md-3 text-center">
-                            <h3 class="text-warning">{{ estimated_credits }}</h3>
-                            <p class="text-muted mb-0">API Credits</p>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <h3 class="text-success">${{ estimated_cost|floatformat:2 }}</h3>
-                            <p class="text-muted mb-0">Estimated Cost</p>
+                        <div class="col-md-4 text-center">
+                            <h3 class="text-warning">{{ estimated_api_calls }}</h3>
+                            <p class="text-muted mb-0">API Calls</p>
                         </div>
                     </div>
                     
                     <hr>
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <p class="mb-1"><strong>Estimated Time:</strong> ~{{ estimated_time_minutes }} minutes</p>
                             <p class="mb-0"><strong>Search Engines:</strong> {{ engines_used|join:", " }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>Remaining Credits:</strong> {{ remaining_credits }}</p>
-                            {% if has_sufficient_credits %}
-                                <p class="mb-0 text-success"><i class="fas fa-check-circle"></i> Sufficient credits available</p>
-                            {% else %}
-                                <p class="mb-0 text-danger"><i class="fas fa-exclamation-circle"></i> Insufficient credits</p>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -141,61 +129,35 @@
                     <h5 class="mb-0"><i class="fas fa-check-square"></i> Confirm Execution</h5>
                 </div>
                 <div class="card-body">
-                    {% if has_sufficient_credits %}
-                        <form method="post" id="execution-form">
-                            {% csrf_token %}
-                            
-                            <div class="form-check mb-3">
-                                {{ form.confirm_execution }}
-                                <label class="form-check-label" for="{{ form.confirm_execution.id_for_label }}">
-                                    {{ form.confirm_execution.label }}
-                                    <small class="text-muted d-block">{{ form.confirm_execution.help_text }}</small>
-                                </label>
-                                {% if form.confirm_execution.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.confirm_execution.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="form-check mb-4">
-                                {{ form.acknowledge_cost }}
-                                <label class="form-check-label" for="{{ form.acknowledge_cost.id_for_label }}">
-                                    {{ form.acknowledge_cost.label }}
-                                    <small class="text-muted d-block">{{ form.acknowledge_cost.help_text }}</small>
-                                </label>
-                                {% if form.acknowledge_cost.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.acknowledge_cost.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            {% if form.non_field_errors %}
-                                <div class="alert alert-danger">
-                                    {{ form.non_field_errors.0 }}
-                                </div>
+                    <form method="post" id="execution-form">
+                        {% csrf_token %}
+                        
+                        <div class="form-check mb-3">
+                            {{ form.confirm_execution }}
+                            <label class="form-check-label" for="{{ form.confirm_execution.id_for_label }}">
+                                {{ form.confirm_execution.label }}
+                                <small class="text-muted d-block">{{ form.confirm_execution.help_text }}</small>
+                            </label>
+                            {% if form.confirm_execution.errors %}
+                                <div class="invalid-feedback d-block">{{ form.confirm_execution.errors.0 }}</div>
                             {% endif %}
-                            
-                            <div class="d-flex justify-content-between">
-                                <a href="{% url 'review_manager:session_detail' session_id=session.id %}" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary" id="execute-btn">
-                                    <i class="fas fa-play"></i> Execute Search
-                                </button>
-                            </div>
-                        </form>
-                    {% else %}
-                        <div class="alert alert-danger mb-4">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <strong>Insufficient Credits</strong>
-                            <p class="mb-0 mt-2">
-                                This search requires {{ estimated_credits }} credits, but you only have {{ remaining_credits }} credits available.
-                                Please contact your administrator to purchase additional credits.
-                            </p>
                         </div>
                         
-                        <a href="{% url 'review_manager:session_detail' session_id=session.id %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Session
-                        </a>
-                    {% endif %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors.0 }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'review_manager:session_detail' session_id=session.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="execute-btn">
+                                <i class="fas fa-play"></i> Execute Search
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

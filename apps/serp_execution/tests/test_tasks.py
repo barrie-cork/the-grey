@@ -177,11 +177,9 @@ class TestPerformSerpQueryTask(TransactionTestCase):
         )
 
     @patch("apps.serp_execution.tasks.ResultProcessor")
-    @patch("apps.serp_execution.tasks.UsageTracker")
-    @patch("apps.serp_execution.tasks.QueryBuilder")
     @patch("apps.serp_execution.tasks.SerperClient")
     def test_successful_query_execution(
-        self, mock_serper, mock_builder, mock_tracker, mock_processor
+        self, mock_serper, mock_processor
     ):
         """Test successful SERP query execution."""
         # Setup mocks
@@ -222,8 +220,7 @@ class TestPerformSerpQueryTask(TransactionTestCase):
         mock_processor_instance.process_search_results.return_value = (2, 0, [])
         mock_processor.return_value = mock_processor_instance
 
-        mock_tracker_instance = Mock()
-        mock_tracker.return_value = mock_tracker_instance
+        # Usage tracker removed for simplification
 
         # Execute task
         result = perform_serp_query_task(str(self.execution.id), str(self.query.id))
@@ -258,7 +255,7 @@ class TestPerformSerpQueryTask(TransactionTestCase):
             raw_results=mock_results["organic"],
             batch_size=50,
         )
-        mock_tracker_instance.track_search.assert_called_once()
+        # Usage tracker assertion removed
 
     @patch("apps.serp_execution.tasks.recovery_manager")
     @patch("apps.serp_execution.tasks.SerperClient")

@@ -1,89 +1,70 @@
 """
-Performance analytics service for reporting slice.
-Business capability: Search performance metrics and analytics.
+Simplified performance analytics service for reporting slice.
+Business capability: Basic search performance metrics.
 """
 
 from typing import Any, Dict
 
 from apps.core.logging import ServiceLoggerMixin
-from apps.reporting.constants import PerformanceConstants
 from apps.results_manager.models import ProcessedResult
 from apps.review_results.models import SimpleReviewDecision
 from apps.serp_execution.models import SearchExecution
 
 
 class PerformanceAnalyticsService(ServiceLoggerMixin):
-    """Service for calculating search performance metrics and analytics."""
+    """Service for calculating basic search performance metrics."""
 
     def calculate_search_performance_metrics(self, session_id: str) -> Dict[str, Any]:
         """
-        Calculate performance metrics for the search strategy.
+        Calculate basic performance metrics for the search strategy.
 
         Args:
             session_id: UUID of the SearchSession
 
         Returns:
-            Dictionary with performance metrics
+            Dictionary with basic performance metrics
         """
-        executions = SearchExecution.objects.filter(query__session_id=session_id)
-        processed_results = ProcessedResult.objects.filter(session_id=session_id)
-
-        # Basic metrics
-        total_executions = executions.count()
-        successful_executions = executions.filter(
-            status=PerformanceConstants.COMPLETED_STATUS
+        # Basic execution counts
+        total_executions = SearchExecution.objects.filter(
+            query__session_id=session_id
         ).count()
-        total_raw_results = sum(e.results_count for e in executions)
-        unique_processed = processed_results.count()
-
-        # Review metrics
+        
+        successful_executions = SearchExecution.objects.filter(
+            query__session_id=session_id, status="completed"
+        ).count()
+        
+        # Result counts
+        unique_processed = ProcessedResult.objects.filter(
+            session_id=session_id
+        ).count()
+        
+        # Review counts
         include_count = SimpleReviewDecision.objects.filter(
-            result__session_id=session_id, tag__name=PerformanceConstants.INCLUDE_TAG
+            result__session_id=session_id, tag__name="Include"
         ).count()
 
         exclude_count = SimpleReviewDecision.objects.filter(
-            result__session_id=session_id, tag__name=PerformanceConstants.EXCLUDE_TAG
+            result__session_id=session_id, tag__name="Exclude"
         ).count()
 
-        # Performance calculations
-        metrics = {
-            "search_efficiency": {
-                "success_rate": round(
-                    successful_executions
-                    / max(total_executions, PerformanceConstants.MIN_DIVISOR)
-                    * PerformanceConstants.PERCENTAGE_MULTIPLIER,
-                    PerformanceConstants.DECIMAL_PLACES["percentage"],
-                ),
-                "deduplication_rate": round(
-                    (total_raw_results - unique_processed)
-                    / max(total_raw_results, PerformanceConstants.MIN_DIVISOR)
-                    * PerformanceConstants.PERCENTAGE_MULTIPLIER,
-                    PerformanceConstants.DECIMAL_PLACES["percentage"],
-                ),
-                "processing_rate": round(
-                    unique_processed
-                    / max(total_raw_results, PerformanceConstants.MIN_DIVISOR)
-                    * PerformanceConstants.PERCENTAGE_MULTIPLIER,
-                    PerformanceConstants.DECIMAL_PLACES["percentage"],
-                ),
-            },
-            "relevance_metrics": {
-                "precision": round(
-                    include_count
-                    / max(
-                        include_count + exclude_count, PerformanceConstants.MIN_DIVISOR
-                    )
-                    * PerformanceConstants.PERCENTAGE_MULTIPLIER,
-                    PerformanceConstants.DECIMAL_PLACES["percentage"],
-                ),
-                "inclusion_rate": round(
-                    include_count
-                    / max(unique_processed, PerformanceConstants.MIN_DIVISOR)
-                    * PerformanceConstants.PERCENTAGE_MULTIPLIER,
-                    PerformanceConstants.DECIMAL_PLACES["percentage"],
-                ),
-            },
-        }
+        # Simple calculations with safe division
+        success_rate = (
+            round((successful_executions / total_executions) * 100, 1)
+            if total_executions > 0 else 0
+        )
+        
+        precision = (
+            round((include_count / (include_count + exclude_count)) * 100, 1)
+            if (include_count + exclude_count) > 0 else 0
+        )
 
-        return metrics
+        return {
+            "total_executions": total_executions,
+            "successful_executions": successful_executions,
+            "success_rate": success_rate,
+            "total_processed": unique_processed,
+            "include_count": include_count,
+            "exclude_count": exclude_count,
+            "precision": precision,
+        }
 

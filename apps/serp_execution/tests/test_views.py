@@ -96,13 +96,9 @@ class TestExecuteSearchView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(str(self.session.id), response.url)
 
-    @patch("apps.serp_execution.views.UsageTracker")
-    def test_execute_search_view_get(self, mock_usage_tracker):
+    def test_execute_search_view_get(self):
         """Test GET request to execute search view."""
-        # Mock usage tracker
-        mock_tracker = Mock()
-        mock_tracker.get_current_usage.return_value = {"remaining_credits": 10000}
-        mock_usage_tracker.return_value = mock_tracker
+        # Usage tracker removed for simplification
 
         url = reverse(
             "serp_execution:execute_search", kwargs={"session_id": self.session.id}
@@ -117,20 +113,14 @@ class TestExecuteSearchView(TestCase):
             response, "300"
         )  # Estimated credits (2 queries * 100 + 1 query with 2 engines * 100)
 
-    @patch("apps.serp_execution.views.calculate_api_cost")
     @patch("apps.serp_execution.views.estimate_execution_time")
-    @patch("apps.serp_execution.views.UsageTracker")
     def test_execute_search_view_context_calculations(
-        self, mock_usage_tracker, mock_estimate_time, mock_calc_cost
+        self, mock_estimate_time
     ):
         """Test context data calculations."""
-        # Setup mocks
-        mock_tracker = Mock()
-        mock_tracker.get_current_usage.return_value = {"remaining_credits": 5000}
-        mock_usage_tracker.return_value = mock_tracker
+        # Usage tracker removed for simplification
 
         mock_estimate_time.return_value = 120  # 2 minutes per query
-        mock_calc_cost.return_value = Decimal("0.30")
 
         url = reverse(
             "serp_execution:execute_search", kwargs={"session_id": self.session.id}
@@ -139,20 +129,13 @@ class TestExecuteSearchView(TestCase):
 
         context = response.context
         self.assertEqual(context["total_queries"], 2)
-        self.assertEqual(context["estimated_cost"], Decimal("0.30"))
-        self.assertEqual(context["remaining_credits"], 5000)
-        self.assertTrue(context["has_sufficient_credits"])
         self.assertEqual(
             context["estimated_time_minutes"], 4.0
         )  # 2 queries * 2 minutes
 
-    @patch("apps.serp_execution.views.UsageTracker")
-    def test_execute_search_insufficient_credits(self, mock_usage_tracker):
+    def test_execute_search_insufficient_credits(self):
         """Test handling insufficient credits."""
-        # Mock low credits
-        mock_tracker = Mock()
-        mock_tracker.get_current_usage.return_value = {"remaining_credits": 50}
-        mock_usage_tracker.return_value = mock_tracker
+        # Usage tracker removed - now uses default placeholder value
 
         url = reverse(
             "serp_execution:execute_search", kwargs={"session_id": self.session.id}
@@ -249,8 +232,6 @@ class TestSearchExecutionStatusView(TestCase):
             initiated_by=self.user,
             status="completed",
             results_count=50,
-            api_credits_used=100,
-            estimated_cost=Decimal("0.10"),
         )
 
     def test_status_view_get(self):

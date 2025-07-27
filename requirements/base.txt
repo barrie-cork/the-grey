@@ -39,3 +39,6 @@ pydantic==2.10.4
 # HTTP Requests (for Serper API)
 requests==2.31.0
 httpx==0.26.0
+
+# Configuration Management
+django-constance[database]==3.1.0

@@ -215,7 +215,7 @@ class ExportService(ServiceLoggerMixin):
         # Count available data
         total_results = ProcessedResult.objects.filter(session_id=session_id).count()
         included_studies = SimpleReviewDecision.objects.filter(
-            result__session_id=session_id, tag__name="Include"
+            session_id=session_id, decision="include"
         ).count()
 
         export_summary = {

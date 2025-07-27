@@ -3,7 +3,7 @@ Search strategy reporting service for reporting slice.
 Business capability: Search strategy documentation and reporting.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from apps.core.logging import ServiceLoggerMixin
 from apps.reporting.constants import PerformanceConstants, SearchStrategyConstants
@@ -111,6 +111,115 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
 
         return report_data
 
+    def _initialize_optimization_report(self, session_id: str) -> Dict[str, Any]:
+        """Initialize the optimization report structure."""
+        return {
+            "session_id": session_id,
+            "query_performance": [],
+            "recommendations": [],
+            "overall_metrics": {
+                "avg_results_per_query": 0,
+                "most_effective_engines": [],
+                "keyword_effectiveness": {},
+            },
+        }
+
+    def _calculate_success_rate(self, executions) -> float:
+        """Calculate execution success rate."""
+        if executions.count() == 0:
+            return 0.0
+        
+        success_count = executions.filter(
+            status=PerformanceConstants.COMPLETED_STATUS
+        ).count()
+        
+        return round(
+            success_count / executions.count() * PerformanceConstants.PERCENTAGE_MULTIPLIER,
+            PerformanceConstants.DECIMAL_PLACES["percentage"],
+        )
+
+    def _calculate_cost_effectiveness(self, total_results: int, executions) -> float:
+        """Calculate cost effectiveness (results per cost unit)."""
+        total_cost = sum(e.estimated_cost for e in executions)
+        if total_cost <= 0:
+            total_cost = 0.01
+        
+        return round(
+            total_results / total_cost,
+            PerformanceConstants.DECIMAL_PLACES["ratio"],
+        )
+
+    def _build_query_performance(self, query, executions) -> Dict[str, Any]:
+        """Build performance metrics for a single query."""
+        query_results = sum(e.results_count for e in executions)
+        
+        return {
+            "query_id": str(query.id),
+            "query_string": query.query_string,
+            "total_results": query_results,
+            "execution_success_rate": self._calculate_success_rate(executions),
+            "cost_effectiveness": self._calculate_cost_effectiveness(query_results, executions),
+        }
+
+    def _track_engine_performance(self, executions, engine_performance: Dict) -> None:
+        """Track performance metrics by search engine."""
+        for execution in executions:
+            engine = execution.search_engine
+            if engine not in engine_performance:
+                engine_performance[engine] = {"results": 0, "count": 0}
+            engine_performance[engine]["results"] += execution.results_count
+            engine_performance[engine]["count"] += 1
+
+    def _calculate_overall_metrics(self, total_results: int, query_count: int, 
+                                  engine_performance: Dict) -> Dict[str, Any]:
+        """Calculate overall optimization metrics."""
+        metrics = {}
+        
+        # Average results per query
+        if query_count > 0:
+            metrics["avg_results_per_query"] = round(
+                total_results / query_count,
+                PerformanceConstants.DECIMAL_PLACES["ratio"],
+            )
+        else:
+            metrics["avg_results_per_query"] = 0
+        
+        # Most effective engines
+        metrics["most_effective_engines"] = self._get_top_engines(engine_performance)
+        metrics["keyword_effectiveness"] = {}  # Placeholder for future implementation
+        
+        return metrics
+
+    def _calculate_engine_average(self, data: Dict[str, int]) -> float:
+        """Calculate average results per execution for an engine."""
+        if data["count"] == 0:
+            return 0.0
+        return data["results"] / data["count"]
+    
+    def _format_engine_result(self, engine: str, data: Dict[str, int]) -> Dict[str, Any]:
+        """Format engine performance data."""
+        return {
+            "engine": engine,
+            "avg_results": round(
+                self._calculate_engine_average(data),
+                PerformanceConstants.DECIMAL_PLACES["ratio"],
+            ),
+        }
+    
+    def _get_top_engines(self, engine_performance: Dict) -> List[Dict[str, Any]]:
+        """Get top performing search engines."""
+        if not engine_performance:
+            return []
+        
+        # Sort by average results per execution
+        sorted_engines = sorted(
+            engine_performance.items(),
+            key=lambda x: self._calculate_engine_average(x[1]),
+            reverse=True,
+        )[:SearchStrategyConstants.TOP_ENGINES_LIMIT]
+        
+        return [self._format_engine_result(engine, data) for engine, data in sorted_engines]
+
     def generate_query_optimization_report(self, session_id: str) -> Dict[str, Any]:
         """
         Generate report on query optimization and effectiveness.
@@ -122,89 +231,28 @@ class SearchStrategyReportingService(ServiceLoggerMixin):
             Dictionary with query optimization analysis
         """
         queries = SearchQuery.objects.filter(session_id=session_id, is_active=True)
-
-        optimization_data = {
-            "session_id": session_id,
-            "query_performance": [],
-            "recommendations": [],
-            "overall_metrics": {
-                "avg_results_per_query": 0,
-                "most_effective_engines": [],
-                "keyword_effectiveness": {},
-            },
-        }
-
+        optimization_data = self._initialize_optimization_report(session_id)
+        
         total_results = 0
-        total_relevance = 0
         engine_performance = {}
 
+        # Process each query
         for query in queries:
             executions = SearchExecution.objects.filter(query=query)
-            processed_results = ProcessedResult.objects.filter(
-                raw_result__execution__query=query
-            )
-
-            query_results = sum(e.results_count for e in executions)
-            query_relevance = 0  # Simplified approach - relevance score removed
-
-            query_performance = {
-                "query_id": str(query.id),
-                "query_string": query.query_string,
-                "total_results": query_results,
-                "execution_success_rate": round(
-                    executions.filter(
-                        status=PerformanceConstants.COMPLETED_STATUS
-                    ).count()
-                    / max(executions.count(), PerformanceConstants.MIN_DIVISOR)
-                    * PerformanceConstants.PERCENTAGE_MULTIPLIER,
-                    PerformanceConstants.DECIMAL_PLACES["percentage"],
-                ),
-                "cost_effectiveness": round(
-                    query_results
-                    / max(sum(e.estimated_cost for e in executions), 0.01),
-                    PerformanceConstants.DECIMAL_PLACES["ratio"],
-                ),
-            }
-
+            
+            # Build query performance metrics
+            query_performance = self._build_query_performance(query, executions)
             optimization_data["query_performance"].append(query_performance)
-
-            total_results += query_results
-            total_relevance += query_relevance
-
+            
+            # Update totals
+            total_results += query_performance["total_results"]
+            
             # Track engine performance
-            for execution in executions:
-                engine = execution.search_engine
-                if engine not in engine_performance:
-                    engine_performance[engine] = {"results": 0, "count": 0}
-                engine_performance[engine]["results"] += execution.results_count
-                engine_performance[engine]["count"] += 1
+            self._track_engine_performance(executions, engine_performance)
 
         # Calculate overall metrics
-        query_count = queries.count()
-        if query_count > 0:
-            optimization_data["overall_metrics"]["avg_results_per_query"] = round(
-                total_results / query_count,
-                PerformanceConstants.DECIMAL_PLACES["ratio"],
-            )
-            # Relevance score calculation removed in simplified approach
-
-        # Most effective engines
-        sorted_engines = sorted(
-            engine_performance.items(),
-            key=lambda x: x[1]["results"] / x[1]["count"],
-            reverse=True,
+        optimization_data["overall_metrics"] = self._calculate_overall_metrics(
+            total_results, queries.count(), engine_performance
         )
-        optimization_data["overall_metrics"]["most_effective_engines"] = [
-            {
-                "engine": engine,
-                "avg_results": round(
-                    data["results"] / data["count"],
-                    PerformanceConstants.DECIMAL_PLACES["ratio"],
-                ),
-            }
-            for engine, data in sorted_engines[
-                : SearchStrategyConstants.TOP_ENGINES_LIMIT
-            ]
-        ]
 
         return optimization_data

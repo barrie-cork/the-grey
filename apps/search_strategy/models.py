@@ -187,6 +187,10 @@ class SearchQuery(models.Model):
     strategy = models.ForeignKey(
         SearchStrategy, on_delete=models.CASCADE, related_name="search_queries"
     )
+    # Denormalized for performance - direct reference to session
+    session = models.ForeignKey(
+        SearchSession, on_delete=models.CASCADE, related_name="search_queries_denorm"
+    )
 
     # Query details
     query_text = models.TextField(help_text="The complete search query string")

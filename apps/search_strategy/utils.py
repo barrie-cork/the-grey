@@ -336,7 +336,7 @@ def get_session_query_statistics(session_id: str) -> Dict[str, Any]:
     Returns:
         Dictionary containing query statistics
     """
-    queries = SearchQuery.objects.filter(session_id=session_id)
+    queries = SearchQuery.objects.filter(strategy__session_id=session_id)
 
     stats = {
         "total_queries": queries.count(),
@@ -391,7 +391,7 @@ def export_queries_to_dict(session_id: str) -> List[Dict[str, Any]]:
     Returns:
         List of dictionaries containing query data
     """
-    queries = SearchQuery.objects.filter(session_id=session_id).order_by(
+    queries = SearchQuery.objects.filter(strategy__session_id=session_id).order_by(
         "order", "created_at"
     )
 

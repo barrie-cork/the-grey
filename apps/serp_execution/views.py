@@ -22,15 +22,10 @@ from apps.search_strategy.models import SearchQuery
 
 from .forms import ErrorRecoveryForm, ExecutionConfirmationForm
 from .models import RawSearchResult, SearchExecution
-from .services.usage_tracker import UsageTracker
+# Removed usage_tracker - using simplified approach
 from .tasks import initiate_search_session_execution_task, retry_failed_execution_task
-from .utils import (
-    calculate_api_cost,
-    calculate_search_coverage,
-    get_execution_statistics,
-    get_failed_executions_with_analysis,
-    optimize_retry_strategy,
-)
+from .utils import get_execution_statistics
+from .recovery import recovery_manager
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +52,7 @@ class SessionOwnershipMixin:
 class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
     """
     Preview and initiate search execution.
-    Shows queries, cost estimation, and requires confirmation.
+    Shows queries and requires confirmation.
     """
 
     template_name = "serp_execution/execute_search.html"
@@ -77,7 +72,7 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        """Add queries and cost estimation to context."""
+        """Add queries to context."""
         context = super().get_context_data(**kwargs)
 
         # Get active queries
@@ -85,8 +80,7 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
             strategy__session=self.session, is_active=True
         ).order_by("execution_order", "created_at")
 
-        # Calculate cost estimation
-        usage_tracker = UsageTracker()
+        # Query statistics
         total_queries = queries.count()
 
         # Since we're using Serper API, we have one engine
@@ -94,12 +88,6 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
 
         # Estimate based on 100 results per query
         estimated_api_calls = total_queries
-        estimated_credits = estimated_api_calls * 100  # 100 credits per search
-        estimated_cost = calculate_api_cost(estimated_credits)
-
-        # Check current usage
-        current_usage = usage_tracker.get_current_usage()
-        remaining_credits = current_usage.get("remaining_credits", 0)
 
         # Estimate execution time (simplified - 5 seconds per query)
         total_execution_time = total_queries * 5
@@ -111,10 +99,6 @@ class ExecuteSearchView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
                 "total_queries": total_queries,
                 "engines_used": list(engines_used),
                 "estimated_api_calls": estimated_api_calls,
-                "estimated_credits": estimated_credits,
-                "estimated_cost": estimated_cost,
-                "remaining_credits": remaining_credits,
-                "has_sufficient_credits": remaining_credits >= estimated_credits,
                 "estimated_time_minutes": round(total_execution_time / 60, 1),
             }
         )
@@ -184,16 +168,11 @@ class SearchExecutionStatusView(LoginRequiredMixin, SessionOwnershipMixin, Detai
         # Calculate enhanced statistics for our new card layout
         stats = self._calculate_enhanced_statistics(executions, str(self.object.id))
 
-        # Get failed executions with analysis
-        failed_executions = get_failed_executions_with_analysis(str(self.object.id))
+        # Get basic failed executions info
+        failed_executions = executions.filter(status="failed")
 
         # Check if any executions are still running
         has_running = executions.filter(status__in=["pending", "running"]).exists()
-
-        # Get coverage metrics if completed
-        coverage_metrics = {}
-        if self.object.status in ["ready_for_review", "under_review", "completed"]:
-            coverage_metrics = calculate_search_coverage(str(self.object.id))
 
         context.update(
             {
@@ -201,7 +180,6 @@ class SearchExecutionStatusView(LoginRequiredMixin, SessionOwnershipMixin, Detai
                 "stats": stats,
                 "failed_executions": failed_executions,
                 "has_running": has_running,
-                "coverage_metrics": coverage_metrics,
                 "refresh_interval": 5000 if has_running else 0,  # 5 seconds if running
             }
         )
@@ -307,17 +285,19 @@ class ErrorRecoveryView(LoginRequiredMixin, SessionOwnershipMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        """Add execution details and retry strategy to context."""
+        """Add execution details to context."""
         context = super().get_context_data(**kwargs)
 
-        retry_strategy = optimize_retry_strategy(self.execution)
+        # Simple retry strategy - just check if it can be retried
+        can_retry = self.execution.can_retry()
+        error_category = recovery_manager.get_error_category(self.execution.error_message)
 
         context.update(
             {
                 "execution": self.execution,
                 "session": self.session,
-                "retry_strategy": retry_strategy,
-                "error_category": self.execution.error_message,
+                "can_retry": can_retry,
+                "error_category": error_category,
             }
         )
 
@@ -510,44 +490,41 @@ def retry_execution_api(request, execution_id: str) -> JsonResponse:
                 status=400,
             )
 
-        # Get retry strategy
-        retry_strategy = optimize_retry_strategy(execution)
+        # Simple retry logic - if it can retry, allow it
+        if execution.can_retry():
+            # Schedule retry
+            with transaction.atomic():
+                execution.retry_count += 1
+                execution.status = "pending"
+                execution.error_message = ""
+                execution.save(update_fields=["retry_count", "status", "error_message"])
 
-        if not retry_strategy["should_retry"]:
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": "Retry not recommended",
-                    "reason": retry_strategy.get(
-                        "modifications", ["Manual intervention required"]
-                    )[0],
-                },
-                status=400,
-            )
-
-        # Schedule retry
-        with transaction.atomic():
-            execution.retry_count += 1
-            execution.status = "pending"
-            execution.error_message = ""
-            execution.save(update_fields=["retry_count", "status", "error_message"])
-
-            # Schedule task with recommended delay
-            task = retry_failed_execution_task.apply_async(
-                args=[str(execution.id)], countdown=retry_strategy["delay_seconds"]
-            )
+                # Get delay based on error type
+                delay_seconds = recovery_manager.get_retry_delay(Exception(execution.error_message))
+                task = retry_failed_execution_task.apply_async(
+                    args=[str(execution.id)], countdown=delay_seconds
+                )
 
             # Update task ID
             execution.celery_task_id = task.id
             execution.save(update_fields=["celery_task_id"])
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Retry not allowed",
+                    "reason": "Maximum retry attempts reached",
+                },
+                status=400,
+            )
 
         response_data = {
             "success": True,
             "execution_id": str(execution.id),
             "task_id": task.id,
             "retry_count": execution.retry_count,
-            "delay_seconds": retry_strategy["delay_seconds"],
-            "message": f"Retry scheduled with {retry_strategy['delay_seconds']}s delay",
+            "delay_seconds": delay_seconds,
+            "message": f"Retry scheduled with {delay_seconds}s delay",
         }
 
         return JsonResponse(response_data)

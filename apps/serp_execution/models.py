@@ -1,5 +1,4 @@
 import uuid
-from decimal import Decimal
 from typing import Any
 
 from django.contrib.auth import get_user_model
@@ -12,7 +11,7 @@ User = get_user_model()
 class SearchExecution(models.Model):
     """
     Tracks the execution of a search query via the Serper API.
-    Records API calls, status, and costs.
+    Records API calls and status.
     """
 
     STATUS_CHOICES = [
@@ -81,16 +80,6 @@ class SearchExecution(models.Model):
         default=0, help_text="Offset for paginated results"
     )
 
-    # Cost tracking
-    api_credits_used = models.IntegerField(
-        default=0, help_text="Number of API credits consumed"
-    )
-    estimated_cost = models.DecimalField(
-        max_digits=10,
-        decimal_places=4,
-        default=Decimal("0.00"),
-        help_text="Estimated cost in USD",
-    )
 
     # Error handling
     error_message = models.TextField(
@@ -217,113 +206,3 @@ class RawSearchResult(models.Model):
         return parsed.netloc
 
 
-class ExecutionMetrics(models.Model):
-    """
-    Aggregated metrics for search executions.
-    Tracks performance, costs, and quality metrics.
-    """
-
-    # Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    # Relationship
-    session = models.OneToOneField(
-        "review_manager.SearchSession",
-        on_delete=models.CASCADE,
-        related_name="execution_metrics",
-        help_text="The search session these metrics belong to",
-    )
-
-    # Execution counts
-    total_executions = models.IntegerField(
-        default=0, help_text="Total number of executions"
-    )
-    successful_executions = models.IntegerField(
-        default=0, help_text="Number of successful executions"
-    )
-    failed_executions = models.IntegerField(
-        default=0, help_text="Number of failed executions"
-    )
-
-    # Performance metrics
-    total_results_retrieved = models.IntegerField(
-        default=0, help_text="Total results retrieved across all executions"
-    )
-    unique_results = models.IntegerField(
-        default=0, help_text="Number of unique results (after deduplication)"
-    )
-    average_execution_time = models.FloatField(
-        null=True, blank=True, help_text="Average execution time in seconds"
-    )
-
-    # Cost metrics
-    total_api_credits = models.IntegerField(
-        default=0, help_text="Total API credits consumed"
-    )
-    total_estimated_cost = models.DecimalField(
-        max_digits=10,
-        decimal_places=4,
-        default=Decimal("0.00"),
-        help_text="Total estimated cost in USD",
-    )
-
-    # Result metrics
-    pdf_results_count = models.IntegerField(
-        default=0, help_text="Number of PDF results found"
-    )
-
-    # Rate limiting
-    rate_limit_hits = models.IntegerField(
-        default=0, help_text="Number of times rate limited"
-    )
-    last_rate_limit = models.DateTimeField(
-        null=True, blank=True, help_text="Last time rate limited"
-    )
-
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    last_execution = models.DateTimeField(
-        null=True, blank=True, help_text="Timestamp of last execution"
-    )
-
-    class Meta:
-        db_table = "execution_metrics"
-        verbose_name_plural = "Execution metrics"
-
-    def __str__(self) -> str:
-        return f"Metrics for {self.session.title}"
-
-    def update_metrics(self) -> None:
-        """
-        Update metrics based on current executions.
-        This would typically be called after each execution.
-        """
-        from django.db.models import Avg, Sum
-
-        executions = SearchExecution.objects.filter(query__session=self.session)
-
-        # Basic counts
-        self.total_executions = executions.count()
-        self.successful_executions = executions.filter(status="completed").count()
-        self.failed_executions = executions.filter(status="failed").count()
-
-        # Aggregate metrics
-        aggs = executions.aggregate(
-            total_results=Sum("results_count"),
-            total_credits=Sum("api_credits_used"),
-            total_cost=Sum("estimated_cost"),
-            avg_time=Avg("duration_seconds"),
-        )
-
-        self.total_results_retrieved = aggs["total_results"] or 0
-        self.total_api_credits = aggs["total_credits"] or 0
-        self.total_estimated_cost = aggs["total_cost"] or Decimal("0.00")
-        self.average_execution_time = aggs["avg_time"]
-
-        # Get latest execution
-        latest = executions.order_by("-completed_at").first()
-        if latest:
-            self.last_execution = latest.completed_at
-
-        self.save()

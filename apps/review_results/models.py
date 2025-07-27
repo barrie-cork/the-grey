@@ -30,6 +30,13 @@ class SimpleReviewDecision(models.Model):
     result = models.OneToOneField(
         "results_manager.ProcessedResult", on_delete=models.CASCADE
     )
+    # Denormalized for performance - direct reference to session
+    session = models.ForeignKey(
+        "review_manager.SearchSession",
+        on_delete=models.CASCADE,
+        related_name="review_decisions_denorm",
+        help_text="Denormalized session reference for performance",
+    )
     reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     decision = models.CharField(

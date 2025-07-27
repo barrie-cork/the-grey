@@ -25,13 +25,13 @@ class SearchResultAnalysisService(ServiceLoggerMixin):
             Dictionary with result flow data (raw -> processed -> reviewed)
         """
         # Raw results retrieved from search
-        raw_count = RawSearchResult.objects.filter(session_id=session_id).count()
+        raw_count = RawSearchResult.objects.filter(execution__query__strategy__session_id=session_id).count()
         
         # Processed results (after deduplication)
         processed_count = ProcessedResult.objects.filter(session_id=session_id).count()
         
         # Review decisions
-        decisions = SimpleReviewDecision.objects.filter(result__session_id=session_id)
+        decisions = SimpleReviewDecision.objects.filter(session_id=session_id)
         included_count = decisions.filter(decision="include").count()
         excluded_count = decisions.filter(decision="exclude").count()
         maybe_count = decisions.filter(decision="maybe").count()

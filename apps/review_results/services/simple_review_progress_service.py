@@ -15,7 +15,7 @@ class SimpleReviewProgressService:
         from ..models import SimpleReviewDecision
 
         total_results = ProcessedResult.objects.filter(session_id=session_id).count()
-        decisions = SimpleReviewDecision.objects.filter(result__session_id=session_id)
+        decisions = SimpleReviewDecision.objects.filter(session_id=session_id)
 
         reviewed_count = decisions.exclude(decision="pending").count()
         include_count = decisions.filter(decision="include").count()

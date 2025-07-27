@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Execution Status - {{ session.title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'serp_execution/css/execution.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header with breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'review_manager:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' session_id=session.id %}">{{ session.title }}</a></li>
+            <li class="breadcrumb-item active">Execution Status</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main content area -->
+        <div class="col-lg-8">
+            <!-- Session Header -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-rocket"></i> Search Execution Progress
+                    </h4>
+                    <div>
+                        <span class="badge badge-info">{{ session.get_status_display }}</span>
+                        {% if has_running %}
+                            <span class="badge badge-primary">
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                Running
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Search execution started for <strong>{{ session.title }}</strong>
+                    </p>
+
+                    <!-- Status Message -->
+                    <div class="alert alert-info" role="alert" id="status-message">
+                        <i class="fas fa-info-circle"></i>
+                        {% if has_running %}
+                            <strong>Search Execution Starting...</strong><br>
+                            Preparing search queries based on your strategy. This may take a few moments.
+                        {% elif stats.successful_executions == stats.total_executions %}
+                            <strong>Search Completed Successfully!</strong><br>
+                            All queries have been executed. Ready to process results.
+                        {% elif stats.failed_executions > 0 %}
+                            <strong>Search Partially Completed</strong><br>
+                            Some queries encountered issues. You can retry failed executions.
+                        {% else %}
+                            <strong>Search Execution Ready</strong><br>
+                            Monitoring search progress...
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Progress Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line"></i> Overall Progress
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 20px;">
+                        {% with total=stats.total_executions %}
+                        {% if total > 0 %}
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {% widthratio stats.successful_executions total 100 %}%">
+                            </div>
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 style="width: {% widthratio stats.failed_executions total 100 %}%">
+                            </div>
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: {% widthratio stats.pending_executions total 100 %}%">
+                            </div>
+                        {% else %}
+                            <div class="progress-bar bg-light" role="progressbar" style="width: 100%">
+                            </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="text-muted small text-center">
+                        Last updated: {{ stats.last_execution_date|timesince }} ago
+                    </div>
+                </div>
+            </div>
+
+            <!-- Execution Statistics Cards -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Execution Progress
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <!-- Total Queries -->
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            {% include 'serp_execution/components/stats_card.html' with value=stats.total_executions label="Total Queries" color_class="text-primary" element_id="total-queries" %}
+                        </div>
+                        
+                        <!-- Completed -->
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            {% include 'serp_execution/components/stats_card.html' with value=stats.successful_executions label="Completed" color_class="text-success" element_id="completed-queries" %}
+                        </div>
+                        
+                        <!-- Running -->
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            {% include 'serp_execution/components/stats_card.html' with value=stats.running_executions|default:0 label="Running" color_class="text-warning" element_id="running-queries" %}
+                        </div>
+                        
+                        <!-- Failed -->
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            {% include 'serp_execution/components/stats_card.html' with value=stats.failed_executions label="Failed" color_class="text-danger" element_id="failed-queries" %}
+                        </div>
+                        
+                        <!-- Results -->
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            {% include 'serp_execution/components/stats_card.html' with value=stats.total_results label="Results" color_class="text-info" element_id="total-results" %}
+                        </div>
+                        
+                        <!-- Retrying -->
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            {% include 'serp_execution/components/stats_card.html' with value=stats.retrying_executions|default:0 label="Retrying" color_class="text-secondary" element_id="retrying-queries" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with session details and activities -->
+        <div class="col-lg-4">
+            <!-- Session Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Session Details
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="session-detail-item mb-3">
+                        <span class="detail-label">Created:</span>
+                        <span class="detail-value">{{ session.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="session-detail-item mb-3">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="badge badge-{{ session.status|lower }}">{{ session.get_status_display }}</span>
+                        </span>
+                    </div>
+                    <div class="session-detail-item mb-3">
+                        <span class="detail-label">Progress:</span>
+                        <span class="detail-value">
+                            {% if stats.total_executions > 0 %}
+                                {% widthratio stats.successful_executions stats.total_executions 100 %}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if not has_running %}
+                        <a href="{% url 'review_manager:session_detail' session_id=session.id %}" 
+                           class="btn btn-outline-primary btn-sm btn-block mb-2">
+                            <i class="fas fa-arrow-left"></i> Back to Session
+                        </a>
+                        
+                        {% if failed_executions %}
+                            <button type="button" class="btn btn-outline-warning btn-sm btn-block mb-2" 
+                                    data-bs-toggle="modal" data-bs-target="#retryModal">
+                                <i class="fas fa-redo"></i> Retry Failed
+                            </button>
+                        {% endif %}
+
+                        {% if stats.successful_executions > 0 %}
+                            <a href="{% url 'results_manager:results_overview' session_id=session.id %}" 
+                               class="btn btn-outline-success btn-sm btn-block">
+                                <i class="fas fa-arrow-right"></i> Continue to Results
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="fas fa-clock"></i>
+                            <p class="small mb-0">Actions available when execution completes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history"></i> Recent Activities
+                    </h6>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if session.activities.all %}
+                        {% for activity in session.activities.all|slice:":10" %}
+                            {% include 'serp_execution/components/activity_item.html' with activity=activity %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="fas fa-history fa-2x mb-2"></i>
+                            <p class="small mb-0">No recent activities</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Retry Modal -->
+{% if failed_executions %}
+<div class="modal fade" id="retryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Retry Failed Executions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>The following executions failed and can be retried:</p>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Error</th>
+                            <th>Suggested Action</th>
+                            <th>Retry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for failed in failed_executions %}
+                        <tr>
+                            <td><small>{{ failed.query_title }}</small></td>
+                            <td><small class="text-danger">{{ failed.error_message|truncatechars:50 }}</small></td>
+                            <td><small>{{ failed.suggested_action }}</small></td>
+                            <td>
+                                {% if failed.can_retry %}
+                                    <button class="btn btn-sm btn-warning retry-btn" 
+                                            data-execution-id="{{ failed.execution_id }}">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted">Max retries</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'serp_execution/js/execution_monitor.js' %}"></script>
+<script>
+// Auto-refresh if executions are running
+{% if refresh_interval > 0 %}
+let refreshInterval = {{ refresh_interval }};
+let refreshTimer = null;
+
+function refreshStatus() {
+    fetch('{% url "serp_execution:session_progress_api" session_id=session.id %}')
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics cards
+            updateStatisticsCards(data);
+            
+            // Update status message
+            updateStatusMessage(data);
+            
+            if (data.has_running) {
+                // Continue refreshing
+                refreshTimer = setTimeout(refreshStatus, refreshInterval);
+            } else {
+                // Stop refreshing and update final status
+                clearTimeout(refreshTimer);
+                updateFinalStatus(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching status:', error);
+            // Retry after delay
+            refreshTimer = setTimeout(refreshStatus, refreshInterval * 2);
+        });
+}
+
+function updateStatisticsCards(data) {
+    // Update statistics with smooth number animations
+    const stats = data.statistics || {};
+    
+    animateNumber('total-queries', stats.total_executions || 0);
+    animateNumber('completed-queries', stats.successful_executions || 0);
+    animateNumber('running-queries', stats.running_executions || 0);
+    animateNumber('failed-queries', stats.failed_executions || 0);
+    animateNumber('total-results', stats.total_results || 0);
+    animateNumber('retrying-queries', stats.retrying_executions || 0);
+    
+    // Update progress bar
+    const total = stats.total_executions || 1;
+    const success = stats.successful_executions || 0;
+    const failed = stats.failed_executions || 0;
+    const pending = stats.pending_executions || 0;
+    
+    const successWidth = (success / total) * 100;
+    const failedWidth = (failed / total) * 100;
+    const pendingWidth = (pending / total) * 100;
+    
+    const progressBars = document.querySelectorAll('.progress-bar');
+    if (progressBars.length >= 3) {
+        progressBars[0].style.width = successWidth + '%';
+        progressBars[1].style.width = failedWidth + '%';
+        progressBars[2].style.width = pendingWidth + '%';
+    }
+}
+
+function animateNumber(elementId, newValue) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    const currentValue = parseInt(element.textContent) || 0;
+    if (currentValue === newValue) return;
+    
+    const difference = newValue - currentValue;
+    const duration = 1000;
+    const steps = 30;
+    const stepValue = difference / steps;
+    const stepDuration = duration / steps;
+    
+    let currentStep = 0;
+    const timer = setInterval(() => {
+        currentStep++;
+        const value = Math.round(currentValue + (stepValue * currentStep));
+        element.textContent = value;
+        
+        if (currentStep >= steps) {
+            clearInterval(timer);
+            element.textContent = newValue;
+        }
+    }, stepDuration);
+}
+
+function updateStatusMessage(data) {
+    const messageElement = document.getElementById('status-message');
+    if (!messageElement) return;
+    
+    let message = '';
+    let alertClass = 'alert-info';
+    
+    if (data.has_running) {
+        message = '<i class="fas fa-spinner fa-spin"></i> <strong>Search Execution In Progress...</strong><br>Processing search queries based on your strategy.';
+        alertClass = 'alert-primary';
+    } else if (data.statistics.successful_executions === data.statistics.total_executions) {
+        message = '<i class="fas fa-check-circle"></i> <strong>Search Completed Successfully!</strong><br>All queries have been executed. Ready to process results.';
+        alertClass = 'alert-success';
+    } else if (data.statistics.failed_executions > 0) {
+        message = '<i class="fas fa-exclamation-triangle"></i> <strong>Search Partially Completed</strong><br>Some queries encountered issues. You can retry failed executions.';
+        alertClass = 'alert-warning';
+    }
+    
+    if (message) {
+        messageElement.className = `alert ${alertClass}`;
+        messageElement.innerHTML = message;
+    }
+}
+
+function updateFinalStatus(data) {
+    // Show completion notification
+    if (data.statistics.successful_executions === data.statistics.total_executions) {
+        showNotification('Search Completed!', `Successfully retrieved ${data.statistics.total_results} results.`, 'success');
+        // Reload page to show final status and enable action buttons
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+    } else if (data.statistics.failed_executions > 0) {
+        showNotification('Search Partially Completed', `Retrieved ${data.statistics.total_results} results. ${data.statistics.failed_executions} queries failed.`, 'warning');
+        // Reload page to show final status
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+    }
+}
+
+function showNotification(title, message, type) {
+    // Simple notification - could be enhanced with a toast library
+    const alertType = type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+    console.log(`${title}: ${message}`);
+}
+
+// Start auto-refresh
+if ({{ has_running|yesno:"true,false" }}) {
+    refreshTimer = setTimeout(refreshStatus, refreshInterval);
+}
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+    if (refreshTimer) {
+        clearTimeout(refreshTimer);
+    }
+});
+{% endif %}
+
+// Retry button handlers
+document.querySelectorAll('.retry-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const executionId = this.dataset.executionId;
+        const button = this;
+        
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        
+        fetch(`{% url "serp_execution:retry_execution_api" execution_id="00000000-0000-0000-0000-000000000000" %}`.replace('00000000-0000-0000-0000-000000000000', executionId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated status
+                window.location.reload();
+            } else {
+                alert('Failed to retry: ' + data.error);
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-redo"></i>';
+            }
+        })
+        .catch(error => {
+            alert('Error retrying execution');
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-redo"></i>';
+        });
+    });
+});
+
+// Initialize popovers
+var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+    return new bootstrap.Popover(popoverTriggerEl)
+});
+</script>
+{% endblock %}

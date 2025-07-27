@@ -46,7 +46,7 @@ The project will adopt a **modular design using Django Apps**. Each core feature
 ### 3.3 Project Structure (Illustrative)
 
 ```
-thesis_grey_project/
+agent-grey/
 ├── manage.py                 # Django's command-line utility
 ├── grey_lit_project/      # Main project Python package
 │   ├── __init__.py
@@ -83,12 +83,21 @@ thesis_grey_project/
 │   │   └── ...
 ├── docs/                     # Documentation
 │   ├── PRD.md                # This master PRD
-│   └── features/             # App-specific PRDs
-│       ├── review_manager/
+│   └── features/             # App-specific PRDs organized by feature
+│       ├── accounts/         # Authentication app PRD
+│       │   └── PRD-auth.md
+│       ├── review_manager/   # Review Manager app PRD
 │       │   └── review-manager-prd.md
-│       ├── search_strategy/
+│       ├── search_strategy/  # Search Strategy app PRD
 │       │   └── search-strategy-prd.md
-│       └── ...
+│       ├── serp_execution/   # SERP Execution app PRD
+│       │   └── serp-execution-prd.md
+│       ├── results_manager/  # Results Manager app PRD
+│       │   └── results-manager-prd.md
+│       ├── review_results/   # Review Results app PRD
+│       │   └── review-results-prd.md
+│       └── reporting/        # Reporting app PRD
+│           └── reporting-prd.md
 ├── static/                   # Project-wide static files (CSS, JS, images)
 │   └── css/
 │   └── js/
@@ -257,7 +266,7 @@ class SessionStatusManager:
 ```
 
 **✅ COMPLETED - Production Ready with 364 tests and 95.8% coverage**  
-**Detailed implementation specifications available in:** `docs/features/review_manager/review-manager-prd.md`
+**Detailed implementation specifications available in:** [docs/features/review_manager/review-manager-prd.md](features/review_manager/review-manager-prd.md)
 
 ### 4.3 Search Strategy ✅ **IMPLEMENTED**
 
@@ -291,7 +300,7 @@ class SearchStrategy(models.Model):
 ```
 
 **✅ COMPLETED - Production Ready with dynamic UI and comprehensive testing**  
-**Detailed implementation specifications available in:** `docs/features/search-strategy/tasks-search-strategy-implementation.md`
+**Detailed implementation specifications available in:** [docs/features/search_strategy/search-strategy-prd.md](features/search_strategy/search-strategy-prd.md)
 
 ### 4.4 SERP Execution 🚧 **IN PROGRESS**
 
@@ -336,7 +345,7 @@ class SearchExecution(models.Model):
 ```
 
 **🎯 Current Status:** Foundation models complete, API integration in progress  
-**Detailed implementation specifications available in:** `docs/features/serp_execute.md/tasks-serp-execution.md`
+**Detailed implementation specifications available in:** [docs/features/serp_execution/serp-execution-prd.md](features/serp_execution/serp-execution-prd.md)
 
 ### 4.5 Results Manager ✅ **COMPLETED (90% COMPLETE)**
 
@@ -383,7 +392,7 @@ class ProcessedResult(models.Model):
 ```
 
 **🎯 Current Status:** Production-ready with comprehensive UI and background processing. Only final workflow integration pending.  
-**Detailed implementation specifications available in:** `docs/features/results-manager/tasks-results-manager-implementation.md`
+**Detailed implementation specifications available in:** [docs/features/results_manager/results-manager-prd.md](features/results_manager/results-manager-prd.md)
 
 ### 4.6 Review Results
 
@@ -406,7 +415,7 @@ class ProcessedResult(models.Model):
 - Visual indication if a result is a duplicate (e.g., an icon). Clicking this provides a modal listing the titles of related duplicates.
 - The workflow aims to support PRISMA guidelines by capturing necessary data for the flow diagram (e.g., counts of included/excluded items).
 
-**Detailed implementation specifications available in:** `docs/features/review_results/review-results-prd.md` (to be created)
+**Detailed implementation specifications available in:** [docs/features/review_results/review-results-prd.md](features/review_results/review-results-prd.md)
 
 ### 4.7 Reporting
 
@@ -424,7 +433,7 @@ class ProcessedResult(models.Model):
 - CSV, JSON, and PDF export of included/excluded results.
 - Summary statistics dashboard with tag distribution and domain distribution.
 
-**Detailed implementation specifications available in:** `docs/features/reporting/reporting-prd.md` (to be created)
+**Detailed implementation specifications available in:** [docs/features/reporting/reporting-prd.md](features/reporting/reporting-prd.md)
 
 ## 5. Project-Wide Standards
 
@@ -639,13 +648,14 @@ While Phase 1 focuses on core functionality, the architecture is designed to sup
 
 ### 8.3 App-Specific Documentation
 
-**Implemented Apps:**
-- **accounts**: `docs/features/auth/` - Complete implementation docs ✅
-- **review_manager**: `docs/features/review-manager/` - Sprint reports and PRD ✅
-- **search_strategy**: `docs/features/search-strategy/` - Implementation tracking ✅
-
-**In Progress:**
-- **serp_execution**: `docs/features/serp_execute.md/` - Task tracking and specs 🚧
+**Complete PRDs Available:**
+- **accounts**: [docs/features/accounts/PRD-auth.md](features/accounts/PRD-auth.md) - Authentication and user management ✅
+- **review_manager**: [docs/features/review_manager/review-manager-prd.md](features/review_manager/review-manager-prd.md) - Session management and dashboard ✅  
+- **search_strategy**: [docs/features/search_strategy/search-strategy-prd.md](features/search_strategy/search-strategy-prd.md) - PIC framework implementation ✅
+- **serp_execution**: [docs/features/serp_execution/serp-execution-prd.md](features/serp_execution/serp-execution-prd.md) - API integration and background tasks 🚧
+- **results_manager**: [docs/features/results_manager/results-manager-prd.md](features/results_manager/results-manager-prd.md) - Results processing pipeline ✅
+- **review_results**: [docs/features/review_results/review-results-prd.md](features/review_results/review-results-prd.md) - Review interface and tagging 📋
+- **reporting**: [docs/features/reporting/reporting-prd.md](features/reporting/reporting-prd.md) - PRISMA reports and data export 📋
 
 ### 8.4 Implementation Tracking ✅ **ACTIVE**
 

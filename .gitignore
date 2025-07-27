@@ -91,3 +91,6 @@ logs/
 
 # Claude commands (private)
 .claude/commands/
+
+# Project-specific ignores
+PRPs-agentic-eng/

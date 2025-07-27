@@ -1,0 +1,35 @@
+{
+  "project": "thesis-grey",
+  "description": "Django 4.2 grey literature review application",
+  "docker_services": {
+    "web": {
+      "image": "agent-grey-web",
+      "container_name": "agent-grey-web-1",
+      "description": "Django web application"
+    },
+    "db": {
+      "image": "postgres:15-alpine",
+      "container_name": "agent-grey-db-1", 
+      "description": "PostgreSQL database"
+    },
+    "redis": {
+      "image": "redis:7-alpine",
+      "container_name": "agent-grey-redis-1",
+      "description": "Redis cache and Celery broker"
+    },
+    "celery_worker": {
+      "image": "agent-grey-celery_worker",
+      "container_name": "agent-grey-celery_worker-1",
+      "description": "Celery background task worker"
+    }
+  },
+  "common_commands": {
+    "start_services": "docker-compose up -d",
+    "stop_services": "docker-compose down", 
+    "view_logs": "docker-compose logs -f",
+    "django_shell": "docker-compose run --rm web python manage.py shell",
+    "run_tests": "docker-compose run --rm web python manage.py test",
+    "make_migrations": "docker-compose run --rm web python manage.py makemigrations",
+    "migrate": "docker-compose run --rm web python manage.py migrate"
+  }
+}

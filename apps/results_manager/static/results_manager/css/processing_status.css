@@ -1,0 +1,319 @@
+/* Results Manager - Processing Status Styles */
+
+/* Progress Containers */
+.progress-container {
+    margin-bottom: 1.5rem;
+}
+
+.progress-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.progress-lg {
+    height: 2rem;
+    border-radius: 0.5rem;
+    background-color: #e9ecef;
+}
+
+.progress-sm {
+    height: 0.75rem;
+    border-radius: 0.375rem;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Current Stage Info */
+.current-stage-info {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    border-left: 4px solid #007bff;
+}
+
+.current-stage-info h6 {
+    margin-bottom: 1rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+/* Stage Items */
+.stage-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.stage-item:last-child {
+    border-bottom: none;
+}
+
+.stage-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    width: 1.5rem;
+    text-align: center;
+    display: inline-block;
+}
+
+.stage-name {
+    font-weight: 500;
+    color: #495057;
+}
+
+.stage-progress-text {
+    font-weight: 500;
+    color: #6c757d;
+}
+
+/* Stage Status Colors */
+.stage-item .progress-bar.bg-success {
+    background-color: #28a745 !important;
+}
+
+.stage-item .progress-bar.bg-primary {
+    background-color: #007bff !important;
+}
+
+.stage-item .progress-bar.bg-light {
+    background-color: #f8f9fa !important;
+    color: #6c757d;
+}
+
+/* Statistics Cards */
+.stat-card {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+/* Error Items */
+.error-item {
+    background-color: #fff5f5;
+    border-radius: 0.375rem;
+}
+
+.error-item h6 {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.error-item .text-danger {
+    color: #dc3545 !important;
+}
+
+/* Auto-refresh Indicator */
+.auto-refresh-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    z-index: 1000;
+    font-size: 0.75rem;
+}
+
+.auto-refresh-indicator .fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Status Badges */
+.badge-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Action Buttons */
+.card-body.text-center .btn {
+    margin: 0 0.25rem;
+    min-width: 120px;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+}
+
+/* Progress Animations */
+.progress-bar {
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% {
+        background-position: 1rem 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .stage-item {
+        padding: 1rem 0;
+    }
+    
+    .stage-icon {
+        display: block;
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+    
+    .auto-refresh-indicator {
+        bottom: 10px;
+        right: 10px;
+        font-size: 0.6875rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .card-body.text-center .btn {
+        display: block;
+        width: 100%;
+        margin: 0.25rem 0;
+        min-width: auto;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn, .auto-refresh-indicator {
+        display: none !important;
+    }
+    
+    .progress {
+        border: 1px solid #000;
+    }
+    
+    .progress-bar {
+        background: #000 !important;
+        animation: none;
+    }
+    
+    .stage-item {
+        page-break-inside: avoid;
+    }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+    .stat-card {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .stat-number {
+        background: linear-gradient(45deg, #63b3ed, #4299e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .current-stage-info {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .error-item {
+        background-color: #2d1b1b;
+        color: #e2e8f0;
+    }
+}

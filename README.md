@@ -21,16 +21,25 @@ Thesis Grey is a Django-based web application designed to help researchers syste
 
 ## Project Status
 
-**Current Phase**: Core Features Development (Phase 4)
-- ✅ Docker environment configured
-- ✅ Django project initialized with 7 apps
-- ✅ All core models implemented
-- ✅ Authentication system complete
-- 🔄 Building user-facing views and APIs
+**Current Phase**: Advanced Feature Development
+- ✅ **accounts**: Custom UUID authentication system (100% complete)
+- ✅ **review_manager**: 9-state session workflow with dashboard (100% complete)
+- ✅ **search_strategy**: PIC framework with dynamic UI (100% complete)
+- 🚧 **serp_execution**: API integration and background tasks (in progress)
+- ✅ **results_manager**: Processing pipeline with deduplication (90% complete)
+- 📋 **review_results**: Manual review interface (planned)
+- 📋 **reporting**: PRISMA-compliant exports (planned)
+
+**Test Coverage**: 364+ tests with 95.8% coverage  
+**Current Branch**: `feature/major-refactor-api-tests`
 
 [See detailed status](PROJECT_STATUS.md)
 
 ## Quick Start
+
+**New Developer?** Check out our comprehensive onboarding resources in the [`onboarding/`](onboarding/) directory:
+- 📖 [Full Developer Guide](onboarding/ONBOARDING.md) - Complete setup and architecture overview  
+- ⚡ [Quick Setup Guide](onboarding/QUICKSTART.md) - Get running in 5 minutes
 
 ### Prerequisites
 
@@ -49,7 +58,33 @@ cd thesis-grey
 2. Copy environment variables:
 ```bash
 cp .env.example .env
+# Edit .env file with required values (see Environment Variables section)
 ```
+
+### Required Environment Variables
+
+The following environment variables must be configured in your `.env` file:
+
+```bash
+# Django Core
+SECRET_KEY=your-django-secret-key-here
+
+# Database Configuration  
+POSTGRES_DB=thesis_grey_db
+POSTGRES_USER=thesis_grey_user
+POSTGRES_PASSWORD=secure_password
+DB_HOST=db
+DB_PORT=5432
+
+# External APIs
+SERPER_API_KEY=your-serper-api-key-here  # Required for search execution
+
+# Optional: Redis/Celery (defaults provided)
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
+```
+
+**⚠️ Important**: Without `SERPER_API_KEY`, search execution functionality will not work.
 
 3. Start Docker services:
 ```bash
@@ -215,10 +250,22 @@ thesis-grey/
 
 ## Documentation
 
-- [Project Status](PROJECT_STATUS.md)
+### Core Documentation
+- [Project Status](PROJECT_STATUS.md)  
 - [Product Requirements Document](docs/PRD.md)
-- [Authentication Implementation](docs/auth/IMPLEMENTATION_STATUS.md)
 - [UI Guidelines](docs/ui-guidelines.md)
+- [Developer Onboarding](onboarding/) - **Start here for new developers**
+
+### App-Specific Implementation Guides
+- [Authentication System](docs/features/accounts/PRD-auth.md)
+- [Review Manager](docs/features/review_manager/review-manager-prd.md)
+- [Search Strategy](docs/features/search_strategy/search-strategy-prd.md)
+- [Results Manager](docs/features/results_manager/results-manager-prd.md)
+- [Review Results](docs/features/review_results/review-results-prd.md)
+- [Reporting](docs/features/reporting/reporting-prd.md)
+
+### Development Resources
+- [PRP Development Methodology](PRPs/README.md)
 - [API Documentation](docs/api/) (coming soon)
 
 ## Security

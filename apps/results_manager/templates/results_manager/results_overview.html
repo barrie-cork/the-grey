@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Results Overview - {{ session.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'results_manager/css/results_overview.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Results Overview</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'review_manager:dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' session.id %}">{{ session.title }}</a></li>
+                        <li class="breadcrumb-item active">Results</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Session Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{{ session.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Status:</strong> 
+                                <span class="badge badge-{{ session.status|default:'secondary' }}">
+                                    {{ session.get_status_display|default:'Unknown' }}
+                                </span>
+                            </p>
+                            {% if processing_session %}
+                            <p class="mb-1"><strong>Processing Status:</strong> 
+                                <span class="badge badge-{{ processing_session.status|default:'secondary' }}">
+                                    {{ processing_session.get_status_display|default:'Unknown' }}
+                                </span>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 text-right">
+                            {% if can_start_processing %}
+                            <form method="post" action="{% url 'results_manager:start_processing' session.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-play"></i> Start Processing
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if is_processing %}
+                            <a href="{% url 'results_manager:processing_status' session.id %}" class="btn btn-info">
+                                <i class="fas fa-chart-line"></i> View Processing Status
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Summary Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ statistics.total_results|default:0 }}</div>
+                                <div class="stat-label">Total Results</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ statistics.unique_results|default:0 }}</div>
+                                <div class="stat-label">Unique Results</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ statistics.duplicate_groups|default:0 }}</div>
+                                <div class="stat-label">Duplicate Groups</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ statistics.average_relevance|floatformat:2|default:'0.00' }}</div>
+                                <div class="stat-label">Average Quality</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filter-form">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="domain">Domain:</label>
+                                <input type="text" class="form-control" id="domain" name="domain" 
+                                       value="{{ filters.domain }}" placeholder="e.g., example.com">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="file_type">File Type:</label>
+                                <select class="form-control" id="file_type" name="file_type">
+                                    <option value="">All Types</option>
+                                    {% for doc_type in filter_options.document_types %}
+                                    <option value="{{ doc_type }}" {% if filters.file_type == doc_type %}selected{% endif %}>
+                                        {{ doc_type|title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="quality_min">Quality Score:</label>
+                                <select class="form-control" id="quality_min" name="quality_min">
+                                    <option value="">All Quality</option>
+                                    {% for value, label in filter_options.quality_ranges %}
+                                    <option value="{{ value }}" {% if filters.quality_min == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="duplicate_status">Duplicates:</label>
+                                <select class="form-control" id="duplicate_status" name="duplicate_status">
+                                    {% for value, label in filter_options.duplicate_options %}
+                                    <option value="{{ value }}" {% if filters.duplicate_status == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="search_term">Search Term:</label>
+                                <input type="text" class="form-control" id="search_term" name="search_term" 
+                                       value="{{ filters.search_term }}" placeholder="Search in titles and snippets">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="sort_by">Sort By:</label>
+                                <select class="form-control" id="sort_by" name="sort_by">
+                                    {% for value, label in filter_options.sort_options %}
+                                    <option value="{{ value }}" {% if filters.sort_by == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                                    <a href="{% url 'results_manager:results_overview' session.id %}" class="btn btn-secondary">Reset</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            Results (Showing {{ results.start_index }}-{{ results.end_index }} of {{ results.paginator.count }})
+                        </h5>
+                        <small class="text-muted">
+                            Sorted by {{ filters.sort_by|title }}
+                        </small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                        {% for result in results %}
+                        <div class="result-card mb-3 p-3 border rounded">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="result-title">
+                                        <a href="{{ result.url }}" target="_blank" rel="noopener noreferrer">
+                                            {{ result.title }}
+                                        </a>
+                                        {% if result.document_type %}
+                                        <span class="badge badge-info ml-2">[{{ result.document_type|upper }}]</span>
+                                        {% endif %}
+                                    </h6>
+                                    <p class="result-url text-muted mb-2">
+                                        {{ result.get_display_url }}
+                                        {% if result.publication_year %}
+                                        | {{ result.publication_year }}
+                                        {% endif %}
+                                    </p>
+                                    {% if result.snippet %}
+                                    <p class="result-snippet">{{ result.snippet|truncatewords:30 }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="result-meta">
+                                        {% if result.has_full_text %}
+                                        <div class="mb-2">
+                                            <span class="badge badge-success">Full Text Available</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if result.duplicate_group %}
+                                        <div class="mb-2">
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> 
+                                                {{ result.duplicate_group.result_count }} duplicates found
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Pagination -->
+                        {% if results.has_other_pages %}
+                        <nav aria-label="Results pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if results.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ results.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for num in results.paginator.page_range %}
+                                    {% if results.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > results.number|add:'-3' and num < results.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if results.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ results.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5>No results found</h5>
+                            <p class="text-muted">
+                                {% if can_start_processing %}
+                                Start processing to see results, or adjust your filters.
+                                {% else %}
+                                Try adjusting your filters to see different results.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit form on filter changes (optional)
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filter-form');
+    const autoSubmitElements = form.querySelectorAll('select');
+    
+    autoSubmitElements.forEach(function(element) {
+        element.addEventListener('change', function() {
+            form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

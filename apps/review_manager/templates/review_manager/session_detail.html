@@ -1,0 +1,232 @@
+{% extends "review_manager/base.html" %}
+{% load static session_tags %}
+
+{% block title %}{{ session.title }} - Thesis Grey{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">{{ session.title|truncatewords:5 }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Session Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h1 class="h3 mb-0">{{ session.title }}</h1>
+                        <span class="badge bg-{{ session.status|status_color }} fs-6">
+                            {{ session.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    {% if session.description %}
+                    <p class="text-muted mb-3">{{ session.description }}</p>
+                    {% endif %}
+                    
+                    <div class="row g-3 text-muted">
+                        <div class="col-auto">
+                            <i class="bi bi-person"></i> {{ session.owner.username }}
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar3"></i> Created {{ session.created_at|date:"M d, Y" }}
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clock"></i> Updated {{ session.updated_at|timesince }} ago
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status Explanation -->
+            <div class="alert alert-{{ session.status|status_color }} d-flex align-items-center" role="alert">
+                <i class="bi {{ session.status|status_icon }} fs-4 me-3"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">{{ session.get_status_display }}</h5>
+                    <p class="mb-0">{{ status_explanation }}</p>
+                </div>
+            </div>
+            
+            <!-- Primary Action -->
+            <div class="card mb-4">
+                <div class="card-body text-center py-4">
+                    <h5 class="card-title">What's Next?</h5>
+                    <p class="card-text">{{ nav_info.help }}</p>
+                    <a href="{{ nav_info.url }}" class="btn btn-primary btn-lg">
+                        <i class="bi {{ nav_info.icon }}"></i> {{ nav_info.text }}
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            {% if session.total_results > 0 %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Review Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="mb-0">{{ session.total_results }}</h3>
+                                <small class="text-muted">Total Results</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="mb-0">{{ session.reviewed_results }}</h3>
+                                <small class="text-muted">Reviewed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="mb-0">{{ session.included_results }}</h3>
+                                <small class="text-muted">Included</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if session.total_results > 0 %}
+                    <div class="mt-3">
+                        <label class="form-label">Progress: {{ progress_percentage }}%</label>
+                        <div class="progress">
+                            <div class="progress-bar" 
+                                 role="progressbar" 
+                                 style="width: {{ progress_percentage }}%"
+                                 aria-valuenow="{{ progress_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if session.reviewed_results > 0 %}
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            Inclusion Rate: {{ inclusion_rate }}%
+                        </small>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Recent Activities -->
+            {% if recent_activities %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ activity.get_activity_type_display }}</h6>
+                            <small>{{ activity.created_at|timesince }} ago</small>
+                        </div>
+                        <p class="mb-1">{{ activity.description }}</p>
+                        <small class="text-muted">by {{ activity.user.username }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if can_edit %}
+                        <a href="{% url 'review_manager:edit_session' session_id=session.id %}" 
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Edit Details
+                        </a>
+                        {% endif %}
+                        
+                        <form method="post" action="{% url 'review_manager:duplicate_session' session_id=session.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-copy"></i> Duplicate Session
+                            </button>
+                        </form>
+                        
+                        {% if can_archive %}
+                        <form method="post" action="{% url 'review_manager:archive_session' session_id=session.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-warning">
+                                <i class="bi bi-archive"></i> Archive Session
+                            </button>
+                        </form>
+                        {% endif %}
+                        
+                        {% if can_delete %}
+                        <a href="{% url 'review_manager:delete_session' session_id=session.id %}" 
+                           class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i> Delete Session
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Allowed Transitions -->
+            {% if allowed_transitions %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Available Status Changes</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">
+                        You can manually change this session to:
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for status in allowed_transitions %}
+                        <span class="badge bg-secondary">
+                            {{ status|title|cut:"_" }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Session Notes -->
+            {% if session.notes %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Internal Notes</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small mb-0">{{ session.notes|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Tags -->
+            {% if session.tags %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Tags</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tag in session.tags %}
+                        <span class="badge bg-info">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

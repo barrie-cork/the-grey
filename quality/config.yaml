@@ -1,0 +1,166 @@
+# Code Quality Configuration
+
+# General settings
+general:
+  # Paths to analyze
+  include_paths:
+    - apps/
+  
+  # Paths to exclude
+  exclude_paths:
+    - "*/migrations/*"
+    - "*/__pycache__/*"
+    - "*/tests/fixtures/*"
+  
+  # File patterns
+  file_patterns:
+    - "*.py"
+  
+  # Parallel processing
+  workers: 4
+
+# Analyzer settings
+analyzers:
+  # Core Python analysis
+  python:
+    enabled: true
+    checks:
+      - unused_imports
+      - undefined_names
+      - syntax_errors
+      - complexity
+  
+  # Django-specific
+  django:
+    enabled: true
+    checks:
+      - n_plus_one_queries
+      - missing_migrations
+      - security_middleware
+      - template_errors
+      - model_validation
+  
+  # Security
+  security:
+    enabled: true
+    bandit:
+      level: medium
+      confidence: medium
+    custom_checks:
+      - hardcoded_secrets
+      - sql_injection
+      - xss_vulnerabilities
+  
+  # Performance
+  performance:
+    enabled: true
+    checks:
+      - slow_queries
+      - missing_indexes
+      - cache_usage
+
+# Severity settings
+severity:
+  # Fail CI/CD on these
+  fail_on:
+    - error
+  
+  # Warning threshold
+  max_warnings: 50
+  
+  # Severity mappings
+  mappings:
+    security_issue: error
+    syntax_error: error
+    undefined_name: error
+    performance_issue: warning
+    style_issue: info
+
+# Auto-fix settings
+auto_fix:
+  enabled: true
+  
+  # Safe fixes to apply automatically
+  safe_fixes:
+    - remove_unused_imports
+    - fix_indentation
+    - add_missing_commas
+    - update_deprecated_imports
+  
+  # Fixes requiring review
+  review_required:
+    - change_logic
+    - modify_queries
+    - update_security_settings
+
+# Reporting
+reporting:
+  # Output formats
+  formats:
+    - console
+    - json
+    - html
+    - github_pr_comment
+  
+  # Metrics to track
+  metrics:
+    - total_issues
+    - issues_by_severity
+    - issues_by_category
+    - files_with_issues
+    - fix_rate
+    - trend_over_time
+  
+  # Report destinations
+  destinations:
+    console:
+      enabled: true
+      verbose: false
+    
+    file:
+      enabled: true
+      path: "quality-report.json"
+    
+    github:
+      enabled: true
+      comment_on_pr: true
+      status_check: true
+
+# Integration settings
+integrations:
+  # Git hooks
+  pre_commit:
+    enabled: true
+    fix_before_commit: true
+    
+  # IDE
+  vscode:
+    enabled: true
+    real_time: true
+    
+  # CI/CD
+  github_actions:
+    enabled: true
+    fail_on_error: true
+    auto_fix_pr: true
+
+# Custom rules
+rules:
+  # Django-specific rules
+  django_rules:
+    - id: no_raw_sql
+      pattern: ".raw\\(|cursor\\.execute"
+      message: "Avoid raw SQL, use Django ORM"
+      severity: warning
+      
+    - id: require_atomic
+      pattern: "def \\w+\\(.*\\):.*\\.save\\("
+      message: "Consider using @transaction.atomic"
+      severity: info
+  
+  # Project-specific rules
+  project_rules:
+    - id: use_uuid_pk
+      pattern: "id = models\\.AutoField"
+      message: "Use UUIDField for primary keys"
+      severity: error

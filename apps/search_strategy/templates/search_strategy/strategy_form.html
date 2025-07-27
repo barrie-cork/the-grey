@@ -1,0 +1,829 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Search Strategy - {{ session.title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'search_strategy/css/strategy_form.css' %}" rel="stylesheet">
+<style>
+.strategy-progress-item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.strategy-progress-item.complete {
+    background-color: #d4edda;
+    color: #155724;
+}
+.strategy-progress-item.partial {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.strategy-progress-item.empty {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+.pic-section {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.pic-section h5 {
+    margin-bottom: 15px;
+    color: #495057;
+}
+.query-preview {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 10px 0;
+}
+.query-item {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+.badge-counter {
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+/* Tag input styling */
+.keyword-input-container {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    min-height: 2.5rem;
+    background-color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    align-items: flex-start;
+    cursor: text;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.keyword-input-container:focus-within {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.keyword-tag {
+    background-color: #e9ecef;
+    border: 1px solid #adb5bd;
+    border-radius: 1rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.8125rem;
+    color: #495057;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    max-width: 100%;
+    overflow: hidden;
+    height: 1.75rem;
+}
+
+.keyword-tag.population {
+    background-color: #cfe2ff;
+    border-color: #86b7fe;
+    color: #084298;
+}
+
+.keyword-tag.interest {
+    background-color: #fff3cd;
+    border-color: #ffda6a;
+    color: #664d03;
+}
+
+.keyword-tag.context {
+    background-color: #d1e7dd;
+    border-color: #a3d3b7;
+    color: #0f5132;
+}
+
+.keyword-tag.domains {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.keyword-tag .tag-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.keyword-tag .remove-tag {
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transition: all 0.15s ease-in-out;
+}
+
+.keyword-tag .remove-tag:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #dc3545;
+}
+
+.keyword-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    min-width: 120px;
+    padding: 0.125rem;
+    font-size: 0.875rem;
+    height: 1.5rem;
+}
+
+.keyword-input::placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.empty-state {
+    color: #6c757d;
+    font-style: italic;
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+    width: 100%;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header with breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'review_manager:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'review_manager:session_detail' session_id=session.id %}">{{ session.title }}</a></li>
+            <li class="breadcrumb-item active">Edit Strategy</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main content area -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit"></i> Edit Search Strategy
+                    </h4>
+                    <div>
+                        <span class="badge badge-info">{{ session.get_status_display }}</span>
+                        {% if strategy.is_complete %}
+                            <span class="badge badge-success">Complete</span>
+                        {% else %}
+                            <span class="badge badge-warning">In Progress</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Update your search strategy for <strong>{{ session.title }}</strong>
+                    </p>
+
+                    {% if validation_errors %}
+                        <div class="alert alert-warning">
+                            <h6>Please address these issues:</h6>
+                            <ul>
+                                {% for field, error in validation_errors.items %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" id="strategy-form">
+                        {% csrf_token %}
+                        
+                        <!-- Update PIC Framework Strategy Alert -->
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Update PIC Framework Strategy</strong>
+                        </div>
+
+                        <!-- Population Section -->
+                        <div class="pic-section">
+                            <h5>
+                                <i class="fas fa-users text-primary"></i> Population
+                                <small class="text-muted">Who is the target population? (optional if relevant)</small>
+                            </h5>
+                            <div class="keyword-input-container" data-field="population" onclick="focusKeywordInput(this)">
+                                <div class="tags-container" data-field="population"></div>
+                                <input type="text" class="keyword-input" placeholder="Type keyword and press Enter..." 
+                                       onkeydown="handleKeywordInput(event, 'population')" 
+                                       onblur="handleInputBlur(event)">
+                                <div class="empty-state" style="display: none;">Type keywords and press Enter to add them</div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Enter population terms and press Enter to add them. These describe who the research focuses on.
+                            </small>
+                            <div style="display: none;">
+                                {{ form.population_terms_text }}
+                                {{ form.population_terms }}
+                            </div>
+                        </div>
+
+                        <!-- Interest/Intervention Section -->
+                        <div class="pic-section">
+                            <h5>
+                                <i class="fas fa-lightbulb text-warning"></i> Interest/Intervention
+                                <small class="text-muted">What is the intervention or interest? (optional if relevant)</small>
+                            </h5>
+                            <div class="keyword-input-container" data-field="interest" onclick="focusKeywordInput(this)">
+                                <div class="tags-container" data-field="interest"></div>
+                                <input type="text" class="keyword-input" placeholder="Type keyword and press Enter..." 
+                                       onkeydown="handleKeywordInput(event, 'interest')" 
+                                       onblur="handleInputBlur(event)">
+                                <div class="empty-state" style="display: none;">Type keywords and press Enter to add them</div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Enter intervention or interest terms and press Enter to add them. These describe what you're studying.
+                            </small>
+                            <div style="display: none;">
+                                {{ form.interest_terms_text }}
+                                {{ form.interest_terms }}
+                            </div>
+                        </div>
+
+                        <!-- Context Section -->
+                        <div class="pic-section">
+                            <h5>
+                                <i class="fas fa-map-marker-alt text-success"></i> Context
+                                <small class="text-muted">In what context or setting? (optional if relevant)</small>
+                            </h5>
+                            <div class="keyword-input-container" data-field="context" onclick="focusKeywordInput(this)">
+                                <div class="tags-container" data-field="context"></div>
+                                <input type="text" class="keyword-input" placeholder="Type keyword and press Enter..." 
+                                       onkeydown="handleKeywordInput(event, 'context')" 
+                                       onblur="handleInputBlur(event)">
+                                <div class="empty-state" style="display: none;">Type keywords and press Enter to add them</div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Enter context terms and press Enter to add them. These describe where or under what conditions.
+                            </small>
+                            <div style="display: none;">
+                                {{ form.context_terms_text }}
+                                {{ form.context_terms }}
+                            </div>
+                        </div>
+
+                        <!-- Search Configuration Section -->
+                        <div class="pic-section">
+                            <h5>
+                                <i class="fas fa-cog text-info"></i> Search Configuration
+                            </h5>
+                            
+                            <!-- Organization Domains -->
+                            <div class="form-group">
+                                <label for="domains-input">
+                                    <i class="fas fa-globe"></i> Organization Domains
+                                </label>
+                                <div class="keyword-input-container" data-field="domains" onclick="focusKeywordInput(this)">
+                                    <div class="tags-container" data-field="domains"></div>
+                                    <input type="text" class="keyword-input" id="domains-input" placeholder="Type domain and press Enter (e.g., nice.org.uk)..." 
+                                           onkeydown="handleKeywordInput(event, 'domains')" 
+                                           onblur="handleInputBlur(event)">
+                                    <div class="empty-state" style="display: none;">Type domains and press Enter to add them</div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Enter domains and press Enter to add them. Each domain will create a separate search query with site restrictions.
+                                </small>
+                                <div style="display: none;">
+                                    {{ form.organization_domains }}
+                                </div>
+                            </div>
+
+                            <!-- General Search Option -->
+                            <div class="form-check mb-3">
+                                {{ form.include_general_search }}
+                                <label class="form-check-label" for="{{ form.include_general_search.id_for_label }}">
+                                    Include General Web Search
+                                </label>
+                                <small class="form-text text-muted">
+                                    Include a general web search without domain restrictions.
+                                </small>
+                            </div>
+
+                            <!-- File Types -->
+                            <div class="form-group">
+                                <label>File Types:</label>
+                                <div class="form-check">
+                                    {{ form.search_pdf }}
+                                    <label class="form-check-label" for="{{ form.search_pdf.id_for_label }}">
+                                        {{ form.search_pdf.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    {{ form.search_doc }}
+                                    <label class="form-check-label" for="{{ form.search_doc.id_for_label }}">
+                                        {{ form.search_doc.label }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Search Engines -->
+                            <div class="form-group">
+                                <label>Search Engines:</label>
+                                <div class="form-check">
+                                    {{ form.use_google_search }}
+                                    <label class="form-check-label" for="{{ form.use_google_search.id_for_label }}">
+                                        {{ form.use_google_search.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    {{ form.use_google_scholar }}
+                                    <label class="form-check-label" for="{{ form.use_google_scholar.id_for_label }}">
+                                        {{ form.use_google_scholar.label }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Maximum Results -->
+                            <div class="form-group row">
+                                <label for="{{ form.max_results_per_query.id_for_label }}" class="col-sm-3 col-form-label">
+                                    Maximum Results per Query:
+                                </label>
+                                <div class="col-sm-3">
+                                    {{ form.max_results_per_query }}
+                                </div>
+                            </div>
+
+                            <!-- Hidden fields -->
+                            {{ form.search_config }}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <a href="{% url 'review_manager:session_detail' session_id=session.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <a href="{% url 'review_manager:session_detail' session_id=session.id %}" class="btn btn-outline-secondary ml-2">
+                                    <i class="fas fa-arrow-left"></i> Back to Session
+                                </a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button type="submit" name="save" class="btn btn-outline-primary">
+                                    <i class="fas fa-save"></i> Save Strategy
+                                </button>
+                                <button type="submit" name="execute_search" value="execute_search" class="btn btn-success ml-2">
+                                    <i class="fas fa-play"></i> Execute Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with progress and preview -->
+        <div class="col-lg-4">
+            <!-- Strategy Progress -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Strategy Progress
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="strategy-progress-item {% if stats.population_count > 0 %}complete{% else %}empty{% endif %}">
+                        <span>Population Terms</span>
+                        <span class="badge-counter">{{ stats.population_count }}</span>
+                    </div>
+                    <div class="strategy-progress-item {% if stats.interest_count > 0 %}complete{% else %}empty{% endif %}">
+                        <span>Interest Terms</span>
+                        <span class="badge-counter">{{ stats.interest_count }}</span>
+                    </div>
+                    <div class="strategy-progress-item {% if stats.context_count > 0 %}complete{% else %}empty{% endif %}">
+                        <span>Context Terms</span>
+                        <span class="badge-counter">{{ stats.context_count }}</span>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <strong>Total Terms: {{ stats.total_terms }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Query Preview -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-eye"></i> Updated Query Preview
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="query-preview">
+                        {% if queries %}
+                            <p class="text-muted small mb-3">
+                                Base preview - actual query may include additional filters
+                            </p>
+                            {% for query in queries %}
+                                <div class="query-item">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="font-weight-bold">
+                                            {% if query.domain %}
+                                                {{ query.domain }}
+                                            {% else %}
+                                                General Search
+                                            {% endif %}
+                                        </span>
+                                        <small class="text-muted">{{ query.type }}</small>
+                                    </div>
+                                    <code class="small">{{ query.query }}</code>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <i class="fas fa-search fa-2x mb-2"></i>
+                                <p>Add PIC terms to see query preview</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-outline-primary btn-sm btn-block mb-2" onclick="previewChanges()">
+                        <i class="fas fa-eye"></i> Preview Changes
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm btn-block mb-2" onclick="debugPreview()">
+                        <i class="fas fa-bug"></i> Debug Preview
+                    </button>
+                    <button type="button" class="btn btn-outline-warning btn-sm btn-block mb-2" onclick="testLocalPreview()">
+                        <i class="fas fa-vial"></i> Test Local Preview
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="validateStrategy()">
+                        <i class="fas fa-check-circle"></i> Validate Strategy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'search_strategy/js/strategy_form.js' %}"></script>
+<script>
+// Prevent duplicate initialization
+window.keywordFormInitialized = window.keywordFormInitialized || false;
+// Global keyword storage
+let keywordData = {
+    population: [],
+    interest: [],
+    context: [],
+    domains: []
+};
+
+// Initialize keywords from existing data
+if (!window.keywordFormInitialized) {
+    window.keywordFormInitialized = true;
+    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize from form data if available
+    const populationText = document.getElementById('{{ form.population_terms_text.id_for_label }}').value;
+    const interestText = document.getElementById('{{ form.interest_terms_text.id_for_label }}').value;
+    const contextText = document.getElementById('{{ form.context_terms_text.id_for_label }}').value;
+    const domainsText = document.getElementById('{{ form.organization_domains.id_for_label }}').value;
+    
+    if (populationText) {
+        keywordData.population = populationText.split('\n').filter(t => t.trim());
+    }
+    if (interestText) {
+        keywordData.interest = interestText.split('\n').filter(t => t.trim());
+    }
+    if (contextText) {
+        keywordData.context = contextText.split('\n').filter(t => t.trim());
+    }
+    if (domainsText) {
+        keywordData.domains = domainsText.split('\n').filter(t => t.trim());
+    }
+    
+    // Render existing tags
+    renderTags('population');
+    renderTags('interest');
+    renderTags('context');
+    renderTags('domains');
+    
+    // Update hidden fields
+    updateHiddenFields();
+    });
+}
+
+// Handle keyword input with Enter key
+function handleKeywordInput(event, fieldType) {
+    if (event.key === 'Enter' || event.key === ',') {
+        event.preventDefault();
+        const input = event.target;
+        const value = input.value.trim();
+        
+        if (value && !keywordData[fieldType].includes(value)) {
+            keywordData[fieldType].push(value);
+            input.value = '';
+            renderTags(fieldType);
+            updateHiddenFields();
+            updateProgressIndicators(getStats());
+            previewChanges();
+        }
+        return false;
+    }
+}
+
+// Handle input blur (lost focus)
+function handleInputBlur(event) {
+    const input = event.target;
+    const container = input.closest('.keyword-input-container');
+    const fieldType = container.dataset.field;
+    const value = input.value.trim();
+    
+    if (value && !keywordData[fieldType].includes(value)) {
+        keywordData[fieldType].push(value);
+        input.value = '';
+        renderTags(fieldType);
+        updateHiddenFields();
+        updateProgressIndicators(getStats());
+        previewChanges();
+    }
+}
+
+// Focus keyword input when container is clicked
+function focusKeywordInput(container) {
+    const input = container.querySelector('.keyword-input');
+    if (input) {
+        input.focus();
+    }
+}
+
+// Render tags for a specific field
+function renderTags(fieldType) {
+    const container = document.querySelector(`.tags-container[data-field="${fieldType}"]`);
+    const inputContainer = document.querySelector(`.keyword-input-container[data-field="${fieldType}"]`);
+    const emptyState = inputContainer.querySelector('.empty-state');
+    
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (keywordData[fieldType].length === 0) {
+        emptyState.style.display = 'block';
+    } else {
+        emptyState.style.display = 'none';
+        keywordData[fieldType].forEach((keyword, index) => {
+            const tag = document.createElement('div');
+            tag.className = `keyword-tag ${fieldType}`;
+            tag.innerHTML = `
+                <span class="tag-text" title="${keyword}">${keyword}</span>
+                <button type="button" class="remove-tag" onclick="removeKeyword('${fieldType}', ${index})" title="Remove">
+                    ×
+                </button>
+            `;
+            container.appendChild(tag);
+        });
+    }
+}
+
+// Remove a keyword
+function removeKeyword(fieldType, index) {
+    keywordData[fieldType].splice(index, 1);
+    renderTags(fieldType);
+    updateHiddenFields();
+    updateProgressIndicators(getStats());
+    previewChanges();
+}
+
+// Update hidden form fields
+function updateHiddenFields() {
+    document.getElementById('{{ form.population_terms_text.id_for_label }}').value = keywordData.population.join('\n');
+    document.getElementById('{{ form.interest_terms_text.id_for_label }}').value = keywordData.interest.join('\n');
+    document.getElementById('{{ form.context_terms_text.id_for_label }}').value = keywordData.context.join('\n');
+    document.getElementById('{{ form.organization_domains.id_for_label }}').value = keywordData.domains.join('\n');
+}
+
+// Get statistics for progress indicators
+function getStats() {
+    return {
+        population_count: keywordData.population.length,
+        interest_count: keywordData.interest.length,
+        context_count: keywordData.context.length,
+        total_terms: keywordData.population.length + keywordData.interest.length + keywordData.context.length
+    };
+}
+
+// Basic real-time preview functionality
+function previewChanges() {
+    // Collect form data
+    const formData = {
+        population_terms: keywordData.population,
+        interest_terms: keywordData.interest,
+        context_terms: keywordData.context,
+        search_config: {
+            domains: keywordData.domains,
+            include_general_search: document.getElementById('{{ form.include_general_search.id_for_label }}').checked,
+            file_types: [
+                ...(document.getElementById('{{ form.search_pdf.id_for_label }}').checked ? ['pdf'] : []),
+                ...(document.getElementById('{{ form.search_doc.id_for_label }}').checked ? ['doc'] : [])
+            ]
+        }
+    };
+
+    console.log('Preview data:', formData); // Debug log
+
+    // Send AJAX request
+    fetch('{% url "search_strategy:update_strategy_ajax" session_id=session.id %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        console.log('Response status:', response.status); // Debug log
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data); // Debug log
+        if (data.success) {
+            updateQueryPreview(data.queries);
+            updateProgressIndicators(data.stats);
+        } else {
+            console.error('Preview failed:', data.error);
+            console.error('Validation errors:', data.validation_errors);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function updateQueryPreview(queries) {
+    const preview = document.getElementById('query-preview');
+    if (queries && queries.length > 0) {
+        let html = '<p class="text-muted small mb-3">Base preview - actual query may include additional filters</p>';
+        queries.forEach(query => {
+            html += `
+                <div class="query-item">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="font-weight-bold">${query.domain || 'General Search'}</span>
+                        <small class="text-muted">${query.type}</small>
+                    </div>
+                    <code class="small">${query.query}</code>
+                </div>
+            `;
+        });
+        preview.innerHTML = html;
+    } else {
+        preview.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-search fa-2x mb-2"></i>
+                <p>Add PIC terms to see query preview</p>
+            </div>
+        `;
+    }
+}
+
+function updateProgressIndicators(stats) {
+    // Update progress counters
+    document.querySelectorAll('.badge-counter').forEach((counter, index) => {
+        const counts = [stats.population_count, stats.interest_count, stats.context_count];
+        counter.textContent = counts[index] || 0;
+    });
+    
+    // Update progress item classes
+    const items = document.querySelectorAll('.strategy-progress-item');
+    const counts = [stats.population_count, stats.interest_count, stats.context_count];
+    
+    items.forEach((item, index) => {
+        item.className = 'strategy-progress-item ' + (counts[index] > 0 ? 'complete' : 'empty');
+    });
+}
+
+function testLocalPreview() {
+    console.log('=== LOCAL PREVIEW TEST ===');
+    
+    // Generate a mock query locally
+    const mockQueries = [];
+    
+    // Check if we have any PIC terms
+    const hasPIC = keywordData.population.length > 0 || keywordData.interest.length > 0 || keywordData.context.length > 0;
+    
+    if (hasPIC) {
+        // Build a basic query string
+        let queryParts = [];
+        if (keywordData.population.length > 0) {
+            queryParts.push('(' + keywordData.population.map(term => `"${term}"`).join(' OR ') + ')');
+        }
+        if (keywordData.interest.length > 0) {
+            queryParts.push('(' + keywordData.interest.map(term => `"${term}"`).join(' OR ') + ')');
+        }
+        if (keywordData.context.length > 0) {
+            queryParts.push('(' + keywordData.context.map(term => `"${term}"`).join(' OR ') + ')');
+        }
+        
+        const baseQuery = queryParts.join(' AND ');
+        
+        // Add domains
+        if (keywordData.domains.length > 0) {
+            keywordData.domains.forEach(domain => {
+                mockQueries.push({
+                    query: `site:${domain} ${baseQuery}`,
+                    domain: domain,
+                    type: 'domain-specific'
+                });
+            });
+        }
+        
+        // Add general search if enabled
+        const generalSearch = document.getElementById('{{ form.include_general_search.id_for_label }}').checked;
+        if (generalSearch) {
+            mockQueries.push({
+                query: baseQuery,
+                domain: null,
+                type: 'general'
+            });
+        }
+    }
+    
+    console.log('Mock queries generated:', mockQueries);
+    
+    // Update preview directly
+    updateQueryPreview(mockQueries);
+}
+
+
+function debugPreview() {
+    console.log('=== DEBUG PREVIEW ===');
+    console.log('Keyword data:', keywordData);
+    console.log('Population terms:', keywordData.population);
+    console.log('Interest terms:', keywordData.interest);
+    console.log('Context terms:', keywordData.context);
+    console.log('Domain terms:', keywordData.domains);
+    
+    const domainsElement = document.getElementById('{{ form.organization_domains.id_for_label }}');
+    console.log('Domains element:', domainsElement);
+    console.log('Domains value:', domainsElement ? domainsElement.value : 'NOT FOUND');
+    
+    const generalSearchElement = document.getElementById('{{ form.include_general_search.id_for_label }}');
+    console.log('General search element:', generalSearchElement);
+    console.log('General search checked:', generalSearchElement ? generalSearchElement.checked : 'NOT FOUND');
+    
+    const pdfElement = document.getElementById('{{ form.search_pdf.id_for_label }}');
+    console.log('PDF element:', pdfElement);
+    console.log('PDF checked:', pdfElement ? pdfElement.checked : 'NOT FOUND');
+    
+    // Force a preview call
+    previewChanges();
+}
+
+// All validation is now handled by SearchStrategyForm class in strategy_form.js
+// This prevents duplicate validation popups
+
+// Auto-preview on input changes (debounced)
+let previewTimeout;
+document.querySelectorAll('textarea, input[type="checkbox"]').forEach(input => {
+    input.addEventListener('input', () => {
+        clearTimeout(previewTimeout);
+        previewTimeout = setTimeout(previewChanges, 1000);
+    });
+});
+</script>
+{% endblock %}
